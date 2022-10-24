@@ -8,7 +8,7 @@
 
 - Modified the plant model for manipulating fruits separately.
 
-  - Model: `assets/capsicum_plant_5_detachable` in this repo.
+  - Model: `assets/capsicum_plant_5_detachable` in this repo. **But don't use this model in anywhere because it has problems!**
 
   - Demo Video: https://youtu.be/uZXLcmiAmCc
 
@@ -35,7 +35,16 @@
         d += 0.02
     ```
 
-    
+- With the method described above, the position of fruits **can't** be found. But it is possible to pass this information to the model:
+
+  - Model Editing Video (with 3DS Max): https://youtu.be/Hul2IaU87Y8
+  - The world position of the fruit can be found in `/gazebo/link_states`.
+  - I have tested the model and it works 
+  - Bounding box can be seen beautifully after this modification:
+
+  ![ss1](assets/ss1.png)
+
+- I think with these modifications the robot can easily detect the closest fruit and manipulate its position. So, should I continue and apply this to other models as well?
 
 
 
