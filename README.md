@@ -4,11 +4,15 @@
 
 ## Meetings
 
-## 26 October 2022
+### 02 October 2022
+
+- Created [capsicum_plant_detachable](https://gitlab.igg.uni-bonn.de/phenorob/oc2/active_perception/capsicum_plant_detachable) repository. Includes detachable fruits for 6 different plants.
+
+### 26 October 2022
 
 - Modified the plant model for manipulating fruits separately.
 
-  - Model: `assets/capsicum_plant_5_detachable` in this repo. **But don't use this model in anywhere because it has problems!**
+  - ~~Model: `assets/capsicum_plant_5_detachable` in this repo. **But don't use this model in anywhere because it has problems!**~~ (see 02 October 2022 meeting)
 
   - Demo Video: https://youtu.be/uZXLcmiAmCc
 
