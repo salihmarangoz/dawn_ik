@@ -66,6 +66,7 @@ Note: Some meeting notes may not be available.
   - I have also added mutex and solved a problem causing segfault (can't delete added fixed_joint's from the vector. let it to become a minor memory leak to solve segfault.).
   - I hope there will be no more issues in the grasping side.
   - **Also**, I am planning to publish fruit poses using the same plugin if they are difficult to parse. Or, I can write a simple world plugin just to do it so we can use it somewhere else. `gazebo_link_pose_publisher`, etc.
+- I can get center points and surface points of capsicum fruits. Using a single fruit for skipping object tracking.
 
 ### 16 Nov 2022
 
