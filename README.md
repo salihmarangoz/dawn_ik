@@ -2,36 +2,6 @@
 
 [toc]
 
-## Workspace
-
-```bash
-# Gitlab
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/gazebo_ros_link_attacher.git
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/capsicum_plant_detachable.git
-
-# Github
-$ git clone git@github.com:salihmarangoz/capsicum_superellipsoid_detector.git
-$ git clone git@github.com:salihmarangoz/superellipsoid_msgs.git
-$ git clone git@github.com:Eruvae/octomap_vpp.git
-$ git clone git@github.com:Eruvae/octomap_vpp_rviz_plugin.git
-$ sudo apt install libceres-dev
-# xarm_ros: https://github.com/xArm-Developer/xarm_ros#4-getting-started-with-xarm_ros
-
-# Other dependencies
-$ cd catkin_ws/
-$ rosdep install --from-paths src --ignore-src -r
-
-# Not available but needed:
-# trolley_description
-
-# Extra. Dont need them now:
-# voxblox: https://voxblox.readthedocs.io/en/latest/pages/Installation.html
-```
-
-
-
 ## To-Do
 
 Note: This section can be confusing. Please check the [Meetings](#meetings) section instead.
@@ -56,6 +26,38 @@ Note: This section can be confusing. Please check the [Meetings](#meetings) sect
 ## Meetings
 
 Note: Some meeting notes may not be available.
+
+### 07 Dec 2022
+
+- Bio-IK LookAtGoal works well. It also works great with minimal displacement goal. **But...** IK runs without collision avoidance. I tried integrating collision avoidance using [setFromIK](http://docs.ros.org/en/jade/api/moveit_core/html/classmoveit_1_1core_1_1RobotState.html#ab816880027ef7e63bbdef22a0497cc78)'s constraint parameter. It didn't work. I think Bio-IK is not using this function internally for rejection sampling, instead moveit tests validity of the IK and rejects automatically if the constraint function reports an issue.
+
+- I have tried [Realtime Arm Servoing](https://ros-planning.github.io/moveit_tutorials/doc/realtime_servo/realtime_servo_tutorial.html#) tutorial of MoveIt. But couldn't make it work. I think it is pretty outdated. I couldn't make it work with `JointGroupVelocityControllers` nor `JointGroupPositionControllers`. Controllers crashed because of PID parameter problems. But I succeeded running it with our robot arm after some tweaks. 
+
+- Realtime servoing test:
+
+  ```bash
+  $ roslaunch salih_marangoz_thesis start.launch
+  
+  $ roslaunch salih_marangoz_thesis moveit_servo_test.launch # after gazebo initiailized
+  
+  $ rostopic pub -r 100 -s /servo_server/delta_twist_cmds geometry_msgs/TwistStamped "header: auto
+  twist:
+    linear:
+      x: 0.1
+      y: 0.0
+      z: 0.1
+    angular:
+      x: 0.0
+      y: 0.0
+      z: 0.0"
+  ```
+
+  
+
+### 30 Nov 2022
+
+- Problem: Superellipsoid predictions was wrong. They were too big.
+  - Solution: Voxblox output points are distributed more homogeneous compared to the raw depth sensor input. So, applying a voxel grid filter solved the density problem. Predictions are better now.
 
 ### 23 Nov 2022
 
@@ -119,3 +121,35 @@ Note: Some meeting notes may not be available.
   ![ss1](assets/ss1.png)
 
 - I think with these modifications the robot can easily detect the closest fruit and manipulate its position. So, should I continue and apply this to other models as well?
+
+
+
+## Workspace Setup
+
+```
+# Gitlab
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/gazebo_ros_link_attacher.git
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/capsicum_plant_detachable.git
+
+# Github
+$ git clone git@github.com:salihmarangoz/capsicum_superellipsoid_detector.git
+$ git clone git@github.com:salihmarangoz/superellipsoid_msgs.git
+$ git clone git@github.com:Eruvae/octomap_vpp.git
+$ git clone git@github.com:Eruvae/octomap_vpp_rviz_plugin.git
+$ sudo apt install libceres-dev
+# xarm_ros: https://github.com/xArm-Developer/xarm_ros#4-getting-started-with-xarm_ros
+$ git clone git@github.com:TAMS-Group/bio_ik.git
+
+# Other dependencies
+$ cd catkin_ws/
+$ rosdep install --from-paths src --ignore-src -r
+
+# Not available but needed:
+# trolley_description
+
+# Extra. Dont need them now:
+# voxblox: https://voxblox.readthedocs.io/en/latest/pages/Installation.html
+```
+
