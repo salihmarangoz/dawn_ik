@@ -27,6 +27,31 @@ Note: This section can be confusing. Please check the [Meetings](#meetings) sect
 
 Note: Some meeting notes may not be available.
 
+### 02 Jan 2023
+
+Current task is to make Bio-IK be able to detect collisions and find distances to the nearest collision (for cost computations).
+
+My findings:
+
+- **Q: How about using FCL directly?**
+  A: Directly using FCL may not be a wise decision. Adding all links from scratch and computing collision distance will be slow.
+
+- **Q: How to speed up collision computations?**
+  A: First solution would be not computing it at all. For example, if there are two arms with 50cm distance to each other, and there are closer objects to the main arm, it wouldn't be wise to compute distances to the other arm (unless it has moved!). If I am not wrong, this idea is implemented as a **manager** class (e.g. DynamicAABBTreeCollisionManager) so all objects can be managed/tracked for efficient computations.  (AABB: Axis-Aligned Bounding Boxes)
+
+- **Q: Is FCL fast enough?**
+  A: According to some posts, Bullet is faster: https://github.com/tesseract-robotics/tesseract/discussions/668. For our case, MoveIt supports both. It would be a wise decision to use MoveIt so we can also benchmark these timings.
+
+- **Q: Does Bullet Manager run multi-threaded?**
+  A: Probably not. There are mutex's for collision checking: https://github.com/ros-planning/moveit/blob/master/moveit_core/collision_detection_bullet/src/collision_env_bullet.cpp . Creating multiple collision managers is also possible.
+
+- **Q: Do we need to build a collision matrix for computations?**
+  A: I don't think so. The manager should be able to handle this.
+  
+- **Q: Should we use cylinders and spheres for efficient computations?**
+
+  A: XArm developers say it may not be necessary: https://github.com/xArm-Developer/xarm_ros/issues/75 If it is a problem, URDF/SDF models can be simplified via MeshLab. I think, using cylinders and sphere must be the last thing we should do to speed up the implementation process.
+
 ### 07 Dec 2022
 
 - Bio-IK LookAtGoal works well. It also works great with minimal displacement goal. **But...** IK runs without collision avoidance. I tried integrating collision avoidance using [setFromIK](http://docs.ros.org/en/jade/api/moveit_core/html/classmoveit_1_1core_1_1RobotState.html#ab816880027ef7e63bbdef22a0497cc78)'s constraint parameter. It didn't work. I think Bio-IK is not using this function internally for rejection sampling, instead moveit tests validity of the IK and rejects automatically if the constraint function reports an issue.
