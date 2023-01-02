@@ -52,6 +52,24 @@ My findings:
 
   A: XArm developers say it may not be necessary: https://github.com/xArm-Developer/xarm_ros/issues/75 If it is a problem, URDF/SDF models can be simplified via MeshLab. I think, using cylinders and sphere must be the last thing we should do to speed up the implementation process.
 
+- **Q: How to compute meaningful distances?**
+
+  A: The first task is to avoid crashing into other arms. These arms will have a Allowed Collision Matrix which should be ignoring the head arm, so they can plan solutions without constraining themselves to the head arm. When it comes to the answer to this question, the head arm should only compute distances to other arms. So, we need a Allowed Collision Matrix with values set to false between head arm and other arms. Also, Self-collision distance can be solved similar to this way.
+
+  **Extra**: I have experimented computing collision distances between head arm and other arms, and succeeded doing computations with ~350Hz (2.8ms) without doing any model simplifications.
+
+  ![acm](assets/acm2.png)
+
+- **Q: Self-distance vs other-robot distances? Why not combine into one?**
+
+  I think, combining both would force the robot to move to singularity. Alternatively, instead of self-distance, self-collision cost (very very high value) can be added to do rejection sampling.
+
+- **Q: How to move the arm reactively?**
+
+  I think, the only solution is to move the arm like `moveit_servo` does. 
+
+
+
 ### 07 Dec 2022
 
 - Bio-IK LookAtGoal works well. It also works great with minimal displacement goal. **But...** IK runs without collision avoidance. I tried integrating collision avoidance using [setFromIK](http://docs.ros.org/en/jade/api/moveit_core/html/classmoveit_1_1core_1_1RobotState.html#ab816880027ef7e63bbdef22a0497cc78)'s constraint parameter. It didn't work. I think Bio-IK is not using this function internally for rejection sampling, instead moveit tests validity of the IK and rejects automatically if the constraint function reports an issue.

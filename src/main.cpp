@@ -12,8 +12,110 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <visualization_msgs/Marker.h>
 #include <random>
+#include <chrono>
 
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "move_group_interface_tutorial");
+  ros::NodeHandle nh;
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
 
+  // Load the planning scene monitor
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
+  planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
+  if (!planning_scene_monitor->getPlanningScene())
+  {
+    exit(-1);
+  }
+
+  planning_scene_monitor->startSceneMonitor();
+  planning_scene_monitor->startWorldGeometryMonitor(
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
+      true /* skip octomap monitor */); // TODO: didn't work
+  //planning_scene_monitor->setStateUpdateFrequency(100); // TODO
+  planning_scene_monitor->startStateMonitor();
+
+  collision_detection::AllowedCollisionMatrix acm;
+  bool is_acm_init = false;
+
+  auto begin = std::chrono::high_resolution_clock::now();
+  int count=0;
+  ros::Rate r(100.0);
+  while (ros::ok())
+  {
+    //planning_scene_monitor->waitForCurrentRobotState(ros::Time::now()); // <---------------------- BLOCKING
+
+    planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+    //robot_model::RobotModelConstPtr model = ls->getRobotModel();
+
+    auto current_state_ = planning_scene_monitor->getStateMonitor()->getCurrentState();
+    current_state_->updateCollisionBodyTransforms();
+    
+    if (!is_acm_init)
+    {
+      acm = ls->getAllowedCollisionMatrix();
+
+      std::vector<std::string> names;
+      acm.getAllEntryNames(names);
+
+      ROS_WARN("Before modifications:");
+      acm.print(std::cout);
+
+      for (int i=0; i<names.size(); i++)
+      {
+        for (int j=0; j<names.size(); j++)
+        {
+          if (names[i].find("arm") != std::string::npos && names[j].find("arm") != std::string::npos) // found
+          {
+            acm.setEntry(names[i], names[j], true);
+          }
+          else if (names[i].find("head") != std::string::npos && names[j].find("head") != std::string::npos) // found
+          {
+            acm.setEntry(names[i], names[j], true);
+          }
+          /*
+          else if (names[i].find("head") != std::string::npos && names[j].find("arm") != std::string::npos) // found
+          {
+            acm.setEntry(names[i], names[j], false);
+          }
+          else if (names[i].find("arm") != std::string::npos && names[j].find("head") != std::string::npos) // found
+          {
+            acm.setEntry(names[i], names[j], false);
+          }
+          */
+        }
+      }
+
+      ROS_WARN("After modifications:");
+      acm.print(std::cout);
+
+      is_acm_init = true;
+    }
+
+    double dist = ls->getCollisionEnv()->distanceSelf(*current_state_, acm);
+    ROS_WARN("Dist-self: %f", dist);
+
+    dist = ls->getCollisionEnv()->distanceRobot(*current_state_, acm);
+    ROS_WARN("Dist-robo: %f", dist);
+
+    count++;
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - begin);
+    if (elapsed.count() > 1e9) // 1e9
+    {
+      begin = std::chrono::high_resolution_clock::now();
+      ROS_WARN("Hz: %d", count);
+      //ROS_WARN("Dist: %f", dist);
+      count = 0;
+    }
+    //r.sleep(); // <---------------------- BLOCKING
+  }
+
+  return 0;
+}
+
+/*
 bool isStateValid(const planning_scene::PlanningScene *planning_scene,
                   robot_state::RobotState *state,
                   const robot_state::JointModelGroup *group, 
@@ -188,3 +290,4 @@ int main(int argc, char** argv)
   ros::shutdown();
   return 0;
 }
+*/
