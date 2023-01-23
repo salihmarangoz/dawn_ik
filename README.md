@@ -27,6 +27,114 @@ Note: This section can be confusing. Please check the [Meetings](#meetings) sect
 
 Note: Some meeting notes may not be available.
 
+### next
+
+- Extra: Neural distance approx. with a balanced dataset.
+
+### 16 Jan 2023
+
+- RelaxedIK with a single robot arm. Add other arms as obstacles.
+  - RelaxedIK have problems with collisions. It looks good at first but there are numerious self collisions. 
+- Small sample space for BioIK so we can move the robot continuously.
+  - It works well without collisions but things get complicated with collisions. Because we are using minimum distances, BioIK tries to approximate gradients with sampling and it is a very difficult task. But instead, if we process each collision pair separately, then each collision pair can affect gradients of a subgroup of joints. Instead, we can use BioIK for sampling in an offline planner.
+- Checked potential field based collision checking but it is slow to compute a potential field.
+- Papers I am reading:
+  - DiffCo: Auto-Differentiable Proxy Collision Detection with Multi-class Labels for Safety-Aware Trajectory Optimization: https://arxiv.org/pdf/2102.07413.pdf
+  - PROXIMA: An Approach for Time or Accuracy Budgeted Collision Proximity Queries: http://www.roboticsproceedings.org/rss18/p043.pdf
+  - IK Survey: https://mathweb.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
+- System design v1:
+  - Similar to the hybrid planner in MoveIt 2.
+  - Since collision avoidance + look at goal is a difficult task here we only aim collision avoidance currently.
+  - Offline planning can be an incremental planner (like D*).
+  - The robot will use offline planning with collision avoidance + pose graph. If there is a risk of collision, the robot will avoid collisions locally. Since we will not be optimizing pose or look at goal, I don't know if we can call this inverse kinematics anymore, it is joint-collision optimization now.
+
+![design1](assets/design1.png)
+
+### 10 Jan 2023
+- https://www.researchgate.net/publication/324024262_Fast_online_collision_avoidance_for_mobile_service_robots_through_potential_fields_on_3D_environment_data_processed_on_GPUs
+
+- relaxed_ik_core compilation fix: https://github.com/jmpinit/crash_relaxed_ik_core/commit/057b2e5cb9f9c09ab56991e2a86750fbd3a2fc81
+
+- Solve `ModuleNotFoundError: No module named 'kdl_parser_py'`: 
+
+  ```bash
+  $ sudo apt-get install ros-noetic-urdfdom-py ros-noetic-kdl-parser-py ros-noetic-kdl-conversions
+  ```
+
+- For testing with Sawyer Robot, clone: `git@github.com:RethinkRobotics/sawyer_robot.git`
+
+- Useful issues: 
+
+  - self collision: https://github.com/uwgraphics/relaxed_ik/issues/33
+  - lookatgoal: https://github.com/uwgraphics/relaxed_ik/issues/24
+  - possible runtime error with multiple endpoints: https://github.com/uwgraphics/relaxed_ik/issues/30
+
+- Found you Rohit :) https://github.com/uwgraphics/relaxed_ik/issues/16#issuecomment-551542923
+
+- Why implement this brilliant idea in Python2 or Rust or Julia... No C++ code.
+
+- Our savior `CreativeInquiry` with the Python3 + Noetic support: https://github.com/CreativeInquiry/relaxed_ik/tree/dev-noetic
+
+  ```bash
+  $ git clone git@github.com:CreativeInquiry/relaxed_ik.git -b dev-noetic
+  ```
+
+- PROBLEM: Collision model simplification is very bad for XArm.
+
+  ![relaxed1](assets/relaxed1.png)
+
+  ![relaxed2](assets/relaxed2.png)
+
+  SOLUTION: https://github.com/uwgraphics/relaxed_ik/issues/29 maybe...
+
+### 05 Jan 2023
+
+Current task is to optimize Bio-IK computations and modify moveit_servo accordingly.
+
+My findings:
+
+- **Q: How to optimize collision computations?**
+
+  A: I have already computed a allowed collision matrix. Furthermore, 
+
+- **Q: Have you tested collision distance computations with Bullet? Is it faster?**
+
+  A: Yes, I have tested it, but I didn't see any improvements. We may need to re-check the performance again when if use Octree for collisions. It is possible to switch to Bullet with this:
+
+  ```c++
+  planning_scene_monitor->getPlanningScene()->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
+  ```
+
+- **Q: Anything different with FCL and Bullet?**
+
+  A: For FCL, robot collisions and environment collisions are separated. But, Bullet uses an unified collision environment for performance reasons. 
+
+- **Q: How about simplifying robot arm collision models?**
+
+  A: This may or may not improve the performance. Currently, I am simplifying the model using boxes, spheres, and cylinders. Even that there are more available shapes (e.g. Capsule, Ellipsoid, etc.) for Bullet and FCL, they are not supported on Gazebo unfortunately.
+
+- **Q: IK using position goal with small weight doesn't produce good results. Why?**
+
+  A: Position goal uses squared distance to the goal. Even setting the weight to 0.1 may not help since the cost is squared. Maybe create a position goal with absolute distance to the goal? Also, maybe create a keep distance goal?
+
+- **Q: Distance computation is too slow**
+
+  A: Distance and collision computations are different. Of course, collision computations are much faster. 
+
+- **Q: Using collisions instead of distances makes the problem more difficult. Because Bio-IK can't estimate a gradient for solving the problem.**
+
+  A: Maybe using a neural network can solve this problem. There are various networks which input endpoint position and output joint position. But maybe we can input joint position and estimate the collision distance? Also a separate network for self-collision distance, another network for distances to other arms, maybe. Since a realtime solution is needed, maybe we can use a neural network. Maybe...
+
+  Also, if we can compute signed distances, then we can still provide gradients for collided states.
+
+- **Q: What if Bio-IK sampling takes a lot of time?**
+
+  A: Current joints + look at goal target -> next joints, may be learned too. I need to check related papers. If we give enough time to Bio-IK it should be able to sample the next pose. Also, we can sample more points around look at goal target in a batch and select the best one, maybe.
+
+- **Q: We didn't start maximizing information gain yet...**
+
+  A: If we can generate possible next moves then we can select the best one. This also doesn't have to be run in real-time.
+
 ### 02 Jan 2023
 
 Current task is to make Bio-IK be able to detect collisions and find distances to the nearest collision (for cost computations).
@@ -195,4 +303,3 @@ $ rosdep install --from-paths src --ignore-src -r
 # Extra. Dont need them now:
 # voxblox: https://voxblox.readthedocs.io/en/latest/pages/Installation.html
 ```
-
