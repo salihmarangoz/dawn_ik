@@ -90,6 +90,24 @@ struct ForwardKinematicsError {
     final_translation = final_translation + final_rotation * T5;
     final_rotation =  final_rotation * R5 * J5;
 
+    // ---------------------------------------------------
+    auto R6 = transforms[6].rotation();
+    auto T6_ = transforms[6].translation();
+    Eigen::Matrix<T,3,1> T6; T6 << T(T6_[0]), T(T6_[1]), T(T6_[2]);
+    auto J6 = Eigen::AngleAxis<T>(joint_values[6], Eigen::Matrix<T,3,1>::UnitZ()).toRotationMatrix();
+
+    final_translation = final_translation + final_rotation * T6;
+    final_rotation =  final_rotation * R6 * J6;
+
+    // ---------------------------------------------------
+    auto R7 = transforms[7].rotation();
+    auto T7_ = transforms[7].translation();
+    Eigen::Matrix<T,3,1> T7; T7 << T(T7_[0]), T(T7_[1]), T(T7_[2]);
+    auto J7 = Eigen::AngleAxis<T>(joint_values[7], Eigen::Matrix<T,3,1>::UnitZ()).toRotationMatrix();
+
+    final_translation = final_translation + final_rotation * T7;
+    final_rotation =  final_rotation * R7 * J7;
+
     residuals[0] = final_translation[0] - endpoint[0];
     residuals[1] = final_translation[1] - endpoint[1];
     residuals[2] = final_translation[2] - endpoint[2];
@@ -151,8 +169,16 @@ public:
       while (true)
       {
         auto current_link = prev_joint->getChildLinkModel();
-        if (current_link->getChildJointModels().size() <= 0) break;
+        if (current_link->getChildJointModels().size() <= 0)
+        {
+                ROS_WARN("link: %s", current_link->getName().c_str());
+          cached_transforms.push_back(current_link->getJointOriginTransform());
+          break;
+        }
         auto current_joint = current_link->getChildJointModels()[0];
+
+        ROS_WARN("link: %s", current_link->getName().c_str());
+        ROS_WARN("joint: %s", prev_joint->getName().c_str());
 
         auto t = current_link->getJointOriginTransform();
         cached_transforms.push_back(t);
@@ -184,6 +210,64 @@ public:
     }
 
     return joint_values;
+  }
+
+  const std::vector<double>& getJointUpperLimits()
+  {
+    if (cached_joint_upper_limits.size() == 0)
+    {
+      auto prev_joint = model->getJointModel(model->getRootJoint()->getName());
+      prev_joint = prev_joint->getChildLinkModel()->getChildJointModels()[0];
+
+      while (true)
+      {
+        auto current_link = prev_joint->getChildLinkModel();
+        if (current_link->getChildJointModels().size() <= 0) break;
+        auto current_joint = current_link->getChildJointModels()[0];
+
+        auto bounds = prev_joint->getVariableBounds();
+        if (bounds.size() == 0)
+        {
+          cached_joint_upper_limits.push_back(99999.0); // TODO
+        }
+        else
+        {
+          cached_joint_upper_limits.push_back(bounds[0].max_position_);
+        }
+        
+        prev_joint = current_joint;
+      }
+    }
+    return cached_joint_upper_limits;
+  }
+
+  const std::vector<double>& getJointLowerLimits()
+  {
+    if (cached_joint_lower_limits.size() == 0)
+    {
+      auto prev_joint = model->getJointModel(model->getRootJoint()->getName());
+      prev_joint = prev_joint->getChildLinkModel()->getChildJointModels()[0];
+
+      while (true)
+      {
+        auto current_link = prev_joint->getChildLinkModel();
+        if (current_link->getChildJointModels().size() <= 0) break;
+        auto current_joint = current_link->getChildJointModels()[0];
+
+        auto bounds = prev_joint->getVariableBounds();
+        if (bounds.size() == 0)
+        {
+          cached_joint_lower_limits.push_back(-99999.0); // TODO
+        }
+        else
+        {
+          cached_joint_lower_limits.push_back(bounds[0].min_position_);
+        }
+
+        prev_joint = current_joint;
+      }
+    }
+    return cached_joint_lower_limits;
   }
 
   void setJointValues(moveit::core::RobotState &robot_state, const std::vector<double> joint_values)
@@ -234,10 +318,19 @@ public:
       ceres::CostFunction* cost_function = ForwardKinematicsError::Create(transforms, endpoint);
       problem.AddResidualBlock(cost_function, nullptr /* squared loss */, joint_values.data());
 
-      // problem.SetParameterLowerBound(parameters, 0, 0.02); problem.SetParameterUpperBound(parameters, 0, 0.15); // TODO
+      auto lower_bounds = getJointLowerLimits();
+      auto upper_bounds = getJointUpperLimits();
+
+      for (int i=0; i<joint_values.size(); i++)
+      {
+        ROS_WARN("idx: %d", i);
+        problem.SetParameterLowerBound(joint_values.data(), i, lower_bounds[i]); 
+        problem.SetParameterUpperBound(joint_values.data(), i, upper_bounds[i]);
+      }
       
       ceres::Solver::Options options;
       options.linear_solver_type = ceres::DENSE_SCHUR;
+      options.minimizer_type = ceres::TRUST_REGION; // LINE_SEARCH methods don't support bounds
       options.minimizer_progress_to_stdout = false;
       ceres::Solver::Summary summary;
       ceres::Solve(options, &problem, &summary);
@@ -260,6 +353,8 @@ public:
   moveit_visual_tools::MoveItVisualToolsPtr visual_tools;
   moveit::core::RobotModelConstPtr model;
   std::vector<Eigen::Isometry3d> cached_transforms;
+  std::vector<double> cached_joint_upper_limits;
+  std::vector<double> cached_joint_lower_limits;
 };
 
 
