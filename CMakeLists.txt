@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(salih_marangoz_thesis)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -24,6 +24,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(Ceres REQUIRED COMPONENTS EigenSparse SparseLinearAlgebraLibrary LAPACK SuiteSparse SchurSpecializations)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -143,6 +145,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(main_node src/main.cpp)
+add_executable(main_node2 src/main2.cpp)
+add_executable(main_node3 src/main3.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,11 +157,25 @@ add_executable(main_node src/main.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(main_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(main_node2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(main_node3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(main_node
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
+)
+
+target_link_libraries(main_node2
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  Ceres::ceres
+)
+
+target_link_libraries(main_node3
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  Ceres::ceres
 )
 
 #############

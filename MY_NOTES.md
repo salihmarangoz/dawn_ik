@@ -1,5 +1,30 @@
 
 
+```bash
+$ git clone git@github.com:ceres-solver/ceres-solver.git
+$ cd ceres-solver
+$ mkdir build
+$ cd build
+$ cmake .. -DUSE_CUDA=0
+$ make -j8
+$ sudo make install # UNINSTALL: sudo make uninstall
+
+$ roslaunch xarm_gazebo xarm7_beside_table.launch
+$ roslaunch xarm7_moveit_config xarm7_moveit_gazebo.launch
+```
+
+
+
+
+
+
+
+----------
+
+
+
+
+
 # My Personal Notes
 
 - idea (1):
