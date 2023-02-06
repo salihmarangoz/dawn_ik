@@ -3,14 +3,34 @@
 
 #include <geometry_msgs/Pose.h>
 #include <moveit/robot_state/robot_state.h>
-
-
 #include "ceres_utils.h"
 
-namespace salih_marangoz_thesis
+namespace utils
 {
 
+// TODO: implement ceres functor using forward kinematics and jacobians of moveit
+// see: http://ceres-solver.org/interfacing_with_autodiff.html
 
+
+
+/*
+// Test forwardKinematics, computeLinkTranslation, computeLinkRotation
+planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
+planning_scene_monitor->startSceneMonitor();
+planning_scene_monitor->startStateMonitor();
+ros::Publisher pub = nh.advertise<geometry_msgs::PoseStamped>("endpoint_pose", 1, true);
+ros::Rate r(1.0);
+while (ros::ok())
+{
+  planning_scene_monitor->waitForCurrentRobotState(ros::Time::now());
+  planning_scene_monitor::LockedPlanningSceneRO lps(planning_scene_monitor);
+  moveit::core::RobotState current_state = lps->getCurrentState(); // copy the current state
+
+  geometry_msgs::PoseStamped endpoint = forwardKinematics(current_state);
+  pub.publish(endpoint);
+  r.sleep();
+}
+*/
 geometry_msgs::PoseStamped forwardKinematics(const moveit::core::RobotState& robot_state)
 {
   moveit::core::RobotModelConstPtr robot_model = robot_state.getRobotModel();
@@ -93,6 +113,6 @@ geometry_msgs::PoseStamped forwardKinematics(const moveit::core::RobotState& rob
 }
 
 
-} // namespace salih_marangoz_thesis
+} // namespace utils
 
 #endif // __SALIH_MARANGOZ_MOVEIT_UTILS_H__
