@@ -1,12 +1,12 @@
 # Salih Marangoz Thesis
 
-### [===> Thesis Notes](thesis/THESIS_NOTES.md)
+### [===> Thesis Notes](thesis/THESIS_NOTES.md) (meetings, etc.)
 
 ### [===> My Notes](thesis/MY_NOTES.md)
 
 
 
-## Setup
+## Installation
 
 - http://ceres-solver.org/installation.html (2.x.x)
 

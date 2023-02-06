@@ -16,13 +16,6 @@ std::string fk_chain_joints[] = {"Jan",
                                  "Sep"};
 
 
-
-
-
-
-
-
-
 } // namespace salih_marangoz_thesis
 
 #endif __ROBOT_CONFIGURATION_H__

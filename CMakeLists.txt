@@ -131,22 +131,38 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Library
-add_library(${PROJECT_NAME}
+
+## ceres_ik library
+add_library(ceres_ik
   src/ceres_ik.cpp
 )
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}
+add_dependencies(ceres_ik ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ceres_ik
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   Ceres::ceres
 )
 
+## ceres_ik_node executable
+add_executable(ceres_ik_node src/ceres_ik_node.cpp)
+add_dependencies(ceres_ik_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ceres_ik_node ceres_ik)
 
-## Executable
-add_executable(node src/node.cpp)
-add_dependencies(node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(node ${PROJECT_NAME})
+
+## robot_parser library
+add_library(robot_parser
+  src/robot_parser.cpp
+)
+add_dependencies(robot_parser ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robot_parser
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+## robot_parser_node executable
+add_executable(robot_parser_node src/robot_parser_node.cpp)
+add_dependencies(robot_parser_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robot_parser_node robot_parser)
 
 
 
