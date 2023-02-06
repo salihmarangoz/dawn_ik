@@ -21,7 +21,24 @@ public:
   robot_model_loader::RobotModelLoaderPtr robot_model_loader;
   moveit::core::RobotModelConstPtr kinematic_model;
 
+
+  std::vector<std::string> link_names;
+  std::vector<int> link_model_index;
+  std::vector<Eigen::Isometry3d> link_transform;
+  std::vector<bool> link_transform_translation_needs_computation;
+  std::vector<bool> link_transform_rotation_needs_computation;
+
+  std::vector<std::string> joint_names;
+  std::vector<int> joint_variable_index;
+  std::vector<float> joint_value_upper_limit;
+  std::vector<float> joint_value_lower_limit;
+  std::vector<bool> joint_transform_needs_computation; // decided using the active/passive state according to the move group
+
+
   RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
+  template <typename T> std::string vector2Str(std::string variable, const std::vector<T>& arr);
+  std::string createHeader();
+  std::string createFooter();
 
 };
 

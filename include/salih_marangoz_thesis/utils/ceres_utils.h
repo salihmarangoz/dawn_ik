@@ -4,7 +4,10 @@
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
-namespace salih_marangoz_thesis
+// TODO: Eigen::Map<const Eigen::Matrix<T, 4, 1> > point(input_point);
+// https://groups.google.com/g/ceres-solver/c/7ZH21XX6HWU/m/kX-2n4vbAwAJ
+
+namespace utils
 {
 
 // Computes translation of the link
@@ -23,6 +26,7 @@ inline void computeLinkTranslation(const T current_translation[3], const T curre
 
 // Computes rotation of the link using the joint (excluding rotation of the link)
 // ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
+// WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
 inline void computeLinkRotation(const T current_rotation[4], const T& joint_value, T result[4])
 {
@@ -35,6 +39,7 @@ inline void computeLinkRotation(const T current_rotation[4], const T& joint_valu
 
 // Computes rotation of the link using the joint (including rotation of the link)
 // ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
+// WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
 inline void computeLinkRotation(const T current_rotation[4], const T link_rotation[4], const T& joint_value, T result[4])
 {
@@ -46,7 +51,42 @@ inline void computeLinkRotation(const T current_rotation[4], const T link_rotati
   ceres::QuaternionProduct(current_rotation, link_and_joint_rotation, result);
 }
 
+/*
+  while(ros::ok())
+  {
+    double fs[3] = {0,0,0};
+    double ss[3] = {1,1,1};
+    double dist = utils::distSphere2Sphere(fs, 0.1, ss, 0.2);
+    ROS_WARN("dist: %f", dist);
+  }
+*/
+template <typename T>
+inline T distSphere2Sphere(const T first_sphere_pos[3], float first_sphere_radius, const T second_sphere_pos[3], float second_sphere_radius)
+{
+  Eigen::Map<const Eigen::Matrix<T, 3, 1>> first_sphere_pos_e(first_sphere_pos);
+  Eigen::Map<const Eigen::Matrix<T, 3, 1>> second_sphere_pos_e(second_sphere_pos);
+  return (first_sphere_pos_e - second_sphere_pos_e).norm() - first_sphere_radius - second_sphere_radius;
+}
 
-} // namespace salih_marangoz_thesis
+template <typename T>
+inline T distPoint2Sphere(const T point_pos[3], const T sphere_pos[3], float sphere_radius)
+{
+  Eigen::Map<const Eigen::Matrix<T, 3, 1>> point_pos_e(point_pos);
+  Eigen::Map<const Eigen::Matrix<T, 3, 1>> sphere_pos_e(sphere_pos);
+  return (point_pos_e - sphere_pos_e).norm() - sphere_radius;
+}
+
+template <typename T>
+inline T distPoint2Point(const T first_point_pos[3], const T second_point_pos[3])
+{
+  Eigen::Map<const Eigen::Matrix<T, 3, 1>> first_point_pos_e(first_point_pos);
+  Eigen::Map<const Eigen::Matrix<T, 3, 1>> second_point_pos_e(second_point_pos);
+  return (first_point_pos_e - second_point_pos_e).norm();
+}
+
+
+
+
+} // namespace utils
 
 #endif // __SALIH_MARANGOZ_CERES_UTILS_H__
