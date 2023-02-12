@@ -7,28 +7,22 @@ RobotParser::RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh) : nh(nh)
 {
   //test();
   parseCurrentRobot();
+  std::cout << generateCodeForParsedRobot();
 }
 
-std::string RobotParser::createHeader()
-{
-  return "";
-}
-
-std::string RobotParser::createFooter()
-{
-  return "";
-}
-
-template <typename T>
-std::string RobotParser::vector2Str(const std::string& variable, const std::vector<T>& arr)
+std::string RobotParser::strVector2Str(const std::string& variable, const std::vector<std::string>& arr)
 {
   std::string out = "";
   out += variable;
-  out += "[] = {";
+  out += "[";
+  out += std::to_string(arr.size());
+  out += "] = {";
 
   for (int i=0; i<arr.size(); i++)
   {
-    out += std::to_string(arr[i]);
+    out += "\"";
+    out += arr[i];
+    out += "\"";
 
     if (i!=arr.size()-1)
     {
@@ -51,7 +45,7 @@ std::string RobotParser::vector2Str(const std::string& variable, const std::vect
 ///         inline const TEST_VARIABLE[3][3] = {{0.500000, 0.200000, 0.300000},
 ///                                             {0.254654, 0.212310, 0.332100},
 ///                                             {0.456121, 0.546546, 0.100000}};
-std::string RobotParser::eigenTranslation2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision)
+std::string RobotParser::eigenTranslation2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision, int extra_whitespace)
 {
   std::ostringstream out_stream;
   if (precision>=0)
@@ -65,7 +59,7 @@ std::string RobotParser::eigenTranslation2Str(const std::string& variable, const
   first_part += std::to_string(transformations.size());
   first_part += "]";
   first_part += "[3] = {";
-  std::string spacing = std::string(first_part.size(), ' ');
+  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
   out_stream << first_part;
 
   for (int i=0; i<transformations.size(); i++)
@@ -75,7 +69,7 @@ std::string RobotParser::eigenTranslation2Str(const std::string& variable, const
     out_stream << "{" << std::to_string(translation.x()) << ", " << std::to_string(translation.y()) << ", " << std::to_string(translation.z()) << "}";
     if (i!=transformations.size()-1) out_stream << ",";
     if (i==transformations.size()-1) out_stream << "};";
-    out_stream << std::endl;
+    if (i!=transformations.size()-1) out_stream << std::endl;
   }
 
   return out_stream.str();
@@ -89,7 +83,7 @@ std::string RobotParser::eigenTranslation2Str(const std::string& variable, const
 ///         inline const TEST_VARIABLE[3][4] = {{0.891007, 0.000000, 0.000000, 0.453990},
 ///                                             {0.707107, 0.707107, 0.000000, 0.000000},
 ///                                             {0.154508, 0.024472, 0.975528, 0.154508}};
-std::string RobotParser::eigenQuaternion2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision)
+std::string RobotParser::eigenQuaternion2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision, int extra_whitespace)
 {
   std::ostringstream out_stream;
   if (precision>=0)
@@ -103,7 +97,7 @@ std::string RobotParser::eigenQuaternion2Str(const std::string& variable, const 
   first_part += std::to_string(transformations.size());
   first_part += "]";
   first_part += "[4] = {";
-  std::string spacing = std::string(first_part.size(), ' ');
+  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
   out_stream << first_part;
 
   for (int i=0; i<transformations.size(); i++)
@@ -113,20 +107,46 @@ std::string RobotParser::eigenQuaternion2Str(const std::string& variable, const 
     out_stream << "{" << std::to_string(rotation.w()) << ", " << std::to_string(rotation.x()) << ", " << std::to_string(rotation.y()) << ", " << std::to_string(rotation.z()) << "}";
     if (i!=transformations.size()-1) out_stream << ",";
     if (i==transformations.size()-1) out_stream << "};";
-    out_stream << std::endl;
+    if (i!=transformations.size()-1) out_stream << std::endl;
   }
 
   return out_stream.str();
 }
 
+std::string RobotParser::eigenArrayXXi2Str(const std::string& variable, const Eigen::ArrayXXi& mat, int extra_whitespace)
+{
+  std::ostringstream out_stream;
+  std::string first_part = "";
+  first_part += variable;
+  first_part += "[";
+  first_part += std::to_string(mat.rows());
+  first_part += "]";
+  first_part += "[";
+  first_part += std::to_string(mat.cols());
+  first_part += "]";
+  first_part += "= {";
+  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
+  out_stream << first_part;
 
-// WARN: Assumed that joints are ordered for forward kinematic computations.
-// WARN: Assumed that each joint can be single DOF or static. So, each joint can't have more than one variable.
-// WARN: Assumed that all active joints rotate around Z axis.
-// WARN: Assumed that collision objects are connected to the links that have a joint parent.
-// WARN: Assumed that joint at 0 (zero) idx is the root joint (which has no parent link).
-// WARN: Assumed that root joint has identity transformation to the child link.
-// WARN: Assumed that acm is processed so that new collision pairs do not appear after adding the custom collision objects.
+  for (int i=0; i<mat.rows(); i++)
+  {
+    if (i!=0) out_stream << spacing;
+    out_stream << "{";
+    for (int j=0; j<mat.cols(); j++)
+    {
+      //int val = mat(i,j);
+      out_stream << std::to_string(mat(i,j));
+      if (j==mat.cols()-1 && i!=mat.rows()-1) out_stream << "},";
+      if (j==mat.cols()-1 && i==mat.rows()-1) out_stream << "}";
+      if (j!=mat.cols()-1) out_stream << ",";
+    }
+    if (i==mat.rows()-1) out_stream << "};";
+    if (i!=mat.rows()-1) out_stream << std::endl;
+  }
+
+  return out_stream.str();
+}
+
 bool RobotParser::parseCurrentRobot()
 {
   // Load robot model, robot state
@@ -144,54 +164,32 @@ bool RobotParser::parseCurrentRobot()
   moveit::core::RobotModelConstPtr robot_model = robot_state.getRobotModel();
 
   const std::vector<const moveit::core::JointModel*> joint_models = robot_model->getJointModels();
-
-
-  /////////////////////////////////////////////////////////////////////
-  int num_joints;
-  int num_variables;
-  int num_links;
-  int num_collision_pairs;
-
-  // Mapping vectors
-  std::vector<int> joint_idx_to_variable_idx; // -1 if no variable available. Can be used as joint_has_variable vector
-  std::vector<int> variable_idx_to_joint_idx;
-
-  // Joint info
-  std::vector<std::string> joint_names;
-  std::vector<int> joint_child_link_idx;
-  std::vector<int> joint_parent_link_idx; // -1 if no link available
-  std::vector<bool> joint_is_position_bounded;
-  std::vector<float> joint_max_position;
-  std::vector<float> joint_min_position;
-  std::vector<bool> joint_is_velocity_bounded;
-  std::vector<float> joint_max_velocity;
-  std::vector<float> joint_min_velocity;
-  std::vector<bool> joint_is_acceleration_bounded;
-  std::vector<float> joint_max_acceleration;
-  std::vector<float> joint_min_acceleration;
-
-  // Link info
-  std::vector<std::string> link_names;
-  std::vector<Eigen::Isometry3d> link_transform;
-  std::vector<bool> link_can_skip_translation;
-  std::vector<bool> link_can_skip_rotation;
-  /////////////////////////////////////////////////////////////////////
-
+  num_joints = joint_models.size();
 
   ROS_INFO("Available links in the robot model:");
   std::vector<std::string> all_links = robot_model->getLinkModelNames(); // WARN: Assuming that getLinkModelNames returns links in order with the indexes, starting from zero
+  num_links = all_links.size();
+  link_names.resize(num_links);
+  link_transform.resize(num_links);
+  link_can_skip_translation.resize(num_links);
+  link_can_skip_rotation.resize(num_links);
   for (auto l: all_links)
   {
     const moveit::core::LinkModel* link_model = robot_state.getLinkModel(l);
     int link_index = link_model->getLinkIndex();
     ROS_INFO("Link name: %s, Link idx: %d", l.c_str(), link_index);
+
+    link_names[link_index] = l.c_str();
+    link_transform[link_index] = link_model->getJointOriginTransform();
+    link_can_skip_translation[link_index] = link_model->getJointOriginTransform().translation().isZero();
+    link_can_skip_rotation[link_index] = link_model->getJointOriginTransform().rotation().isIdentity();
   }
 
   ROS_INFO("ACM:");
   collision_detection::AllowedCollisionMatrix acm = lps->getAllowedCollisionMatrix();
   acm.print(std::cout);
   ROS_INFO("Processed ACM:");
-  Eigen::ArrayXXi processed_acm = Eigen::ArrayXXi::Zero(all_links.size(), all_links.size()); // values must be one or zero
+  processed_acm = Eigen::ArrayXXi::Zero(all_links.size(), all_links.size()); // values must be one or zero
 
   for (int i=0; i<all_links.size(); i++)
   {
@@ -231,7 +229,7 @@ bool RobotParser::parseCurrentRobot()
       // Discard collision checking between other arms
       if (all_links[i].find("arm_") != std::string::npos && all_links[j].find("arm_") != std::string::npos)
       {
-        ROS_WARN_ONCE("Applying extra rules for horti robot!!!");
+        ROS_FATAL_ONCE("Applying extra rules for horti robot!!!");
         ROS_WARN("Discarding collision checking between %s and %s", all_links[i].c_str(), all_links[j].c_str());
         processed_acm(i,j) = 1;
         continue;
@@ -249,9 +247,25 @@ bool RobotParser::parseCurrentRobot()
   num_collision_pairs = processed_acm.size() - processed_acm.sum();
   ROS_INFO("Total number of collision pairs: %d", num_collision_pairs);
   std::cout << processed_acm << std::endl;
-  
 
+
+  ROS_INFO("Available joints in the robot model:");
   // Number of joints will be more than variables in our case. But each joint can have its own transformation.
+  num_variables = 0;
+  joint_idx_to_variable_idx.resize(num_joints, -1);
+  variable_idx_to_joint_idx.resize(num_joints); // will be shrink after this block
+  joint_names.resize(num_joints);
+  joint_child_link_idx.resize(num_joints);
+  joint_parent_link_idx.resize(num_joints);
+  joint_is_position_bounded.resize(num_joints);
+  joint_max_position.resize(num_joints);
+  joint_min_position.resize(num_joints);
+  joint_is_velocity_bounded.resize(num_joints);
+  joint_max_velocity.resize(num_joints);
+  joint_min_velocity.resize(num_joints);
+  joint_is_acceleration_bounded.resize(num_joints);
+  joint_max_acceleration.resize(num_joints);
+  joint_min_acceleration.resize(num_joints);
   for (auto j: joint_models)
   {
     ROS_INFO("------------------------------------------------------");
@@ -259,21 +273,26 @@ bool RobotParser::parseCurrentRobot()
 
     int joint_idx = j->getJointIndex(); // joint idx in robot model
     ROS_INFO("joint idx: %d", joint_idx);
+    joint_names[joint_idx] = j->getName();
 
     // Get parent link
     const moveit::core::LinkModel* parent_link = j->getParentLinkModel(); // if j is the ROOT joint this will return NULL pointer!!!
     if (parent_link!=nullptr)
     {
       ROS_INFO("parent link name: %s", parent_link->getName().c_str());
+      joint_parent_link_idx[joint_idx] = parent_link->getLinkIndex();
     }
     else
     {
       ROS_INFO("no parent link available (current joint is the root joint!)");
+      joint_parent_link_idx[joint_idx] = -1;
     }
 
     // Get child link
     const moveit::core::LinkModel* child_link = j->getChildLinkModel(); // There will be always a link
     ROS_INFO("child link name: %s", child_link->getName().c_str());
+    joint_child_link_idx[joint_idx] = child_link->getLinkIndex();
+
     bool skip_translation = child_link->getJointOriginTransform().translation().isZero();
     bool skip_rotation = child_link->getJointOriginTransform().rotation().isIdentity();
     if (skip_translation)
@@ -281,6 +300,7 @@ bool RobotParser::parseCurrentRobot()
     if (skip_rotation)
     ROS_WARN("child link origin doesn't need rotation!");
 
+    // Check if the current joint has a supported variable
     if (j->getVariableCount()==0)
     {
       ROS_INFO("Joint has no variables. Skipping...");
@@ -291,94 +311,122 @@ bool RobotParser::parseCurrentRobot()
       ROS_ERROR("Joint has too many variables. This is not supported!");
       continue;
     }
+    num_variables++;
 
-    // Get name and idxs
+    // Get variable name and idxs
     std::string variable_name = j->getVariableNames()[0]; // For single DOF joints, this will be just the joint name
     int variable_idx = j->getFirstVariableIndex(); // variable idx in robot state
     ROS_INFO("variable name: %s, variable idx: %d", variable_name.c_str(), variable_idx);
+    joint_idx_to_variable_idx[joint_idx] = variable_idx;
+    variable_idx_to_joint_idx[variable_idx] = joint_idx;
 
     // Get variable limits
     moveit::core::JointModel::Bounds variable_bounds = j->getVariableBounds();
-    bool is_position_bounded = variable_bounds[0].position_bounded_;
-    float min_position = variable_bounds[0].min_position_;
-    float max_position = variable_bounds[0].max_position_;
-    bool is_velocity_bounded = variable_bounds[0].velocity_bounded_;
-    float min_velocity = variable_bounds[0].min_velocity_;
-    float max_velocity = variable_bounds[0].max_velocity_;
-    bool is_acceleration_bounded = variable_bounds[0].acceleration_bounded_;
-    float min_acceleration = variable_bounds[0].min_acceleration_;
-    float max_acceleration = variable_bounds[0].max_acceleration_;
+    joint_is_position_bounded[joint_idx] = variable_bounds[0].position_bounded_;
+    joint_min_position[joint_idx] = variable_bounds[0].min_position_;
+    joint_max_position[joint_idx] = variable_bounds[0].max_position_;
+    joint_is_velocity_bounded[joint_idx] = variable_bounds[0].velocity_bounded_;
+    joint_min_velocity[joint_idx] = variable_bounds[0].min_velocity_;
+    joint_max_velocity[joint_idx] = variable_bounds[0].max_velocity_;
+    joint_is_acceleration_bounded[joint_idx] = variable_bounds[0].acceleration_bounded_;
+    joint_min_acceleration[joint_idx] = variable_bounds[0].min_acceleration_;
+    joint_max_acceleration[joint_idx] = variable_bounds[0].max_acceleration_;
 
-    if (is_position_bounded)
-      ROS_INFO("min position: %f, max position: %f", min_position, max_position);
+    if (joint_is_position_bounded[joint_idx])
+      ROS_INFO("min position: %f, max position: %f", joint_min_position[joint_idx], joint_max_position[joint_idx]);
     else
       ROS_INFO("no position limits!");
 
-    if (is_velocity_bounded)
-      ROS_INFO("min velocity: %f, max velocity: %f", min_velocity, max_velocity);
+    if (joint_is_velocity_bounded[joint_idx])
+      ROS_INFO("min velocity: %f, max velocity: %f", joint_min_velocity[joint_idx], joint_max_velocity[joint_idx]);
     else
       ROS_INFO("no velocity limits!");
 
-    if (is_acceleration_bounded)
-      ROS_INFO("min acceleration: %f, max acceleration: %f", min_acceleration, max_acceleration);
+    if (joint_is_acceleration_bounded[joint_idx])
+      ROS_INFO("min acceleration: %f, max acceleration: %f", joint_min_acceleration[joint_idx], joint_max_acceleration[joint_idx]);
     else
       ROS_INFO("no acceleration limits!");
-
-    //(global_transform_from_parent -> apply joint_value from current state (maybe a parameter) -> apply child link transform)
-    //(global transform links -> collisions)
-    
   }
-
-
-  /*
-  for (int i=0; i<robot_state.getVariableCount(); i++)
-  {
-    
-  }
-  */
-  
-
-
-
-  /*
-  // Follow the kinematic tree
-  const moveit::core::JointModel* current_joint = robot_model->getRootJoint();
-  ROS_INFO("Joint: %s", current_joint->getName().c_str());
-
-  while (true)
-  {
-    // One child link is possible
-    const moveit::core::LinkModel* current_link = current_joint->getChildLinkModel();
-    ROS_INFO("Link: %s", current_link->getName().c_str());
-
-    // Get link transform
-    const Eigen::Isometry3d current_link_transform = current_link->getJointOriginTransform();
-    if (!current_link_transform.translation().isZero())
-    {
-      ROS_INFO_STREAM("translation: " << current_link_transform.translation());
-    }
-
-    if (current_link_transform.rotation().isIdentity())
-    {
-      ROS_INFO_STREAM("rotation: " << current_link_transform.rotation() << " without joint rotation");
-    }
-    else
-    {
-      ROS_INFO_STREAM("rotation: " << current_link_transform.rotation() << " with joint rotation");
-    }
-
-    const double* pos_ = robot_state.getJointPositions(current_joint->getName());
-    float pos = *pos_;
-
-    // Multiple joints are possible. But here we will pick the first one.
-    const std::vector<const moveit::core::JointModel*> next_joints = current_link->getChildJointModels();
-    if (next_joints.size() <= 0) break; // end of the kinematic tree
-    current_joint = next_joints[0];
-    ROS_INFO("Joint: %s", current_joint->getName().c_str());
-  }
-  */
+  variable_idx_to_joint_idx.resize(num_variables);
 
   return true;
+}
+
+std::string RobotParser::generateCodeForParsedRobot()
+{
+  std::string prefix = "const ";
+  std::string header_guard_name = "__AUTOGENERATED_ROBOT_CONFIGURATION__";
+  std::string namespace_name = "robot";
+
+  std::ostringstream out_stream;
+
+  // header guard start
+  out_stream << "#ifndef " << header_guard_name << std::endl;
+  out_stream << "#define " << header_guard_name << std::endl;
+  out_stream << std::endl;
+
+  // libs
+  out_stream << "#include <vector>" << std::endl;
+  out_stream << "#include <string>" << std::endl;
+  out_stream << "#include <Eigen/Dense>" << std::endl;
+  out_stream << std::endl;
+
+  // namespace start
+  out_stream << "namespace " << namespace_name << std::endl;
+  out_stream << "{" << std::endl;
+  out_stream << std::endl;
+
+  // Constants
+  out_stream << "// Constants" << std::endl;
+  out_stream << prefix << "int num_joints = " << num_joints << ";" << std::endl;
+  out_stream << prefix << "int num_variables = " << num_variables << ";" << std::endl;
+  out_stream << prefix << "int num_links = " << num_links << ";" << std::endl;
+  out_stream << prefix << "int num_collision_pairs = " << num_collision_pairs << ";" << std::endl;
+  out_stream << std::endl;
+
+  // Mapping vectors
+  out_stream << "// Mapping vectors" << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_idx_to_variable_idx", joint_idx_to_variable_idx) << " // -1 if no variable available. Can be used as joint_has_variable vector" << std::endl;
+  out_stream << prefix << primitiveVector2Str("int variable_idx_to_joint_idx", variable_idx_to_joint_idx) << std::endl;
+  out_stream << std::endl;
+
+  // Joint info
+  out_stream << "// Joint info" << std::endl;
+  out_stream << prefix << strVector2Str("std::string joint_names", joint_names) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_child_link_idx", joint_child_link_idx) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_parent_link_idx", joint_parent_link_idx) << " // -1 if no link available" << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_is_position_bounded", joint_is_position_bounded) << " // bool" << std::endl;
+  out_stream << prefix << primitiveVector2Str("float joint_max_position", joint_max_position) << std::endl;
+  out_stream << prefix << primitiveVector2Str("float joint_min_position", joint_min_position) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_is_velocity_bounded", joint_is_velocity_bounded) << " // bool" << std::endl;
+  out_stream << prefix << primitiveVector2Str("float joint_max_velocity", joint_max_velocity) << std::endl;
+  out_stream << prefix << primitiveVector2Str("float joint_min_velocity", joint_min_velocity) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_is_acceleration_bounded", joint_is_acceleration_bounded) << " // bool" << std::endl;
+  out_stream << prefix << primitiveVector2Str("float joint_max_acceleration", joint_max_acceleration) << std::endl;
+  out_stream << prefix << primitiveVector2Str("float joint_min_acceleration", joint_min_acceleration) << std::endl;
+  out_stream << std::endl;
+
+  // Link info
+  out_stream << "// Link info" << std::endl;
+  out_stream << prefix << strVector2Str("std::string link_names", link_names) << std::endl;
+  out_stream << prefix << eigenTranslation2Str("float link_transform_translation_only", link_transform, 10, prefix.size()) << std::endl;
+  out_stream << prefix << eigenQuaternion2Str("float link_transform_quaternion_only", link_transform, 10, prefix.size()) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int link_can_skip_translation", link_can_skip_translation) << " // bool" << std::endl;
+  out_stream << prefix << primitiveVector2Str("int link_can_skip_rotation", link_can_skip_rotation) << " // bool" << std::endl;
+  out_stream << std::endl;
+
+  // ACM
+  out_stream << "// ACM" << std::endl;
+  out_stream << prefix << eigenArrayXXi2Str("int processed_acm", processed_acm, prefix.size());
+  out_stream << std::endl;
+
+  // namespace end
+  out_stream << "} // namespace " << namespace_name << std::endl;
+  out_stream << std::endl;
+
+  // header guardend
+  out_stream << "#endif // " << header_guard_name << std::endl;
+  return out_stream.str();
 }
 
 
@@ -401,7 +449,6 @@ void RobotParser::test()
 
   std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
 }
-
 
 
 } // namespace salih_marangoz_thesis
