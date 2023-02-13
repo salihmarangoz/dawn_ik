@@ -37,7 +37,7 @@ Note: Some meeting notes may not be available.
 
 - IDEA: Maybe we can discard some collision sphere pairs with a second iteration of generating ACM-like matrix? We can sample many random robot states and check if these pairs very close/collide or not.
 
-- GCC has some nice features (like `-funroll-loops`):
+- GCC has some nice features (like `-funroll-loops`): [**TEST HERE**](https://godbolt.org/z/McoM848qK)
 
   - Without unrolling (-O2 level optimization):
 
