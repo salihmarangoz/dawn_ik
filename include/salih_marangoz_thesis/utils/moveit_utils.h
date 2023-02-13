@@ -4,6 +4,7 @@
 #include <geometry_msgs/Pose.h>
 #include <moveit/robot_state/robot_state.h>
 #include "ceres_utils.h"
+#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
 
 namespace utils
 {
@@ -107,6 +108,85 @@ geometry_msgs::PoseStamped forwardKinematics(const moveit::core::RobotState& rob
   p.pose.orientation.x = rot[1];
   p.pose.orientation.y = rot[2];
   p.pose.orientation.z = rot[3];
+  p.header.frame_id = "world";
+  p.header.stamp = ros::Time::now();
+  return p;
+}
+
+template <typename T>
+geometry_msgs::PoseStamped forwardKinematicsDebug(const moveit::core::RobotState& robot_state, int (&joint_idx_to_target_idx)[robot::num_joints], double (&target_values)[robot::num_targets], double* variable_positions)
+{
+  T global_link_translations[3*robot::num_links];
+  T global_link_rotations[4*robot::num_links];
+
+  T link_translations[3*robot::num_links];
+  T link_rotations[4*robot::num_links];
+  for (int i=0; i<robot::num_links; i++)
+  {
+    link_translations[3*i+0] = T(robot::link_transform_translation_only[i][0]);
+    link_translations[3*i+1] = T(robot::link_transform_translation_only[i][1]);
+    link_translations[3*i+2] = T(robot::link_transform_translation_only[i][2]);
+    link_rotations[4*i+0] = T(robot::link_transform_quaternion_only[i][0]);
+    link_rotations[4*i+1] = T(robot::link_transform_quaternion_only[i][1]);
+    link_rotations[4*i+2] = T(robot::link_transform_quaternion_only[i][2]);
+    link_rotations[4*i+3] = T(robot::link_transform_quaternion_only[i][3]);
+  }
+
+  // TODO: To a separate function
+  for (int i=0; i<robot::num_joints; i++)
+  {
+    int child_link_idx = robot::joint_child_link_idx[i];
+    int parent_link_idx = robot::joint_parent_link_idx[i];
+    int target_idx = joint_idx_to_target_idx[i];
+    int variable_idx = robot::joint_idx_to_variable_idx[i];
+
+    // init
+    if (parent_link_idx == -1)
+    {
+      // TODO
+      global_link_translations[3*child_link_idx+0] = T(0.0);
+      global_link_translations[3*child_link_idx+1] = T(0.0);
+      global_link_translations[3*child_link_idx+2] = T(0.0);
+      global_link_rotations[4*child_link_idx+0] = T(1.0);
+      global_link_rotations[4*child_link_idx+1] = T(0.0);
+      global_link_rotations[4*child_link_idx+2] = T(0.0);
+      global_link_rotations[4*child_link_idx+3] = T(0.0);
+      continue;
+    }
+
+    // Translation
+    utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), 
+                                  &(global_link_rotations[4*parent_link_idx]), 
+                                  &(link_translations[3*child_link_idx]), 
+                                  &(global_link_translations[3*child_link_idx]));
+
+    
+    if (variable_idx!=-1) // if joint can move
+    { 
+      T joint_val = T(variable_positions[variable_idx]);
+      utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
+                                 &(link_rotations[4*child_link_idx]), 
+                                 joint_val, 
+                                 &(global_link_rotations[4*child_link_idx]));
+    }
+    else
+    {
+      utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
+                                 &(link_rotations[4*child_link_idx]),
+                                 &(global_link_rotations[4*child_link_idx]));
+    }
+
+    
+  }
+
+  geometry_msgs::PoseStamped p;
+  p.pose.position.x = global_link_translations[3*robot::endpoint_link_idx+0];;
+  p.pose.position.y = global_link_translations[3*robot::endpoint_link_idx+1];;
+  p.pose.position.z = global_link_translations[3*robot::endpoint_link_idx+2];;
+  p.pose.orientation.w = global_link_rotations[4*robot::endpoint_link_idx+0];;
+  p.pose.orientation.x = global_link_rotations[4*robot::endpoint_link_idx+1];;
+  p.pose.orientation.y = global_link_rotations[4*robot::endpoint_link_idx+2];;
+  p.pose.orientation.z = global_link_rotations[4*robot::endpoint_link_idx+3];;
   p.header.frame_id = "world";
   p.header.stamp = ros::Time::now();
   return p;

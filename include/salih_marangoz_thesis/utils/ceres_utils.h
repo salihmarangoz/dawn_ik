@@ -57,6 +57,14 @@ inline void computeLinkRotation(const T current_rotation[4], const T link_rotati
   ceres::QuaternionProduct(current_rotation, link_and_joint_rotation, result);
 }
 
+// Computes rotation of the link without the joint (including rotation of the link)
+// WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
+template <typename T>
+inline void computeLinkRotation(const T current_rotation[4], const T link_rotation[4], T result[4])
+{
+  ceres::QuaternionProduct(current_rotation, link_rotation, result);
+}
+
 /*
   while(ros::ok())
   {

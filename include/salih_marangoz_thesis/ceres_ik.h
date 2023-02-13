@@ -37,6 +37,7 @@ public:
   void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
   ros::Subscriber endpoint_sub; 
   Eigen::Vector3d endpoint;
+  ros::Publisher vis_pub;
 
   CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   moveit::core::RobotState getCurrentRobotState();

@@ -53,6 +53,17 @@ Note: Some meeting notes may not be available.
 
 - I found a bug in my code about centering joints goal for regularization. I did (max-min)/2 but it should be (max+min)/2. It would be very difficult to find...
 
+- I found how to do transformations manually and in a clean way:
+
+  - But of course, there are some little annoying details:
+  - 1. Sometimes, joint origin transforms and rotation don't have any effect (identity transformation). But I parsed them so it is possible to skip those sections by checking the related constant arrays.
+    2. Sometimes, joints don't have a variable. In this case, only the link rotation is applied. In the code, computeLinkRotation can handle this and all other cases.
+    3. Sometimes, joints are not the optimization parameters. In Horti robot case, head arm's joints should be optimized, but other arms shouldn't. 
+
+  ![moveit_kinematic_tree.drawio](assets/moveit_kinematic_tree.drawio.png)
+
+- IDEA: Maybe I can get the endpoint IK goal kinematic tree from the user. So, ceres wouldn't need to traverse all the joints and links.
+
 ### 16 Jan 2023
 
 - RelaxedIK with a single robot arm. Add other arms as obstacles.

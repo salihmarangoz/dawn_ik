@@ -1,4 +1,5 @@
 #include <salih_marangoz_thesis/ceres_ik.h>
+#include <salih_marangoz_thesis/utils/moveit_utils.h>
 
 namespace salih_marangoz_thesis
 {
@@ -16,6 +17,7 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
 
   // TODO
   endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &CeresIK::subscriberCallback, this);
+  vis_pub = priv_nh.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
 
   loop(); // TODO
 }
@@ -47,7 +49,7 @@ void CeresIK::loop()
   while (ros::ok())
   {
     //robot_state.setToRandomPositions();
-    //robot_state = getCurrentRobotState();
+    robot_state = getCurrentRobotState();
 
     if (!update(robot_state))
     {
@@ -81,7 +83,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_positions[i] = variable_positions[variable_i];
 
     // Add noise to the init state to avoid gimball lock, etc.
-    double noise = 0.1; // TODO: 0.1
+    double noise = 0.0; // TODO: 0.1
     if (noise>0)
     {
       double sampling_min = target_positions[i]-noise;
@@ -123,6 +125,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   // int current_joint_idx = robot::endpoint_joint_idx;
   // .....
 
+
   ceres::Problem problem;
 
   //Eigen::Vector3d endpoint;
@@ -162,8 +165,42 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   //options.use_approximate_eigenvalue_bfgs_scaling = true;
   //options.use_mixed_precision_solves = true; options.max_num_refinement_iterations = 3;
   ceres::Solver::Summary summary;
-  ceres::Solve(options, &problem, &summary);
+  //ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
+
+
+  // DEBUG //////////////////////////
+  auto p = utils::forwardKinematicsDebug<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
+  p.header.frame_id = "world";
+  p.header.stamp = ros::Time::now();
+  
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = "world";
+  marker.header.stamp = ros::Time();
+  marker.ns = "my_namespace";
+  marker.id = 0;
+  marker.type = visualization_msgs::Marker::SPHERE;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.pose.position.x = p.pose.position.x;
+  marker.pose.position.y = p.pose.position.y;
+  marker.pose.position.z = p.pose.position.z;
+  marker.pose.orientation.x = 0.0;
+  marker.pose.orientation.y = 0.0;
+  marker.pose.orientation.z = 0.0;
+  marker.pose.orientation.w = 1.0;
+  marker.scale.x = 0.1;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.1;
+  marker.color.a = 1.0; // Don't forget to set the alpha!
+  marker.color.r = 0.0;
+  marker.color.g = 1.0;
+  marker.color.b = 0.0;
+  vis_pub.publish( marker );
+  //visual_tools->publishArrow(p, rviz_visual_tools::BLUE);
+  ///////////////////////////////////
+
+
+
 
   // Update robot state
   for (int i=0; i<robot::num_targets; i++)
