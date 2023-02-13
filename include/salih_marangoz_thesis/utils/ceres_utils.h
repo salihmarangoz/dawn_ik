@@ -30,7 +30,10 @@ inline void computeLinkTranslation(const T current_translation[3], const T curre
 template <typename T>
 inline void computeLinkRotation(const T current_rotation[4], const T& joint_value, T result[4])
 {
-  const T angle_axis[3] = {0.0, 0.0, joint_value}; // z axis!
+  T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
+  angle_axis[0] = T(0.0);
+  angle_axis[1] = T(0.0);
+  angle_axis[2] = joint_value;
   T joint_rotation[4];
   ceres::AngleAxisToQuaternion(angle_axis, joint_rotation);
   ceres::QuaternionProduct(current_rotation, joint_rotation, result);
@@ -43,7 +46,10 @@ inline void computeLinkRotation(const T current_rotation[4], const T& joint_valu
 template <typename T>
 inline void computeLinkRotation(const T current_rotation[4], const T link_rotation[4], const T& joint_value, T result[4])
 {
-  const T angle_axis[3] = {0.0, 0.0, joint_value}; // z axis!
+  T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
+  angle_axis[0] = T(0.0);
+  angle_axis[1] = T(0.0);
+  angle_axis[2] = joint_value;
   T joint_rotation[4];
   ceres::AngleAxisToQuaternion(angle_axis, joint_rotation);
   T link_and_joint_rotation[4];

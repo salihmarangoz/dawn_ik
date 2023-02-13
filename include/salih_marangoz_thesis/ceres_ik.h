@@ -9,6 +9,9 @@
 #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
+#include <salih_marangoz_thesis/utils/ceres_utils.h>
+
+#include <visualization_msgs/InteractiveMarkerFeedback.h> // TODO
 
 namespace salih_marangoz_thesis
 {
@@ -30,6 +33,10 @@ public:
   robot_model_loader::RobotModelLoaderPtr robot_model_loader;
   moveit_visual_tools::MoveItVisualToolsPtr visual_tools;
 
+  // TODO
+  void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
+  ros::Subscriber endpoint_sub; 
+  Eigen::Vector3d endpoint;
 
   CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   moveit::core::RobotState getCurrentRobotState();
@@ -93,6 +100,108 @@ struct CenterJointsGoal {
    }
    
    const double* target_centers;
+};
+
+struct EndpointGoal {
+  EndpointGoal(const Eigen::Vector3d &endpoint, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions) : endpoint(endpoint), joint_idx_to_target_idx(joint_idx_to_target_idx), variable_positions(variable_positions) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    T global_link_translations[3*robot::num_links];
+    T global_link_rotations[4*robot::num_links];
+
+    T link_translations[3*robot::num_links];
+    T link_rotations[4*robot::num_links];
+    for (int i=0; i<robot::num_links; i++)
+    {
+      link_translations[3*i+0] = T(robot::link_transform_translation_only[i][0]);
+      link_translations[3*i+1] = T(robot::link_transform_translation_only[i][1]);
+      link_translations[3*i+2] = T(robot::link_transform_translation_only[i][2]);
+      link_rotations[4*i+0] = T(robot::link_transform_quaternion_only[i][0]);
+      link_rotations[4*i+1] = T(robot::link_transform_quaternion_only[i][1]);
+      link_rotations[4*i+2] = T(robot::link_transform_quaternion_only[i][2]);
+      link_rotations[4*i+3] = T(robot::link_transform_quaternion_only[i][3]);
+    }
+
+    // TODO: To a separate function
+    for (int i=0; i<robot::num_joints; i++)
+    {
+      int child_link_idx = robot::joint_child_link_idx[i];
+      int parent_link_idx = robot::joint_parent_link_idx[i];
+      int target_idx = joint_idx_to_target_idx[i];
+      int variable_idx = robot::joint_idx_to_variable_idx[i];
+
+      // init
+      if (parent_link_idx == -1)
+      {
+        // TODO
+        global_link_translations[3*child_link_idx+0] = T(0.0);
+        global_link_translations[3*child_link_idx+1] = T(0.0);
+        global_link_translations[3*child_link_idx+2] = T(0.0);
+        global_link_rotations[4*child_link_idx+0] = T(1.0);
+        global_link_rotations[4*child_link_idx+1] = T(0.0);
+        global_link_rotations[4*child_link_idx+2] = T(0.0);
+        global_link_rotations[4*child_link_idx+3] = T(0.0);
+      }
+      else
+      {
+        if (robot::link_can_skip_translation[parent_link_idx])
+        {
+          global_link_translations[3*child_link_idx+0] = global_link_translations[3*parent_link_idx+0];
+          global_link_translations[3*child_link_idx+1] = global_link_translations[3*parent_link_idx+1];
+          global_link_translations[3*child_link_idx+2] = global_link_translations[3*parent_link_idx+2];
+        }
+        else
+        {
+          utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), &(global_link_rotations[4*parent_link_idx]), &(link_translations[3*parent_link_idx]), &(global_link_translations[3*child_link_idx]));
+        }
+
+        
+        if (variable_idx!=-1) // if joint can move
+        { 
+          T joint_val;
+          if (target_idx!=-1)
+          { // this is an optimization target
+            joint_val = target_values[target_idx];
+          }
+          else
+          { // this is a joint value but not an optimization target
+            joint_val = T(variable_positions[variable_idx]);
+          }
+
+          // TODO: if (robot::link_can_skip_rotation[parent_link_idx]) .....
+          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), &(link_rotations[3*parent_link_idx]), joint_val, &(global_link_rotations[4*child_link_idx]));
+        }
+        else
+        {
+          global_link_rotations[4*child_link_idx+0] = global_link_rotations[4*parent_link_idx+0];
+          global_link_rotations[4*child_link_idx+1] = global_link_rotations[4*parent_link_idx+1];
+          global_link_rotations[4*child_link_idx+2] = global_link_rotations[4*parent_link_idx+2];
+          global_link_rotations[4*child_link_idx+3] = global_link_rotations[4*parent_link_idx+3];
+        }
+
+      }
+    }
+
+    // TODO: The correct way is to compute via hypot, but this is simpler
+    residuals[0] = global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0];
+    residuals[1] = global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1];
+    residuals[2] = global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2];
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from
+   // the client code.
+   static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
+   {
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 3, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new EndpointGoal(endpoint, joint_idx_to_target_idx, variable_positions)));
+   }
+
+  const Eigen::Vector3d endpoint;
+  const int (&joint_idx_to_target_idx)[robot::num_joints];
+  const double* variable_positions;
 };
 
 

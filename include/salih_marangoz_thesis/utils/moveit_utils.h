@@ -39,8 +39,8 @@ geometry_msgs::PoseStamped forwardKinematics(const moveit::core::RobotState& rob
   const moveit::core::JointModel* current_joint = robot_model->getRootJoint();
   ROS_INFO("Joint: %s", current_joint->getName().c_str());
 
-  float pos[3] = {0,0,0};
-  float rot[4] = {1,0,0,0};
+  double pos[3] = {0,0,0};
+  double rot[4] = {1,0,0,0};
 
   while (true)
   {
@@ -54,12 +54,12 @@ geometry_msgs::PoseStamped forwardKinematics(const moveit::core::RobotState& rob
     {
       ROS_INFO_STREAM("translation: " << current_link_transform.translation());
 
-      float link_translation[3];
+      double link_translation[3];
       link_translation[0] = current_link_transform.translation().x();
       link_translation[1] = current_link_transform.translation().y();
       link_translation[2] = current_link_transform.translation().z();
 
-      float out[3];
+      double out[3];
       computeLinkTranslation(pos, rot, link_translation, out);
       pos[0] = out[0];
       pos[1] = out[1];
@@ -76,16 +76,16 @@ geometry_msgs::PoseStamped forwardKinematics(const moveit::core::RobotState& rob
     }
 
     const double* pos_ = robot_state.getJointPositions(current_joint->getName());
-    float pos = *pos_;
+    double pos = *pos_;
 
     Eigen::Quaterniond link_rot(current_link_transform.rotation());
-    float link_rot_r[4];
+    double link_rot_r[4];
     link_rot_r[0] = link_rot.w();
     link_rot_r[1] = link_rot.x();
     link_rot_r[2] = link_rot.y();
     link_rot_r[3] = link_rot.z();
 
-    float out[4];
+    double out[4];
     computeLinkRotation(rot, link_rot_r, pos, out);
     rot[0] = out[0];
     rot[1] = out[1];

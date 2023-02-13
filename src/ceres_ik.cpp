@@ -14,7 +14,19 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
   // init visual_tools
   visual_tools.reset(new moveit_visual_tools::MoveItVisualTools(planning_scene_monitor->getRobotModel()->getModelFrame(), "/ceres_ik_visual_markers"));
 
+  // TODO
+  endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &CeresIK::subscriberCallback, this);
+
   loop(); // TODO
+}
+
+void CeresIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg)
+{
+  auto given_endpoint = msg->pose;
+  ROS_WARN_THROTTLE(1.0, "Endpoint received. x: %lf, y: %lf, z: %lf", given_endpoint.position.x, given_endpoint.position.y, given_endpoint.position.z);
+  endpoint.x() =  given_endpoint.position.x;
+  endpoint.y() =  given_endpoint.position.y;
+  endpoint.z() =  given_endpoint.position.z;
 }
 
 moveit::core::RobotState CeresIK::getCurrentRobotState()
@@ -69,7 +81,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_positions[i] = variable_positions[variable_i];
 
     // Add noise to the init state to avoid gimball lock, etc.
-    double noise = 0.1; // TODO
+    double noise = 0.1; // TODO: 0.1
     if (noise>0)
     {
       double sampling_min = target_positions[i]-noise;
@@ -98,22 +110,32 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_centers[i] = 0.5 * (robot::joint_max_position[joint_i] + robot::joint_min_position[joint_i]);
   }
 
+  // Generate joint_idx_to_target_idx
+  int joint_idx_to_target_idx[robot::num_joints];
+  for (int i=0; i<robot::num_joints; i++) joint_idx_to_target_idx[i] = -1; // set to -1 by default
+  for (int i=0; i<robot::num_targets; i++)
+  {
+    const int joint_i = robot::target_idx_to_joint_idx[i];
+    joint_idx_to_target_idx[joint_i] = i;
+  }
+
   // TODO: Find the partial kinematic tree for the endpoint goal
   // int current_joint_idx = robot::endpoint_joint_idx;
   // .....
 
   ceres::Problem problem;
 
-  //ceres::CostFunction* cost_function = ForwardKinematicsError::Create(transforms, endpoint);
-  //problem.AddResidualBlock(cost_function, nullptr /* squared loss */, joint_values.data());
+  //Eigen::Vector3d endpoint;
+  //endpoint << 0.3 , 0.2 , 0.2;
+  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, joint_idx_to_target_idx, variable_positions);
+  problem.AddResidualBlock(endpoint_goal, nullptr /* squared loss */, target_positions);
 
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
-  ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(1.0); // goal weight
+  ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(0.1); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
-  // MinimalJointDisplacementGoal
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(1.0); // goal weight
+  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.1); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
   // Target min/max constraints
