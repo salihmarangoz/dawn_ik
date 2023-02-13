@@ -51,7 +51,7 @@ void CeresIK::loop()
 
 bool CeresIK::update(moveit::core::RobotState &current_state)
 {
-  ROS_INFO_ONCE("Number of variables in the robot state: %d", current_state.getVariableCount());
+  ROS_INFO_ONCE("Number of variables in the robot state: %d", (int)(current_state.getVariableCount()) );
   if (robot::num_variables != current_state.getVariableCount())
   {
     ROS_FATAL_ONCE("Number of variables does not match!");

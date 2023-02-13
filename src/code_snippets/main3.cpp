@@ -127,6 +127,7 @@ struct ForwardKinematicsError {
   const Eigen::Vector3d endpoint;
 };
 
+/*
 struct JointCenter {
   JointCenter(const std::vector<double> &lower_bounds, const std::vector<double> &upper_bounds)
   : lower_bounds(lower_bounds), upper_bounds(upper_bounds) {}
@@ -157,7 +158,9 @@ struct JointCenter {
    std::vector<double> lower_bounds;
    std::vector<double> upper_bounds;
 };
+*/
 
+/*
 struct JointMovement {
   JointMovement(const std::vector<double> &init_values)
   :init_values(init_values) {}
@@ -187,6 +190,7 @@ struct JointMovement {
    
    std::vector<double> init_values;
 };
+*/
 
 
 class IKSolver {

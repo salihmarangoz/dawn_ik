@@ -396,21 +396,21 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << prefix << primitiveVector2Str("int joint_child_link_idx", joint_child_link_idx) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_parent_link_idx", joint_parent_link_idx) << " // -1 if no link available" << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_is_position_bounded", joint_is_position_bounded) << " // bool" << std::endl;
-  out_stream << prefix << primitiveVector2Str("float joint_max_position", joint_max_position) << std::endl;
-  out_stream << prefix << primitiveVector2Str("float joint_min_position", joint_min_position) << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_max_position", joint_max_position) << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_min_position", joint_min_position) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_is_velocity_bounded", joint_is_velocity_bounded) << " // bool" << std::endl;
-  out_stream << prefix << primitiveVector2Str("float joint_max_velocity", joint_max_velocity) << std::endl;
-  out_stream << prefix << primitiveVector2Str("float joint_min_velocity", joint_min_velocity) << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_max_velocity", joint_max_velocity) << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_min_velocity", joint_min_velocity) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_is_acceleration_bounded", joint_is_acceleration_bounded) << " // bool" << std::endl;
-  out_stream << prefix << primitiveVector2Str("float joint_max_acceleration", joint_max_acceleration) << std::endl;
-  out_stream << prefix << primitiveVector2Str("float joint_min_acceleration", joint_min_acceleration) << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_max_acceleration", joint_max_acceleration) << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_min_acceleration", joint_min_acceleration) << std::endl;
   out_stream << std::endl;
 
   // Link info
   out_stream << "// Link info" << std::endl;
   out_stream << prefix << strVector2Str("std::string link_names", link_names) << std::endl;
-  out_stream << prefix << eigenTranslation2Str("float link_transform_translation_only", link_transform, 10, prefix.size()) << std::endl;
-  out_stream << prefix << eigenQuaternion2Str("float link_transform_quaternion_only", link_transform, 10, prefix.size()) << std::endl;
+  out_stream << prefix << eigenTranslation2Str("double link_transform_translation_only", link_transform, 10, prefix.size()) << std::endl;
+  out_stream << prefix << eigenQuaternion2Str("double link_transform_quaternion_only", link_transform, 10, prefix.size()) << std::endl;
   out_stream << prefix << primitiveVector2Str("int link_can_skip_translation", link_can_skip_translation) << " // bool" << std::endl;
   out_stream << prefix << primitiveVector2Str("int link_can_skip_rotation", link_can_skip_rotation) << " // bool" << std::endl;
   out_stream << std::endl;

@@ -23,18 +23,18 @@ const std::string joint_names[10] = {"ASSUMED_FIXED_ROOT_JOINT","world_joint","j
 const int joint_child_link_idx[10] = {0,1,2,3,4,5,6,7,8,9};
 const int joint_parent_link_idx[10] = {-1,0,1,2,3,4,5,6,7,8}; // -1 if no link available
 const int joint_is_position_bounded[10] = {0,0,1,1,1,1,1,1,1,0}; // bool
-const float joint_max_position[10] = {0.000000,0.000000,6.283185,2.094400,6.283185,3.927000,6.283185,3.141593,6.283185,0.000000};
-const float joint_min_position[10] = {0.000000,0.000000,-6.283185,-2.059000,-6.283185,-0.191980,-6.283185,-1.692970,-6.283185,0.000000};
+const double joint_max_position[10] = {0.000000,0.000000,6.283185,2.094400,6.283185,3.927000,6.283185,3.141593,6.283185,0.000000};
+const double joint_min_position[10] = {0.000000,0.000000,-6.283185,-2.059000,-6.283185,-0.191980,-6.283185,-1.692970,-6.283185,0.000000};
 const int joint_is_velocity_bounded[10] = {0,0,1,1,1,1,1,1,1,0}; // bool
-const float joint_max_velocity[10] = {0.000000,0.000000,2.140000,2.140000,2.140000,2.140000,2.140000,2.140000,2.140000,0.000000};
-const float joint_min_velocity[10] = {0.000000,0.000000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,0.000000};
+const double joint_max_velocity[10] = {0.000000,0.000000,2.140000,2.140000,2.140000,2.140000,2.140000,2.140000,2.140000,0.000000};
+const double joint_min_velocity[10] = {0.000000,0.000000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,0.000000};
 const int joint_is_acceleration_bounded[10] = {0,0,0,0,0,0,0,0,0,0}; // bool
-const float joint_max_acceleration[10] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
-const float joint_min_acceleration[10] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
+const double joint_max_acceleration[10] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
+const double joint_min_acceleration[10] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
 
 // Link info
 const std::string link_names[10] = {"world","link_base","link1","link2","link3","link4","link5","link6","link7","link_eef"};
-const float link_transform_translation_only[10][3] = {{0.000000, 0.000000, 0.000000},
+const double link_transform_translation_only[10][3] = {{0.000000, 0.000000, 0.000000},
                                                       {0.000000, 0.000000, 0.000000},
                                                       {0.000000, 0.000000, 0.267000},
                                                       {0.000000, 0.000000, 0.000000},
@@ -44,7 +44,7 @@ const float link_transform_translation_only[10][3] = {{0.000000, 0.000000, 0.000
                                                       {0.000000, 0.000000, 0.000000},
                                                       {0.076000, 0.097000, 0.000000},
                                                       {0.000000, 0.000000, 0.000000}};
-const float link_transform_quaternion_only[10][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
+const double link_transform_quaternion_only[10][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
                                                      {1.000000, 0.000000, 0.000000, 0.000000},
                                                      {1.000000, 0.000000, 0.000000, 0.000000},
                                                      {0.707105, -0.707108, 0.000000, 0.000000},
@@ -72,12 +72,13 @@ const int processed_acm[10][10]= {{1,1,1,1,1,1,1,1,1,1},
 //////////////////////////////////////////////////////////////////////// TODO:
 
 // Optimization targets
-const int optimization_targets[10] = {0,0,1,1,1,1,1,1,1,0}; // bool
+const int num_targets = 7;
+const int target_idx_to_joint_idx[7] = {2,3,4,5,6,7,8};
 
 struct Collision
 {
   int link_idx;
-  float x,y,z,radius;
+  double x,y,z,radius;
 };
 
 const Collision collisions[] = {{1, 0.0, 0.0, 0.0, 0.2},
