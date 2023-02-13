@@ -34,6 +34,7 @@ const double joint_min_acceleration[10] = {0.000000,0.000000,0.000000,0.000000,0
 
 // Link info
 const std::string link_names[10] = {"world","link_base","link1","link2","link3","link4","link5","link6","link7","link_eef"};
+const int link_parent_joint_idx[10] = {0,1,2,3,4,5,6,7,8,9};
 const double link_transform_translation_only[10][3] = {{0.000000, 0.000000, 0.000000},
                                                       {0.000000, 0.000000, 0.000000},
                                                       {0.000000, 0.000000, 0.267000},
@@ -74,6 +75,8 @@ const int processed_acm[10][10]= {{1,1,1,1,1,1,1,1,1,1},
 // Optimization targets
 const int num_targets = 7;
 const int target_idx_to_joint_idx[7] = {2,3,4,5,6,7,8};
+
+const int endpoint_joint_idx = 9;
 
 struct Collision
 {

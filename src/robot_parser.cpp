@@ -170,6 +170,7 @@ bool RobotParser::parseCurrentRobot()
   std::vector<std::string> all_links = robot_model->getLinkModelNames(); // WARN: Assuming that getLinkModelNames returns links in order with the indexes, starting from zero
   num_links = all_links.size();
   link_names.resize(num_links);
+  link_parent_joint_idx.resize(num_links);
   link_transform.resize(num_links);
   link_can_skip_translation.resize(num_links);
   link_can_skip_rotation.resize(num_links);
@@ -180,9 +181,11 @@ bool RobotParser::parseCurrentRobot()
     ROS_INFO("Link name: %s, Link idx: %d", l.c_str(), link_index);
 
     link_names[link_index] = l.c_str();
+    link_parent_joint_idx[link_index] = link_model->getParentJointModel()->getJointIndex();
     link_transform[link_index] = link_model->getJointOriginTransform();
     link_can_skip_translation[link_index] = link_model->getJointOriginTransform().translation().isZero();
     link_can_skip_rotation[link_index] = link_model->getJointOriginTransform().rotation().isIdentity();
+    
   }
 
   ROS_INFO("ACM:");
@@ -409,6 +412,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   // Link info
   out_stream << "// Link info" << std::endl;
   out_stream << prefix << strVector2Str("std::string link_names", link_names) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int link_parent_joint_idx", link_parent_joint_idx) << std::endl;
   out_stream << prefix << eigenTranslation2Str("double link_transform_translation_only", link_transform, 10, prefix.size()) << std::endl;
   out_stream << prefix << eigenQuaternion2Str("double link_transform_quaternion_only", link_transform, 10, prefix.size()) << std::endl;
   out_stream << prefix << primitiveVector2Str("int link_can_skip_translation", link_can_skip_translation) << " // bool" << std::endl;

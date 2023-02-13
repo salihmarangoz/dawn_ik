@@ -55,6 +55,7 @@ public:
 
   // Link info
   std::vector<std::string> link_names;
+  std::vector<int> link_parent_joint_idx;
   std::vector<Eigen::Isometry3d> link_transform; 
   std::vector<int> link_can_skip_translation;  // bool
   std::vector<int> link_can_skip_rotation;  // bool
