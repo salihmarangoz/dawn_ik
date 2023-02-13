@@ -22,6 +22,8 @@ using ceres::Solve;
 class CeresIK
 {
 public:
+  std::random_device rand_dev;
+  std::mt19937 rand_gen;
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;

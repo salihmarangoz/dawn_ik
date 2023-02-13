@@ -3,7 +3,7 @@
 namespace salih_marangoz_thesis
 {
 
-CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh)
+CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
   // init planning_scene_monitor
   planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
@@ -60,20 +60,34 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
 
   double* variable_positions = current_state.getVariablePositions();
 
-  // Generate target_positions (this will be optimized)
+  // Generate target_positions (this is the init state and this will be optimized)
   double target_positions[robot::num_targets];
   for (int i=0; i<robot::num_targets; i++)
   {
     const int joint_i = robot::target_idx_to_joint_idx[i];
     const int variable_i = robot::joint_idx_to_variable_idx[joint_i];
     target_positions[i] = variable_positions[variable_i];
+
+    // Add noise to the init state to avoid gimball lock, etc.
+    double noise = 0.1; // TODO
+    if (noise>0)
+    {
+      double sampling_min = target_positions[i]-noise;
+      if (sampling_min<robot::joint_min_position[joint_i]) sampling_min=robot::joint_min_position[joint_i];
+      double sampling_max = target_positions[i]+noise;
+      if (sampling_max>robot::joint_max_position[joint_i]) sampling_max=robot::joint_max_position[joint_i];
+      std::uniform_real_distribution<> dis(sampling_min, sampling_max);
+      target_positions[i] = dis(rand_gen);
+    }
   }
 
-  // Generate target_positions (this will be a copy of target_positions, this should not be modified!)
-  double init_target_positions[robot::num_targets];
+  // Generate const_target_positions (this a noise-free copy of target_positions and should not be modified!)
+  double const_target_positions[robot::num_targets];
   for (int i=0; i<robot::num_targets; i++)
   {
-    init_target_positions[i] = target_positions[i];
+    const int joint_i = robot::target_idx_to_joint_idx[i];
+    const int variable_i = robot::joint_idx_to_variable_idx[joint_i];
+    const_target_positions[i] = variable_positions[i];
   }
 
   // Generate target centers. Assuming that center=(max+min)/2
