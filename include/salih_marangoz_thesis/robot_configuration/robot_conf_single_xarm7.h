@@ -72,11 +72,13 @@ const int processed_acm[10][10]= {{1,1,1,1,1,1,1,1,1,1},
 
 //////////////////////////////////////////////////////////////////////// TODO:
 
+// TODO: link_parent_joint_idx, etc. is difficult to read!
+
 // Optimization targets
 const int num_targets = 7;
 const int target_idx_to_joint_idx[7] = {2,3,4,5,6,7,8};
 
-const int endpoint_joint_idx = 9;
+const int endpoint_link_idx = 9;
 
 struct Collision
 {

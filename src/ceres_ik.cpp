@@ -98,6 +98,10 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_centers[i] = 0.5 * (robot::joint_max_position[joint_i] + robot::joint_min_position[joint_i]);
   }
 
+  // TODO: Find the partial kinematic tree for the endpoint goal
+  // int current_joint_idx = robot::endpoint_joint_idx;
+  // .....
+
   ceres::Problem problem;
 
   //ceres::CostFunction* cost_function = ForwardKinematicsError::Create(transforms, endpoint);
@@ -108,7 +112,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
   // MinimalJointDisplacementGoal
-  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(init_target_positions);
+  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
   ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(1.0); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
@@ -131,7 +135,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   options.minimizer_progress_to_stdout = false;
   // experimental
   //options.preconditioner_type = ceres::SUBSET;
-  //options.jacobi_scaling = true; // TODO
+  //options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
   //options.use_nonmonotonic_steps = true;
   //options.use_approximate_eigenvalue_bfgs_scaling = true;
   //options.use_mixed_precision_solves = true; options.max_num_refinement_iterations = 3;
