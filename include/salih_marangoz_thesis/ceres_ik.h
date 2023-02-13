@@ -13,6 +13,12 @@
 namespace salih_marangoz_thesis
 {
 
+using ceres::AutoDiffCostFunction;
+using ceres::CostFunction;
+using ceres::Problem;
+using ceres::Solver;
+using ceres::Solve;
+
 class CeresIK
 {
 public:

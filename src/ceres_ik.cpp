@@ -34,16 +34,16 @@ void CeresIK::loop()
   ros::Rate r(100);
   while (ros::ok())
   {
+    //robot_state.setToRandomPositions();
+    //robot_state = getCurrentRobotState();
+
     if (!update(robot_state))
     {
       ROS_ERROR("Can't find a solution!");
       r.sleep();
       continue;
     }
-    //robot_state.setToRandomPositions();
-    robot_state = getCurrentRobotState();
 
-    robot_state.update(); // TODO: can be faster with: updateLinkTransforms()
     visual_tools->publishRobotState(robot_state);
     r.sleep();
   }
@@ -58,12 +58,81 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     exit(-1);
   }
 
-
   double* variable_positions = current_state.getVariablePositions();
-  
 
+  // Generate target_positions (this will be optimized)
+  double target_positions[robot::num_targets];
+  for (int i=0; i<robot::num_targets; i++)
+  {
+    const int joint_i = robot::target_idx_to_joint_idx[i];
+    const int variable_i = robot::joint_idx_to_variable_idx[joint_i];
+    target_positions[i] = variable_positions[variable_i];
+  }
 
+  // Generate target_positions (this will be a copy of target_positions, this should not be modified!)
+  double init_target_positions[robot::num_targets];
+  for (int i=0; i<robot::num_targets; i++)
+  {
+    init_target_positions[i] = target_positions[i];
+  }
 
+  // Generate target centers. Assuming that center=(max+min)/2
+  double target_centers[robot::num_targets];
+  for (int i=0; i<robot::num_targets; i++)
+  {
+    const int joint_i = robot::target_idx_to_joint_idx[i];
+    target_centers[i] = 0.5 * (robot::joint_max_position[joint_i] + robot::joint_min_position[joint_i]);
+  }
+
+  ceres::Problem problem;
+
+  //ceres::CostFunction* cost_function = ForwardKinematicsError::Create(transforms, endpoint);
+  //problem.AddResidualBlock(cost_function, nullptr /* squared loss */, joint_values.data());
+
+  ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
+  ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(1.0); // goal weight
+  problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
+
+  // MinimalJointDisplacementGoal
+  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(init_target_positions);
+  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(1.0); // goal weight
+  problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
+
+  // Target min/max constraints
+  for (int i=0; i<robot::num_targets; i++)
+  {
+    const int joint_i = robot::target_idx_to_joint_idx[i];
+    if (!robot::joint_is_position_bounded[joint_i])
+    {
+      ROS_WARN("Target is not bounded. This can cause bad solutions!");
+      continue;
+    }
+    problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
+    problem.SetParameterUpperBound(target_positions, i, robot::joint_max_position[joint_i]); 
+  }
+
+  ceres::Solver::Options options;
+  options.linear_solver_type = ceres::DENSE_QR;
+  options.minimizer_type = ceres::TRUST_REGION; // LINE_SEARCH methods don't support bounds
+  options.minimizer_progress_to_stdout = false;
+  // experimental
+  //options.preconditioner_type = ceres::SUBSET;
+  //options.jacobi_scaling = true; // TODO
+  //options.use_nonmonotonic_steps = true;
+  //options.use_approximate_eigenvalue_bfgs_scaling = true;
+  //options.use_mixed_precision_solves = true; options.max_num_refinement_iterations = 3;
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+  std::cout << summary.FullReport() << "\n";
+
+  // Update robot state
+  for (int i=0; i<robot::num_targets; i++)
+  {
+    const int joint_idx = robot::target_idx_to_joint_idx[i];
+    const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
+    variable_positions[variable_idx] = target_positions[i];
+  }
+  current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
 
   return true;
 }

@@ -51,7 +51,7 @@ Note: Some meeting notes may not be available.
 
   ![generated_header](assets/generated_header.png)
 
-
+- I found a bug in my code about centering joints goal for regularization. I did (max-min)/2 but it should be (max+min)/2. It would be very difficult to find...
 
 ### 16 Jan 2023
 
