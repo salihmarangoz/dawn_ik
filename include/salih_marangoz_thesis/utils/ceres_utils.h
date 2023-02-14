@@ -75,7 +75,7 @@ inline void computeLinkRotation(const T current_rotation[4], const T link_rotati
   }
 */
 template <typename T>
-inline T distSphere2Sphere(const T first_sphere_pos[3], float first_sphere_radius, const T second_sphere_pos[3], float second_sphere_radius)
+inline T distSphere2Sphere(const T first_sphere_pos[3], double first_sphere_radius, const T second_sphere_pos[3], double second_sphere_radius)
 {
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> first_sphere_pos_e(first_sphere_pos);
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> second_sphere_pos_e(second_sphere_pos);
@@ -83,7 +83,7 @@ inline T distSphere2Sphere(const T first_sphere_pos[3], float first_sphere_radiu
 }
 
 template <typename T>
-inline T distPoint2Sphere(const T point_pos[3], const T sphere_pos[3], float sphere_radius)
+inline T distPoint2Sphere(const T point_pos[3], const T sphere_pos[3], double sphere_radius)
 {
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> point_pos_e(point_pos);
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> sphere_pos_e(sphere_pos);

@@ -1,5 +1,4 @@
 #include <salih_marangoz_thesis/ceres_ik.h>
-#include <salih_marangoz_thesis/utils/moveit_utils.h>
 
 namespace salih_marangoz_thesis
 {
@@ -136,6 +135,10 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, joint_idx_to_target_idx, variable_positions);
   ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
+
+  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(joint_idx_to_target_idx, variable_positions);
+  //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
+  problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
 
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
   ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(0.1); // goal weight

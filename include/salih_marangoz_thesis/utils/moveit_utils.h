@@ -12,6 +12,9 @@ typedef ptrdiff_t Size;
 template< class Type, Size n >
 Size countOf( Type (&)[n] ) { return n; }
 
+// Try to use countOf instead, use this if other option doesn't compile
+#define COUNTOF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+
 namespace utils
 {
 
