@@ -206,72 +206,15 @@ struct EndpointGoal {
       }
     }
 
-    /*
-    // TODO: To a separate function
-    for (int i=0; i<robot::num_joints; i++)
-    {
-      int child_link_idx = robot::joint_child_link_idx[i];
-      int parent_link_idx = robot::joint_parent_link_idx[i];
-      int target_idx = joint_idx_to_target_idx[i];
-      int variable_idx = robot::joint_idx_to_variable_idx[i];
+    // Simpler, maybe faster?
+    //residuals[0] = global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0];
+    //residuals[1] = global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1];
+    //residuals[2] = global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2];
 
-      // init
-      if (parent_link_idx == -1)
-      {
-        // TODO
-        global_link_translations[3*child_link_idx+0] = T(0.0);
-        global_link_translations[3*child_link_idx+1] = T(0.0);
-        global_link_translations[3*child_link_idx+2] = T(0.0);
-        global_link_rotations[4*child_link_idx+0] = T(1.0);
-        global_link_rotations[4*child_link_idx+1] = T(0.0);
-        global_link_rotations[4*child_link_idx+2] = T(0.0);
-        global_link_rotations[4*child_link_idx+3] = T(0.0);
-      }
-      else
-      {
-        if (robot::link_can_skip_translation[parent_link_idx])
-        {
-          global_link_translations[3*child_link_idx+0] = global_link_translations[3*parent_link_idx+0];
-          global_link_translations[3*child_link_idx+1] = global_link_translations[3*parent_link_idx+1];
-          global_link_translations[3*child_link_idx+2] = global_link_translations[3*parent_link_idx+2];
-        }
-        else
-        {
-          utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), &(global_link_rotations[4*parent_link_idx]), &(link_translations[3*parent_link_idx]), &(global_link_translations[3*child_link_idx]));
-        }
-
-        
-        if (variable_idx!=-1) // if joint can move
-        { 
-          T joint_val;
-          if (target_idx!=-1)
-          { // this is an optimization target
-            joint_val = target_values[target_idx];
-          }
-          else
-          { // this is a joint value but not an optimization target
-            joint_val = T(variable_positions[variable_idx]);
-          }
-
-          // TODO: if (robot::link_can_skip_rotation[parent_link_idx]) .....
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), &(link_rotations[3*parent_link_idx]), joint_val, &(global_link_rotations[4*child_link_idx]));
-        }
-        else
-        {
-          global_link_rotations[4*child_link_idx+0] = global_link_rotations[4*parent_link_idx+0];
-          global_link_rotations[4*child_link_idx+1] = global_link_rotations[4*parent_link_idx+1];
-          global_link_rotations[4*child_link_idx+2] = global_link_rotations[4*parent_link_idx+2];
-          global_link_rotations[4*child_link_idx+3] = global_link_rotations[4*parent_link_idx+3];
-        }
-
-      }
-    }
-    */
-
-    // TODO: The correct way is to compute via hypot, but this is simpler
-    residuals[0] = global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0];
-    residuals[1] = global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1];
-    residuals[2] = global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2];
+    // L2 distance to the endpoint. Seems correct
+    residuals[0] = ceres::hypot(global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0],
+                                global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1],
+                                global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2]);
     return true;
   }
 
@@ -279,7 +222,7 @@ struct EndpointGoal {
    // the client code.
    static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
    {
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 3, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new EndpointGoal(endpoint, joint_idx_to_target_idx, variable_positions)));
    }
 
