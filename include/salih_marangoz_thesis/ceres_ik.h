@@ -39,6 +39,8 @@ public:
   Eigen::Vector3d endpoint;
   ros::Publisher vis_pub;
 
+  ros::Publisher marker_array_pub;
+
   CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   moveit::core::RobotState getCurrentRobotState();
   void loop();
@@ -112,6 +114,7 @@ struct EndpointGoal {
     T global_link_translations[3*robot::num_links];
     T global_link_rotations[4*robot::num_links];
 
+    // TODO: convert to function
     T link_translations[3*robot::num_links];
     T link_rotations[4*robot::num_links];
     for (int i=0; i<robot::num_links; i++)
@@ -135,7 +138,7 @@ struct EndpointGoal {
       // init
       if (parent_link_idx == -1)
       {
-        // TODO
+        // TODO: convert to function
         global_link_translations[3*child_link_idx+0] = T(0.0);
         global_link_translations[3*child_link_idx+1] = T(0.0);
         global_link_translations[3*child_link_idx+2] = T(0.0);
@@ -149,6 +152,7 @@ struct EndpointGoal {
       // Translation
       if (robot::link_can_skip_translation[child_link_idx])
       {
+          // TODO: convert to function
           global_link_translations[3*child_link_idx+0] = global_link_translations[3*parent_link_idx+0];
           global_link_translations[3*child_link_idx+1] = global_link_translations[3*parent_link_idx+1];
           global_link_translations[3*child_link_idx+2] = global_link_translations[3*parent_link_idx+2];
@@ -191,6 +195,7 @@ struct EndpointGoal {
       {
         if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
         {
+          // TODO: convert to function
           global_link_rotations[4*child_link_idx+0] = global_link_rotations[4*parent_link_idx+0];
           global_link_rotations[4*child_link_idx+1] = global_link_rotations[4*parent_link_idx+1];
           global_link_rotations[4*child_link_idx+2] = global_link_rotations[4*parent_link_idx+2];

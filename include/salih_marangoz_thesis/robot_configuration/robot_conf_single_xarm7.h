@@ -86,8 +86,17 @@ struct Collision
   double x,y,z,radius;
 };
 
-const Collision collisions[] = {{1, 0.0, 0.0, 0.0, 0.2},
-                                {3, 0.0, 0.1, 0.0, 0.1}};
+// const std::string link_names[10] = {"world","link_base","link1","link2","link3","link4","link5","link6","link7","link_eef"};
+const Collision collisions[] = {{0, 0.0, 0.0, 0.0, 0.1},
+                                {1, 0.0, 0.0, 0.0, 0.1},
+                                {2, 0.0, 0.0, 0.0, 0.1},
+                                {3, 0.0, 0.0, 0.0, 0.1},
+                                {4, 0.0, 0.0, 0.0, 0.1},
+                                {5, 0.0, 0.0, 0.0, 0.1},
+                                {6, 0.0, 0.0, 0.0, 0.1},
+                                {7, 0.0, 0.0, 0.0, 0.1},
+                                {8, 0.0, 0.0, 0.0, 0.1},
+                                {9, 0.0, 0.0, 0.0, 0.1}};
 
 
 } // namespace robot

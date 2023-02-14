@@ -19,6 +19,8 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
   endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &CeresIK::subscriberCallback, this);
   vis_pub = priv_nh.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
 
+  marker_array_pub = priv_nh.advertise<visualization_msgs::MarkerArray>("visualization_array", 0);
+
   loop(); // TODO
 }
 
@@ -167,40 +169,6 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
 
-  /*
-  // DEBUG //////////////////////////
-  auto p = utils::forwardKinematicsDebug<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
-  p.header.frame_id = "world";
-  p.header.stamp = ros::Time::now();
-  visualization_msgs::Marker marker;
-  marker.header.frame_id = "world";
-  marker.header.stamp = ros::Time();
-  marker.ns = "my_namespace";
-  marker.id = 0;
-  marker.type = visualization_msgs::Marker::SPHERE;
-  marker.action = visualization_msgs::Marker::ADD;
-  marker.pose.position.x = p.pose.position.x;
-  marker.pose.position.y = p.pose.position.y;
-  marker.pose.position.z = p.pose.position.z;
-  marker.pose.orientation.x = 0.0;
-  marker.pose.orientation.y = 0.0;
-  marker.pose.orientation.z = 0.0;
-  marker.pose.orientation.w = 1.0;
-  marker.scale.x = 0.1;
-  marker.scale.y = 0.1;
-  marker.scale.z = 0.1;
-  marker.color.a = 1.0; // Don't forget to set the alpha!
-  marker.color.r = 0.0;
-  marker.color.g = 1.0;
-  marker.color.b = 0.0;
-  vis_pub.publish( marker );
-  //visual_tools->publishArrow(p, rviz_visual_tools::BLUE);
-  ///////////////////////////////////
-  */
-
-
-
-
   // Update robot state
   for (int i=0; i<robot::num_targets; i++)
   {
@@ -210,10 +178,12 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   }
   current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
 
+  // collision debug
+  auto marker_array = utils::visualizeCollisions<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
+  marker_array_pub.publish(marker_array);
+
   return true;
 }
-
-
 
 
 } // namespace salih_marangoz_thesis
