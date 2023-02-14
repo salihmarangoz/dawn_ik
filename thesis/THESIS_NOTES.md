@@ -83,6 +83,7 @@ Note: Some meeting notes may not be available.
 
   [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/ozfgAdYVhYc/0.jpg)](https://www.youtube.com/watch?v=ozfgAdYVhYc)
 
+- I don't know how to penalty collision distances. 1/dist? threshold-dist? some_func(dist)?
 - Next step would be applying this to the horti robot, because it will be challenging to do it on that robot. But before that, it would be good to refactor the codebase until next week, because the number of TODO's are increased a lot.
 
 ### 16 Jan 2023
