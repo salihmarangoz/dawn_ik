@@ -49,7 +49,7 @@ void CeresIK::loop()
   while (ros::ok())
   {
     //robot_state.setToRandomPositions();
-    robot_state = getCurrentRobotState();
+    //robot_state = getCurrentRobotState();
 
     if (!update(robot_state))
     {
@@ -83,7 +83,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_positions[i] = variable_positions[variable_i];
 
     // Add noise to the init state to avoid gimball lock, etc.
-    double noise = 0.0; // TODO: 0.1
+    double noise = 0.1; // TODO: 0.1
     if (noise>0)
     {
       double sampling_min = target_positions[i]-noise;
@@ -138,7 +138,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.1); // goal weight
+  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.5); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
   // Target min/max constraints
@@ -160,20 +160,19 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   options.minimizer_progress_to_stdout = false;
   // experimental
   //options.preconditioner_type = ceres::SUBSET;
-  //options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
+  options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
   //options.use_nonmonotonic_steps = true;
   //options.use_approximate_eigenvalue_bfgs_scaling = true;
   //options.use_mixed_precision_solves = true; options.max_num_refinement_iterations = 3;
   ceres::Solver::Summary summary;
-  //ceres::Solve(options, &problem, &summary);
+  ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
 
-
+  /*
   // DEBUG //////////////////////////
   auto p = utils::forwardKinematicsDebug<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
   p.header.frame_id = "world";
   p.header.stamp = ros::Time::now();
-  
   visualization_msgs::Marker marker;
   marker.header.frame_id = "world";
   marker.header.stamp = ros::Time();
@@ -198,6 +197,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   vis_pub.publish( marker );
   //visual_tools->publishArrow(p, rviz_visual_tools::BLUE);
   ///////////////////////////////////
+  */
 
 
 

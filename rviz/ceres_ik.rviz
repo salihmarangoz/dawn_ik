@@ -451,13 +451,13 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /salih_marangoz_thesis_ceres_ik/visualization_marker
       Name: Marker
       Namespaces:
-        my_namespace: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -486,7 +486,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.6611456871032715
+      Distance: 1.555837631225586
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -494,17 +494,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.010120575316250324
-        Y: -0.08197211474180222
-        Z: 0.2322562336921692
+        X: -0.06269516050815582
+        Y: -0.016984624788165092
+        Z: 0.4690728485584259
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6247972846031189
+      Pitch: 0.19479790329933167
       Target Frame: <Fixed Frame>
-      Yaw: 3.0699307918548584
+      Yaw: 4.538635730743408
     Saved: ~
 Window Geometry:
   Displays:
