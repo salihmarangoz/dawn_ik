@@ -66,6 +66,20 @@ Note: Some meeting notes may not be available.
 
 - IDEA: Maybe I can get the endpoint IK goal kinematic tree from the user. So, ceres wouldn't need to traverse all the joints and links.
 
+- JointCenterGoal shouldn't apply on joints without position limits, also on the endpoint joint. Because;
+
+  - When we rotate the endpoint direction on Z axis, whole robot tries to adapt it because the robot tries to center the endpoint joint.
+  - If a robot doesn't have a position limit, we can skip computing it or set very high value. Maybe do this on the robot configuration header by setting to a very big value?
+    - Similarly, the same joints must be excluded from the minimal displacement goal.
+  
+- I think minimal displacement goal some issues. Bio-IK also did the same. It is used to find a local solution but adding displacement costs is not the same thing as adding constraints. So, alternatively... CeresIK should work better with displacement constraints added as real constraints. Not on the loss side. Using this on the loss side gives us a nice animation on RViz side, because the solver tries to move towards the solution slowly just because of this specific goal. I will try the alternative method...
+
+  - I have tried. The arm trembles a lot. I think the optimizer is constrained a lot.
+  - Alternatively, I tried both constraining and adding displacement costs. No jumps, and less tremble.
+
+- The CeresIK name became confusing. This is kind of WBC.
+
+
 ### 16 Jan 2023
 
 - RelaxedIK with a single robot arm. Add other arms as obstacles.

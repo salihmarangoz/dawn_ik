@@ -31,6 +31,7 @@ void CeresIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeed
   endpoint.x() =  given_endpoint.position.x;
   endpoint.y() =  given_endpoint.position.y;
   endpoint.z() =  given_endpoint.position.z;
+  direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
 }
 
 moveit::core::RobotState CeresIK::getCurrentRobotState()
@@ -85,7 +86,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_positions[i] = variable_positions[variable_i];
 
     // Add noise to the init state to avoid gimball lock, etc.
-    double noise = 1.0; // TODO: 0.1
+    double noise = 0.0; // TODO: 0.1
     if (noise>0)
     {
       double sampling_min = target_positions[i]-noise;
@@ -132,15 +133,16 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
 
   //Eigen::Vector3d endpoint;
   //endpoint << 0.3 , 0.2 , 0.2;
-  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, joint_idx_to_target_idx, variable_positions);
-  problem.AddResidualBlock(endpoint_goal, nullptr /* squared loss */, target_positions);
+  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, joint_idx_to_target_idx, variable_positions);
+  ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
+  problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
 
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
   ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(0.1); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.5); // goal weight
+  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.02); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
   // Target min/max constraints
@@ -152,8 +154,18 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
       ROS_WARN("Target is not bounded. This can cause bad solutions!");
       continue;
     }
-    problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
-    problem.SetParameterUpperBound(target_positions, i, robot::joint_max_position[joint_i]); 
+
+    // TODO: ALTERNATIVE WAY?
+    double min_val = const_target_positions[i] - 0.02;
+    double max_val = const_target_positions[i] + 0.02;
+    if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];
+    if (robot::joint_max_position[joint_i] < max_val) max_val = robot::joint_max_position[joint_i];
+    problem.SetParameterLowerBound(target_positions, i, min_val); 
+    problem.SetParameterUpperBound(target_positions, i, max_val); 
+
+    // STANDARD WAY OF SETTING JOINT LIMITS
+    //problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
+    //problem.SetParameterUpperBound(target_positions, i, robot::joint_max_position[joint_i]); 
   }
 
   ceres::Solver::Options options;
@@ -163,8 +175,12 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   // experimental
   //options.preconditioner_type = ceres::SUBSET;
   options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
-  options.use_nonmonotonic_steps = true;
-  options.use_approximate_eigenvalue_bfgs_scaling = true;
+  //options.use_nonmonotonic_steps = true;
+  //options.use_approximate_eigenvalue_bfgs_scaling = true;
+  options.function_tolerance = DBL_MIN;
+  options.gradient_tolerance = DBL_MIN;
+  options.parameter_tolerance = DBL_MIN;
+  options.max_solver_time_in_seconds = 1./100.; // 100hz
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
@@ -182,7 +198,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   auto marker_array = utils::visualizeCollisions<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
   marker_array_pub.publish(marker_array);
 
-  return true;
+  return summary.IsSolutionUsable();
 }
 
 

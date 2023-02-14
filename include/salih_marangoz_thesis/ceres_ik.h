@@ -37,6 +37,8 @@ public:
   void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
   ros::Subscriber endpoint_sub; 
   Eigen::Vector3d endpoint;
+  Eigen::Quaterniond direction;
+
   ros::Publisher vis_pub;
 
   ros::Publisher marker_array_pub;
@@ -58,7 +60,7 @@ struct MinimalJointDisplacementGoal {
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
-    for (int i=0; i<robot::num_targets; i++)
+    for (int i=0; i<robot::num_targets-2; i++) // TODO: skip the last joint. actually this should be modifiable in the robot configuration
     {
       residuals[i] = target_values[i] - init_target_positions[i];
     }
@@ -68,8 +70,8 @@ struct MinimalJointDisplacementGoal {
    // Factory to hide the construction of the CostFunction object from
    // the client code.
    static ceres::CostFunction* Create(const double *init_target_positions)
-   {
-     return (new ceres::AutoDiffCostFunction<MinimalJointDisplacementGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+   { // TODO: robot::num_targets-2 !!!!!!!!!!!!!!
+     return (new ceres::AutoDiffCostFunction<MinimalJointDisplacementGoal, robot::num_targets-2, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new MinimalJointDisplacementGoal(init_target_positions)));
    }
    
@@ -87,7 +89,7 @@ struct CenterJointsGoal {
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
-    for (int i=0; i<robot::num_targets; i++)
+    for (int i=0; i<robot::num_targets-2; i++) // TODO: skip the last joint. actually this should be modifiable in the robot configuration
     {
       residuals[i] = target_values[i] - target_centers[i];
     }
@@ -97,8 +99,8 @@ struct CenterJointsGoal {
    // Factory to hide the construction of the CostFunction object from
    // the client code.
    static ceres::CostFunction* Create(const double* target_centers)
-   {
-     return (new ceres::AutoDiffCostFunction<CenterJointsGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+   { // TODO: robot::num_targets-2 !!!!!!!!!!!!!!
+     return (new ceres::AutoDiffCostFunction<CenterJointsGoal, robot::num_targets-2, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new CenterJointsGoal(target_centers)));
    }
    
@@ -106,7 +108,7 @@ struct CenterJointsGoal {
 };
 
 struct EndpointGoal {
-  EndpointGoal(const Eigen::Vector3d &endpoint, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions) : endpoint(endpoint), joint_idx_to_target_idx(joint_idx_to_target_idx), variable_positions(variable_positions) {}
+  EndpointGoal(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions) : endpoint(endpoint), direction(direction), joint_idx_to_target_idx(joint_idx_to_target_idx), variable_positions(variable_positions) {}
 
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
@@ -220,18 +222,42 @@ struct EndpointGoal {
     residuals[0] = ceres::hypot(global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0],
                                 global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1],
                                 global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2]);
+
+    // angle diff: BAD
+    //residuals[1] = ceres::acos(global_link_rotations[4*robot::endpoint_link_idx+0]*direction.w()+
+    //                           global_link_rotations[4*robot::endpoint_link_idx+1]*direction.x()+
+    //                           global_link_rotations[4*robot::endpoint_link_idx+2]*direction.y()+
+    //                           global_link_rotations[4*robot::endpoint_link_idx+3]*direction.z());
+
+    // element-wise diff: GOOD
+    residuals[1] = global_link_rotations[4*robot::endpoint_link_idx+0] - direction.w();
+    residuals[2] = global_link_rotations[4*robot::endpoint_link_idx+1] - direction.x();
+    residuals[3] = global_link_rotations[4*robot::endpoint_link_idx+2] - direction.y();
+    residuals[4] = global_link_rotations[4*robot::endpoint_link_idx+3] - direction.z();
+
+    // quaternion product -> 1-w as a cost? WEIRD
+    //T direction_[4];
+    //direction_[0] = T(direction.w());
+    //direction_[1] = T(direction.x());
+    //direction_[2] = T(direction.y());
+    //direction_[3] = T(direction.z());
+    //T result[4];
+    //ceres::QuaternionProduct(direction_, &(global_link_rotations[4*robot::endpoint_link_idx]), result);
+    //residuals[1] = 1.0 - result[0];
+
     return true;
   }
 
    // Factory to hide the construction of the CostFunction object from
    // the client code.
-   static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
+   static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
    {
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new EndpointGoal(endpoint, joint_idx_to_target_idx, variable_positions)));
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new EndpointGoal(endpoint, direction, joint_idx_to_target_idx, variable_positions)));
    }
 
   const Eigen::Vector3d endpoint;
+  const Eigen::Quaterniond direction;
   const int (&joint_idx_to_target_idx)[robot::num_joints];
   const double* variable_positions;
 };
