@@ -79,6 +79,11 @@ Note: Some meeting notes may not be available.
 
 - The CeresIK name became confusing. This is kind of WBC.
 
+- I have tested the collision **with 10 spheres**, and looks like it is working. (yes, it needs more work to build a collision model). This prototype is working at >100Hz on the main thread of the node (doing robot state monitor, visualization messages, moveit stuff, besides the robot control).
+
+  [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/ozfgAdYVhYc/0.jpg)](https://www.youtube.com/watch?v=ozfgAdYVhYc)
+
+- Next step would be applying this to the horti robot, because it will be challenging to do it on that robot. But before that, it would be good to refactor the codebase until next week, because the number of TODO's are increased a lot.
 
 ### 16 Jan 2023
 
