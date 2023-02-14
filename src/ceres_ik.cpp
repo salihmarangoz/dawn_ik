@@ -83,7 +83,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_positions[i] = variable_positions[variable_i];
 
     // Add noise to the init state to avoid gimball lock, etc.
-    double noise = 0.1; // TODO: 0.1
+    double noise = 1.0; // TODO: 0.1
     if (noise>0)
     {
       double sampling_min = target_positions[i]-noise;
@@ -161,9 +161,8 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   // experimental
   //options.preconditioner_type = ceres::SUBSET;
   options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
-  //options.use_nonmonotonic_steps = true;
-  //options.use_approximate_eigenvalue_bfgs_scaling = true;
-  //options.use_mixed_precision_solves = true; options.max_num_refinement_iterations = 3;
+  options.use_nonmonotonic_steps = true;
+  options.use_approximate_eigenvalue_bfgs_scaling = true;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
