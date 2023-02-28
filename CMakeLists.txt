@@ -138,6 +138,7 @@ include_directories(
 ## ceres_ik library
 add_library(ceres_ik
   src/ceres_ik.cpp
+  src/joint_trajectory_control_interface.cpp
 )
 add_dependencies(ceres_ik ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ceres_ik

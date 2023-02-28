@@ -3,17 +3,8 @@
 
 #include <geometry_msgs/Pose.h>
 #include <moveit/robot_state/robot_state.h>
-#include "ceres_utils.h"
+#include "utils.h"
 #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
-
-// util: find number of elements in an static array
-#include <stddef.h>
-typedef ptrdiff_t Size;
-template< class Type, Size n >
-Size countOf( Type (&)[n] ) { return n; }
-
-// Try to use countOf instead, use this if other option doesn't compile
-#define COUNTOF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 namespace utils
 {
@@ -230,118 +221,7 @@ geometry_msgs::PoseStamped forwardKinematicsDebug(const moveit::core::RobotState
   return p;
 }
 
-template <typename T>
-visualization_msgs::MarkerArray visualizeCollisions(const moveit::core::RobotState& robot_state, int (&joint_idx_to_target_idx)[robot::num_joints], double (&target_values)[robot::num_targets], double* variable_positions)
-{
-  T global_link_translations[3*robot::num_links];
-  T global_link_rotations[4*robot::num_links];
 
-  T link_translations[3*robot::num_links];
-  T link_rotations[4*robot::num_links];
-  for (int i=0; i<robot::num_links; i++)
-  {
-    link_translations[3*i+0] = T(robot::link_transform_translation_only[i][0]);
-    link_translations[3*i+1] = T(robot::link_transform_translation_only[i][1]);
-    link_translations[3*i+2] = T(robot::link_transform_translation_only[i][2]);
-    link_rotations[4*i+0] = T(robot::link_transform_quaternion_only[i][0]);
-    link_rotations[4*i+1] = T(robot::link_transform_quaternion_only[i][1]);
-    link_rotations[4*i+2] = T(robot::link_transform_quaternion_only[i][2]);
-    link_rotations[4*i+3] = T(robot::link_transform_quaternion_only[i][3]);
-  }
-
-  // TODO: To a separate function
-  for (int i=0; i<robot::num_joints; i++)
-  {
-    int child_link_idx = robot::joint_child_link_idx[i];
-    int parent_link_idx = robot::joint_parent_link_idx[i];
-    int target_idx = joint_idx_to_target_idx[i];
-    int variable_idx = robot::joint_idx_to_variable_idx[i];
-
-    // init
-    if (parent_link_idx == -1)
-    {
-      // TODO
-      global_link_translations[3*child_link_idx+0] = T(0.0);
-      global_link_translations[3*child_link_idx+1] = T(0.0);
-      global_link_translations[3*child_link_idx+2] = T(0.0);
-      global_link_rotations[4*child_link_idx+0] = T(1.0);
-      global_link_rotations[4*child_link_idx+1] = T(0.0);
-      global_link_rotations[4*child_link_idx+2] = T(0.0);
-      global_link_rotations[4*child_link_idx+3] = T(0.0);
-      continue;
-    }
-
-    // Translation
-    utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), 
-                                  &(global_link_rotations[4*parent_link_idx]), 
-                                  &(link_translations[3*child_link_idx]), 
-                                  &(global_link_translations[3*child_link_idx]));
-
-    
-    if (variable_idx!=-1) // if joint can move
-    { 
-      T joint_val = T(variable_positions[variable_idx]);
-      utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
-                                 &(link_rotations[4*child_link_idx]), 
-                                 joint_val, 
-                                 &(global_link_rotations[4*child_link_idx]));
-    }
-    else
-    {
-      utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
-                                 &(link_rotations[4*child_link_idx]),
-                                 &(global_link_rotations[4*child_link_idx]));
-    }
-  }
-
-  visualization_msgs::MarkerArray arr;
-  
-
-  // Put collisions
-
-  
-
-
-  for (int i=0; i<countOf(robot::collisions); i++)
-  {
-    visualization_msgs::Marker marker;
-    const robot::Collision &obj = robot::collisions[i];
-
-    T obj_pos[3];
-    T result[3];
-    obj_pos[0] = obj.x;
-    obj_pos[1] = obj.y;
-    obj_pos[2] = obj.z;
-    computeLinkTranslation(&(global_link_translations[3*obj.link_idx]),
-                           &(global_link_rotations[4*obj.link_idx]),
-                           obj_pos,
-                           result);
-
-    marker.header.frame_id = "world";
-    marker.header.stamp = ros::Time(0);
-    marker.ns = "collisions";
-    marker.id = i;
-    marker.type = visualization_msgs::Marker::SPHERE;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = result[0];
-    marker.pose.position.y = result[1];
-    marker.pose.position.z = result[2];
-    marker.pose.orientation.x = 0;
-    marker.pose.orientation.y = 0;
-    marker.pose.orientation.z = 0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = obj.radius;
-    marker.scale.y = obj.radius;
-    marker.scale.z = obj.radius;
-    marker.color.a = 0.75; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 1.0;
-    arr.markers.push_back(marker);
-  }
-
-  return arr;
-}
 
 
 } // namespace utils

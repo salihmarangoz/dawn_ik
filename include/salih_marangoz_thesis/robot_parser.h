@@ -5,8 +5,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <salih_marangoz_thesis/shapes.h>
-#include <salih_marangoz_thesis/utils/utils.h>
+#include <salih_marangoz_thesis/utils.h>
 
 namespace salih_marangoz_thesis
 {

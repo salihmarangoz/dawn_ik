@@ -1,9 +1,0 @@
-#ifndef __SALIH_MARANGOZ_VISUALIZATION_UTILS_H__
-#define __SALIH_MARANGOZ_VISUALIZATION_UTILS_H__
-
-namespace utils
-{
-
-} // namespace utils
-
-#endif // __SALIH_MARANGOZ_VISUALIZATION_UTILS_H__

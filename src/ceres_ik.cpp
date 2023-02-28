@@ -144,9 +144,9 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(0.1); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
-  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.02); // goal weight
-  problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
+  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
+  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.02); // goal weight
+  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
   // Target min/max constraints
   for (int i=0; i<robot::num_targets; i++)
@@ -159,8 +159,8 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     }
 
     // TODO: ALTERNATIVE WAY?
-    double min_val = const_target_positions[i] - 0.02;
-    double max_val = const_target_positions[i] + 0.02;
+    double min_val = const_target_positions[i] - 0.1;
+    double max_val = const_target_positions[i] + 0.1;
     if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];
     if (robot::joint_max_position[joint_i] < max_val) max_val = robot::joint_max_position[joint_i];
     problem.SetParameterLowerBound(target_positions, i, min_val); 
@@ -180,10 +180,14 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
   //options.use_nonmonotonic_steps = true;
   //options.use_approximate_eigenvalue_bfgs_scaling = true;
-  options.function_tolerance = DBL_MIN;
-  options.gradient_tolerance = DBL_MIN;
-  options.parameter_tolerance = DBL_MIN;
-  options.max_solver_time_in_seconds = 1./100.; // 100hz
+
+
+  //options.function_tolerance = DBL_MIN;
+  //options.gradient_tolerance = DBL_MIN;
+  //options.parameter_tolerance = DBL_MIN;
+  //options.max_solver_time_in_seconds = 1./100.; // 100hz
+
+
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";

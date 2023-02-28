@@ -6,13 +6,13 @@
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
-#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
-#include <salih_marangoz_thesis/utils/ceres_utils.h>
-#include <salih_marangoz_thesis/utils/moveit_utils.h>
-
 #include <visualization_msgs/InteractiveMarkerFeedback.h> // TODO
+
+#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
+#include <salih_marangoz_thesis/joint_trajectory_control_interface.h>
+#include <salih_marangoz_thesis/utils.h>
 
 namespace salih_marangoz_thesis
 {
@@ -33,6 +33,7 @@ public:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
   robot_model_loader::RobotModelLoaderPtr robot_model_loader;
   moveit_visual_tools::MoveItVisualToolsPtr visual_tools;
+  std::shared_ptr<JointTrajectoryControlInterface> joint_controller;
 
   // TODO
   void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
@@ -376,8 +377,8 @@ struct CollisionAvoidanceGoal {
     const double dist_threshold = 0.1; // TODO: move to robot conf
 
     // Compute collision positions
-    T collision_pos[3*countOf(robot::collisions)]; // w.r.t. world frame
-    for (int i=0; i<countOf(robot::collisions); i++)
+    T collision_pos[3*utils::countOf(robot::collisions)]; // w.r.t. world frame
+    for (int i=0; i<utils::countOf(robot::collisions); i++)
     {
     const robot::Collision &obj = robot::collisions[i];
 
@@ -396,7 +397,7 @@ struct CollisionAvoidanceGoal {
     {
       for (int j=0; j<robot::num_links; j++)
       {
-        for (int k=0; k<countOf(robot::collisions); k++)
+        for (int k=0; k<utils::countOf(robot::collisions); k++)
         {
           if (robot::processed_acm[i][j] == 0)
           {
