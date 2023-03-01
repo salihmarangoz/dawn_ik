@@ -33,6 +33,12 @@ Note: Some meeting notes may not be available.
 
   [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/W4ndkFPEKuY/0.jpg)](https://www.youtube.com/watch?v=W4ndkFPEKuY)
 
+- I found a good differentiable distances library: https://github.com/SimiPro/DCA
+  
+  - There was no LICENSE file in the project. So, I wrote an email to the author.
+  - If I can provide jacobians to ceres solver, it should work instead of using spheres everywhere.
+  
+
 ### 14 Feb 2023
 
 - Played a little (without collision checks):
