@@ -20,6 +20,9 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
 
   marker_array_pub = priv_nh.advertise<visualization_msgs::MarkerArray>("visualization_array", 0);
 
+  joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh, "/xarm/xarm7_traj_controller");
+  joint_controller->start("");
+
   loop(); // TODO
 }
 
@@ -47,6 +50,7 @@ void CeresIK::loop()
   
   moveit::core::RobotState robot_state = getCurrentRobotState();
 
+
   ros::Rate r(100);
   while (ros::ok())
   {
@@ -60,8 +64,20 @@ void CeresIK::loop()
       continue;
     }
 
+    // TODO: control robot
+    auto controller_state = joint_controller->getState();
+    if (controller_state!=nullptr)
+    {
+      joint_controller->setJointPositions(robot_state.getVariablePositions());
+    }
+
+
     visual_tools->publishRobotState(robot_state);
     r.sleep();
+
+    // TODO: control robot
+    if (controller_state!=nullptr)
+      robot_state.setVariablePositions(controller_state->actual.positions.data());
   }
 }
 
@@ -144,9 +160,9 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(0.1); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
-  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.02); // goal weight
-  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
+  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
+  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.005); // goal weight
+  problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
   // Target min/max constraints
   for (int i=0; i<robot::num_targets; i++)
@@ -159,8 +175,8 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     }
 
     // TODO: ALTERNATIVE WAY?
-    double min_val = const_target_positions[i] - 0.1;
-    double max_val = const_target_positions[i] + 0.1;
+    double min_val = const_target_positions[i] - 0.2;
+    double max_val = const_target_positions[i] + 0.2;
     if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];
     if (robot::joint_max_position[joint_i] < max_val) max_val = robot::joint_max_position[joint_i];
     problem.SetParameterLowerBound(target_positions, i, min_val); 

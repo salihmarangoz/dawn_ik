@@ -3,10 +3,10 @@
 namespace salih_marangoz_thesis
 {
 
-JointTrajectoryControlInterface::JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_manager_ns) : nh_(nh), state_(nullptr), speed_scale_(0.5), is_started_(false)
+JointTrajectoryControlInterface::JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic) : nh_(nh), state_(nullptr), speed_scale_(0.5), is_started_(false)
 {
-  command_topic_ = controller_manager_ns + "/command";
-  state_topic_ = controller_manager_ns + "/state";
+  command_topic_ = controller_topic + "/command";
+  state_topic_ = controller_topic + "/state";
 
   state_sub_ = nh_.subscribe(state_topic_, 2, &JointTrajectoryControlInterface::stateCallback_, this);
 }
@@ -37,7 +37,7 @@ JointTrajectoryControlInterface::stop()
 {
   if (!is_started_) return false;
 
-  // TODO: switch the controller
+  // TODO: switch the controller?
   ROS_WARN("TODO: switch the controller");
 
   command_pub_.shutdown();

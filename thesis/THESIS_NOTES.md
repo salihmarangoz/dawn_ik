@@ -27,6 +27,12 @@ Note: This section can be confusing. Please check the [Meetings](#meetings) sect
 
 Note: Some meeting notes may not be available.
 
+### xx Mar 2023
+
+- Controlling the arm using joint trajectory controller. State feed is also faster this way. Instead of receiving robot state from moveit, updating the state using the feed of the controller is much faster. 
+
+  [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/W4ndkFPEKuY/0.jpg)](https://www.youtube.com/watch?v=W4ndkFPEKuY)
+
 ### 14 Feb 2023
 
 - Played a little (without collision checks):
