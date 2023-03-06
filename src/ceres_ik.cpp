@@ -5,6 +5,9 @@ namespace salih_marangoz_thesis
 
 CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
+  // init robot monitor
+  robot_monitor = std::make_shared<RobotMonitor>(nh);
+
   // init planning_scene_monitor
   planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
   planning_scene_monitor->setStateUpdateFrequency(100);
@@ -51,11 +54,60 @@ void CeresIK::loop()
   moveit::core::RobotState robot_state = getCurrentRobotState();
 
 
-  ros::Rate r(100);
+  ros::Rate r(500);
   while (ros::ok())
   {
     //robot_state.setToRandomPositions();
     //robot_state = getCurrentRobotState();
+
+    // ROBOT MONITOR TEST
+    ros::spinOnce();
+    const double* glt = robot_monitor->getGlobalLinkTransformations();
+    if (!glt) continue;
+
+    visualization_msgs::MarkerArray arr;
+    for (int i=0; i<utils::countOf(robot::collisions); i++)
+    {
+      visualization_msgs::Marker marker;
+      const robot::Collision &obj = robot::collisions[i];
+
+      double obj_pos[3];
+      double result[3];
+      obj_pos[0] = obj.x;
+      obj_pos[1] = obj.y;
+      obj_pos[2] = obj.z;
+      utils::computeLinkTranslation(&(glt[7*obj.link_idx]),
+                                    &(glt[7*obj.link_idx+3]),
+                                    obj_pos,
+                                    result);
+
+      marker.header.frame_id = "world";
+      marker.header.stamp = ros::Time(0);
+      marker.ns = "collisions";
+      marker.id = i;
+      marker.type = visualization_msgs::Marker::SPHERE;
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.pose.position.x = result[0];
+      marker.pose.position.y = result[1];
+      marker.pose.position.z = result[2];
+      marker.pose.orientation.x = 0;
+      marker.pose.orientation.y = 0;
+      marker.pose.orientation.z = 0;
+      marker.pose.orientation.w = 1.0;
+      marker.scale.x = obj.radius;
+      marker.scale.y = obj.radius;
+      marker.scale.z = obj.radius;
+      marker.color.a = 0.75; // Don't forget to set the alpha!
+      marker.color.r = 0.0;
+      marker.color.g = 0.0;
+      marker.color.b = 1.0;
+      arr.markers.push_back(marker);
+    }
+    marker_array_pub.publish(arr);
+    
+
+    r.sleep();
+    continue;
 
     if (!update(robot_state))
     {

@@ -13,6 +13,7 @@
 #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
 #include <salih_marangoz_thesis/joint_trajectory_control_interface.h>
 #include <salih_marangoz_thesis/utils.h>
+#include <salih_marangoz_thesis/robot_monitor.h>
 
 namespace salih_marangoz_thesis
 {
@@ -25,6 +26,9 @@ using ceres::Solve;
 
 class CeresIK
 {
+// my classes
+public:
+  std::shared_ptr<RobotMonitor> robot_monitor;
 public:
   std::random_device rand_dev;
   std::mt19937 rand_gen;
