@@ -16,6 +16,8 @@
 
 ### Simulation
 
+Note: To increase joint states update frequency, added `<param name="rate" value="200" />` to the `joint_state_publisher` in `xarm_ros/xarm7_moveit_config/launch/moveit_rviz_common.launch`.
+
 ```bash
 # select one!
 $ roslaunch horti_moveit_config demo_gazebo.launch # TODO: modify the launch file
@@ -35,10 +37,3 @@ $ rosrun salih_marangoz_thesis robot_parser_node
 ```bash
 $ roslaunch salih_marangoz_thesis ceres_ik_node.launch
 ```
-
-
-
-## ToDo:
-
-- **[EIGEN_NO_DEBUG](https://eigen.tuxfamily.org/dox/TopicPreprocessorDirectives.html)**: disables Eigen's assertions if defined. Not defined by default, unless the `NDEBUG` macro is defined (this is a standard C++ macro which disables all asserts).
-- `-funroll-loops` or `-O3` is needed!
