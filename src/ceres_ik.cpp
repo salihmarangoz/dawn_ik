@@ -57,13 +57,11 @@ void CeresIK::loop()
   ros::Rate r(500);
   while (ros::ok())
   {
-    //robot_state.setToRandomPositions();
-    //robot_state = getCurrentRobotState();
-
     // ROBOT MONITOR TEST
     ros::spinOnce();
-    const double* glt = robot_monitor->getGlobalLinkTransformations();
-    if (!glt) continue;
+    const std::shared_ptr<std::vector<double>> glt_ptr = robot_monitor->getGlobalLinkTransformationsAsync();
+    if (glt_ptr == nullptr) continue;
+    std::vector<double> &glt = *glt_ptr;
 
     auto timestamp = ros::Time::now();
     visualization_msgs::MarkerArray arr;
