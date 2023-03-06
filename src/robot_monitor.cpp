@@ -11,7 +11,9 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
                            const int* joint_child_link_idx,
                            const int* joint_parent_link_idx,
                            const double* link_transform_translation_only,
-                           const double* link_transform_quaternion_only
+                           const double* link_transform_quaternion_only,
+                           const int* link_can_skip_translation,
+                           const int* link_can_skip_rotation
                            ): nh_(nh), 
                               joint_states_topic_(joint_states_topic), 
                               num_joints_(num_joints), 
@@ -20,7 +22,9 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
                               joint_child_link_idx_(joint_child_link_idx),
                               joint_parent_link_idx_(joint_parent_link_idx),
                               link_transform_translation_only_(link_transform_translation_only),
-                              link_transform_quaternion_only_(link_transform_quaternion_only)
+                              link_transform_quaternion_only_(link_transform_quaternion_only),
+                              link_can_skip_translation_(link_can_skip_translation),
+                              link_can_skip_rotation_(link_can_skip_rotation)
 {
   last_joint_state_msg_ = nullptr;
   last_joint_state_is_dirty_ = true;
@@ -28,7 +32,6 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
   joint_idx_to_msg_idx_ = nullptr;
 
   joint_states_sub_ = nh_.subscribe(joint_states_topic, 2, &RobotMonitor::jointStateCallback_, this);
-  ROS_WARN("init!");
 }
 
 RobotMonitor::~RobotMonitor()
@@ -40,7 +43,14 @@ RobotMonitor::~RobotMonitor()
 void 
 RobotMonitor::jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg)
 {
-  ROS_INFO_ONCE("RobotMonitor: first jointStateCallback_");
+  // sanity checks
+  ROS_INFO_ONCE("RobotMonitor: Received joint state!");
+  if (last_joint_state_msg_ != nullptr)
+  {
+    double update_freq = 1. / (msg->header.stamp - last_joint_state_msg_->header.stamp).toSec();
+    if (update_freq < 100) ROS_WARN_THROTTLE(5.0, "RobotMonitor: Joint state update freq is low: %f", update_freq);
+  }
+
   last_joint_state_msg_ = msg;
   last_joint_state_is_dirty_ = true;
 }
@@ -98,7 +108,7 @@ RobotMonitor::getGlobalLinkTransformations(bool return_cached_transformations)
     }
 
     // Translation
-    if (robot::link_can_skip_translation[child_link_idx])
+    if (link_can_skip_translation_[child_link_idx])
     {
         global_link_transformations_[7*child_link_idx+0] = global_link_transformations_[7*parent_link_idx+0];
         global_link_transformations_[7*child_link_idx+1] = global_link_transformations_[7*parent_link_idx+1];
@@ -116,7 +126,7 @@ RobotMonitor::getGlobalLinkTransformations(bool return_cached_transformations)
     { 
       double joint_val = current_joint_state_msg->position[msg_idx];
       
-      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then only rotate using the joint position
+      if (link_can_skip_rotation_[child_link_idx]) // if can skip the rotation then only rotate using the joint position
       {
         utils::computeLinkRotation(&(global_link_transformations_[7*parent_link_idx+3]),
                                   joint_val, 
@@ -132,7 +142,7 @@ RobotMonitor::getGlobalLinkTransformations(bool return_cached_transformations)
     }
     else // if joint is static
     {
-      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
+      if (link_can_skip_rotation_[child_link_idx]) // if can skip the rotation then no need to do anything
       {
         global_link_transformations_[7*child_link_idx+3] = global_link_transformations_[7*parent_link_idx+3];
         global_link_transformations_[7*child_link_idx+4] = global_link_transformations_[7*parent_link_idx+4];

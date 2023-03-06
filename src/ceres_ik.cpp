@@ -65,6 +65,7 @@ void CeresIK::loop()
     const double* glt = robot_monitor->getGlobalLinkTransformations();
     if (!glt) continue;
 
+    auto timestamp = ros::Time::now();
     visualization_msgs::MarkerArray arr;
     for (int i=0; i<utils::countOf(robot::collisions); i++)
     {
@@ -82,7 +83,7 @@ void CeresIK::loop()
                                     result);
 
       marker.header.frame_id = "world";
-      marker.header.stamp = ros::Time(0);
+      marker.header.stamp = timestamp;
       marker.ns = "collisions";
       marker.id = i;
       marker.type = visualization_msgs::Marker::SPHERE;
