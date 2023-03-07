@@ -16,7 +16,7 @@
 #ifndef ROBOT_MONITOR_NO_DEFAULTS
   #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
   #define ROBOT_MON_DEF_joint_states_topic = std::string("/joint_states")
-  #define ROBOT_MON_DEF_global_link_transformations_async_thread_rate = 100.0
+  #define ROBOT_MON_DEF_async_thread_rate = 100.0
   #define ROBOT_MON_DEF_num_joints = robot::num_joints
   #define ROBOT_MON_DEF_num_links = robot::num_links
   #define ROBOT_MON_DEF_joint_names = robot::joint_names
@@ -31,12 +31,21 @@
 namespace salih_marangoz_thesis
 {
 
+// len: num_links_*7 layout: x1,y1,z1,rw1,rx1,ry1,rz1,x2,y2,z2,rw2,rx2,ry2,rz2,... (linear1,quaternion1,linear2,quaternion2,...)
+
+struct JointLinkState
+{
+  std::shared_ptr<std::vector<double>> global_link_transformations;
+  sensor_msgs::JointStateConstPtr joint_state;
+  bool success;
+};
+
 class RobotMonitor
 {
 public:
   RobotMonitor(ros::NodeHandle &nh,
                const std::string joint_states_topic ROBOT_MON_DEF_joint_states_topic,
-               double global_link_transformations_async_thread_rate ROBOT_MON_DEF_global_link_transformations_async_thread_rate,
+               double async_thread_rate ROBOT_MON_DEF_async_thread_rate,
                int num_joints ROBOT_MON_DEF_num_joints, 
                int num_links ROBOT_MON_DEF_num_links,
                const std::string* joint_names ROBOT_MON_DEF_joint_names,
@@ -49,12 +58,7 @@ public:
                );
   ~RobotMonitor();
 
-  // x1,y1,z1,rw1,rx1,ry1,rz1,x2,y2,z2,rw2,rx2,ry2,rz2,... (linear1,quaternion1,linear2,quaternion2,...)
-  // return_cached_transformations=true to skip updating the kinematic tree
-  // // If you used getGlobalLinkTransformationsAsync at least once, do not use getGlobalLinkTransformations again!
-  const std::shared_ptr<std::vector<double>> getGlobalLinkTransformations();
-  const std::shared_ptr<std::vector<double>> getGlobalLinkTransformationsUnsafe();
-  const std::shared_ptr<std::vector<double>> getGlobalLinkTransformationsAsync();
+  const JointLinkState getJointLinkState();
 
   // setter/getter
   int getNumJoints(){return num_joints_;}
@@ -63,7 +67,7 @@ public:
   int getChildLinkIdx(int joint_idx){return joint_child_link_idx_[joint_idx];}
   int getParentLinkIdx(int joint_idx){return joint_parent_link_idx_[joint_idx];}
   int getMessageIdx(int joint_idx){return joint_idx_to_msg_idx_[joint_idx];}
-  const sensor_msgs::JointStateConstPtr getJointStateMsg()
+  const sensor_msgs::JointStateConstPtr getJointState()
   {
     msg_mtx_.lock();
     const sensor_msgs::JointStateConstPtr tmp = last_joint_state_msg_;
@@ -73,14 +77,14 @@ public:
 
 public:
   void jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg);
-  void globalLinkTransformationsAsyncThread_();
+  void asyncThread_();
 private:
-  bool computeGlobalLinkTransformations_(std::vector<double> &global_link_transformations);
+  JointLinkState computeJointLinkState_();
 private:
   // from the constructor
   ros::NodeHandle nh_;
   const std::string joint_states_topic_;
-  double global_link_transformations_async_thread_rate_;
+  double async_thread_rate_;
   int num_joints_;
   int num_links_;
   const std::string* joint_names_; // len: num_joints_
@@ -93,15 +97,12 @@ private:
   // internal
   std::mutex msg_mtx_;
   sensor_msgs::JointStateConstPtr last_joint_state_msg_;
-  bool joint_state_cache_is_dirty_;
-  bool joint_state_async_is_dirty_;
-  //std::mutex async_cache_; // cache is used internally, and not overriden. so not needed
-  std::shared_ptr<std::vector<double>> global_link_transformations_cache_; // len: num_links_*7 layout: x1,y1,z1,rw1,rx1,ry1,rz1,x2,y2,z2,rw2,rx2,ry2,rz2,... (linear1,quaternion1,linear2,quaternion2,...)
+  bool joint_state_is_dirty_;
   std::mutex async_mtx_;
-  std::shared_ptr<std::vector<double>> global_link_transformations_async_; // len: num_links_*7 layout: x1,y1,z1,rw1,rx1,ry1,rz1,x2,y2,z2,rw2,rx2,ry2,rz2,... (linear1,quaternion1,linear2,quaternion2,...)
-  int* joint_idx_to_msg_idx_; // len: num_joints_
-  boost::thread* global_link_transformations_async_thread_;
+  JointLinkState async_state_;
+  boost::thread* async_thread_;
   ros::Subscriber joint_states_sub_;
+  int* joint_idx_to_msg_idx_; // len: num_joints_
 
 };
 

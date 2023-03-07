@@ -50,7 +50,6 @@ moveit::core::RobotState CeresIK::getCurrentRobotState()
 // TODO: this is just a dummy loop function. this will run on a separate thread!
 void CeresIK::loop()
 {
-  
   moveit::core::RobotState robot_state = getCurrentRobotState();
 
 
@@ -59,9 +58,9 @@ void CeresIK::loop()
   {
     // ROBOT MONITOR TEST
     ros::spinOnce();
-    const std::shared_ptr<std::vector<double>> glt_ptr = robot_monitor->getGlobalLinkTransformationsAsync();
-    if (glt_ptr == nullptr) continue;
-    std::vector<double> &glt = *glt_ptr;
+    auto state = robot_monitor->getJointLinkState();
+    if (!state.success) continue;
+    std::vector<double> &glt = *(state.global_link_transformations);
 
     auto timestamp = ros::Time::now();
     visualization_msgs::MarkerArray arr;
@@ -103,7 +102,6 @@ void CeresIK::loop()
       arr.markers.push_back(marker);
     }
     marker_array_pub.publish(arr);
-    
 
     r.sleep();
     continue;
