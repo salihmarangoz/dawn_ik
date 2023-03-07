@@ -4,13 +4,13 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 
-#include <algorithm> // find
+#include <algorithm> // std::find
 #include <vector>
 #include <string>
-#include <boost/thread.hpp> // TODO: use std?
+#include <boost/thread.hpp>
 #include <mutex>
 
-#include <salih_marangoz_thesis/utils.h>
+#include <salih_marangoz_thesis/utils.h> // computeLinkTranslation, computeLinkRotation
 #include <salih_marangoz_thesis/JointLinkState.h>
 
 
@@ -102,7 +102,6 @@ private:
   boost::thread* async_thread_;
   ros::Subscriber joint_states_sub_;
   int* joint_idx_to_msg_idx_; // len: num_joints_
-
 };
 
 } // namespace salih_marangoz_thesis

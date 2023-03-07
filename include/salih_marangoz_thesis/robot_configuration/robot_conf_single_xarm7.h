@@ -75,18 +75,20 @@ const int processed_acm[10][10]= {{1,1,1,1,1,1,1,1,1,1},
 // TODO: link_parent_joint_idx, etc. is difficult to read!
 
 // Optimization targets
-const int num_targets = 7;
-const int target_idx_to_joint_idx[7] = {2,3,4,5,6,7,8};
+const int num_targets = 7; // TODO: will be generated
+const int target_idx_to_joint_idx[7] = {2,3,4,5,6,7,8}; // TODO: will be generated
 
 const int endpoint_link_idx = 9;
 
+// TODO
 struct Collision
 {
   int link_idx;
   double x,y,z,radius;
 };
 
-// const std::string link_names[10] = {"world","link_base","link1","link2","link3","link4","link5","link6","link7","link_eef"};
+
+// TODO: will be generated
 const Collision collisions[] = {{1, 0.0, 0.0, 0.1, 0.1},
                                 {1, 0.0, 0.0, 0.2, 0.1},
                                 {2, 0.0, 0.0, 0.0, 0.1},
