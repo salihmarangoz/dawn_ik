@@ -5,7 +5,7 @@ namespace salih_marangoz_thesis
 
 RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
                            const std::string joint_states_topic,
-                           double async_thread_rate,
+                           double async_thread_rate_limit,
                            int num_joints,
                            int num_links,
                            const std::string* joint_names,
@@ -17,7 +17,7 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
                            const int* link_can_skip_rotation
                            ): nh_(nh), 
                               joint_states_topic_(joint_states_topic),
-                              async_thread_rate_(async_thread_rate),
+                              async_thread_rate_limit_(async_thread_rate_limit),
                               num_joints_(num_joints), 
                               num_links_(num_links), 
                               joint_names_(joint_names),
@@ -32,7 +32,7 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
   joint_state_is_dirty_ = true;
   joint_idx_to_msg_idx_ = nullptr;
   async_thread_ = nullptr;
-  if (async_thread_rate > 0) 
+  if (async_thread_rate_limit > 0) 
     async_thread_ = new boost::thread(boost::bind(&RobotMonitor::asyncThread_, this));
   joint_states_sub_ = nh_.subscribe(joint_states_topic, 2, &RobotMonitor::jointStateCallback_, this);
 }
@@ -82,6 +82,16 @@ RobotMonitor::jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg)
   last_joint_state_msg_ = msg;
   joint_state_is_dirty_ = true;
   msg_mtx_.unlock();
+
+  // process the message here if async thread is disabled
+  if (async_thread_rate_limit_ <= 0)
+  {
+    JointLinkState new_state = computeJointLinkState_();
+    joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
+    async_mtx_.lock();
+    async_state_ = new_state;
+    async_mtx_.unlock();
+  }
 }
 
 const JointLinkState
@@ -96,7 +106,7 @@ RobotMonitor::getJointLinkState()
 void
 RobotMonitor::asyncThread_()
 {
-  ros::Rate r(async_thread_rate_);
+  ros::Rate r(async_thread_rate_limit_);
   while (ros::ok())
   {
     if (joint_state_is_dirty_)

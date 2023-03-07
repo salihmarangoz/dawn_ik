@@ -16,7 +16,7 @@
 #ifndef ROBOT_MONITOR_NO_DEFAULTS
   #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
   #define ROBOT_MON_DEF_joint_states_topic = std::string("/joint_states")
-  #define ROBOT_MON_DEF_async_thread_rate = 100.0
+  #define ROBOT_MON_DEF_async_thread_rate_limit = -1 // non-positive: kinematics processed in the callback. positive: kinematics processed in a separate thread with a fixed rate
   #define ROBOT_MON_DEF_num_joints = robot::num_joints
   #define ROBOT_MON_DEF_num_links = robot::num_links
   #define ROBOT_MON_DEF_joint_names = robot::joint_names
@@ -45,7 +45,7 @@ class RobotMonitor
 public:
   RobotMonitor(ros::NodeHandle &nh,
                const std::string joint_states_topic ROBOT_MON_DEF_joint_states_topic,
-               double async_thread_rate ROBOT_MON_DEF_async_thread_rate,
+               double async_thread_rate_limit ROBOT_MON_DEF_async_thread_rate_limit,
                int num_joints ROBOT_MON_DEF_num_joints, 
                int num_links ROBOT_MON_DEF_num_links,
                const std::string* joint_names ROBOT_MON_DEF_joint_names,
@@ -84,7 +84,7 @@ private:
   // from the constructor
   ros::NodeHandle nh_;
   const std::string joint_states_topic_;
-  double async_thread_rate_;
+  double async_thread_rate_limit_;
   int num_joints_;
   int num_links_;
   const std::string* joint_names_; // len: num_joints_
