@@ -78,6 +78,7 @@ add_message_files(
   ProximityState.msg
   JointLinkState.msg
   JointLinkProximityState.msg
+  SolverSummary.msg
 )
 
 ## Generate services in the 'srv' folder
