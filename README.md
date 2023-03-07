@@ -16,22 +16,31 @@
 
 ### Simulation
 
+Select one!
+
+#### 1. xArm7
+
 Note: To increase joint states update frequency, added `<param name="rate" value="200" />` to the `joint_state_publisher` in `xarm_ros/xarm7_moveit_config/launch/moveit_rviz_common.launch`.
 
 ```bash
-# select one!
+$ roslaunch salih_marangoz_thesis xarm7_sim.launch
+```
+
+#### 2. Horti
+
+```bash
 $ roslaunch horti_moveit_config demo_gazebo.launch # TODO: modify the launch file
-$ roslaunch salih_marangoz_thesis ceres_ik_sim.launch
 ```
 
 ### Code Generation
 
+Make sure the robot description is loaded. (if the simulation is running then it is loaded). Re-compile the project after this step. 
+
 ```bash
-# Make sure the robot description is loaded. (if the simulation is running then it is loaded)
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm7
 ```
 
-### IK Solver/Controller
+### Solver/Controller
 
 ```bash
 $ roslaunch salih_marangoz_thesis ceres_ik_node.launch
