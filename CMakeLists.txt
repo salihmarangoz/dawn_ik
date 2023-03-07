@@ -74,8 +74,11 @@ find_package(Ceres REQUIRED COMPONENTS EigenSparse SparseLinearAlgebraLibrary LA
 add_message_files(
   DIRECTORY msg
   FILES
+  LinkState.msg
+  ProximityState.msg
   JointLinkState.msg
-  JointLinkCollisionState.msg)
+  JointLinkProximityState.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(

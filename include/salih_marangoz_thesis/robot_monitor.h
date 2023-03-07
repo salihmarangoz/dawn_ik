@@ -11,6 +11,7 @@
 #include <mutex>
 
 #include <salih_marangoz_thesis/utils.h>
+#include <salih_marangoz_thesis/JointLinkState.h>
 
 
 #ifndef ROBOT_MONITOR_NO_DEFAULTS
@@ -31,14 +32,14 @@
 namespace salih_marangoz_thesis
 {
 
-// len: num_links_*7 layout: x1,y1,z1,rw1,rx1,ry1,rz1,x2,y2,z2,rw2,rx2,ry2,rz2,... (linear1,quaternion1,linear2,quaternion2,...)
-
+/*
 struct JointLinkState
 {
   std::shared_ptr<std::vector<double>> global_link_transformations;
   sensor_msgs::JointStateConstPtr joint_state;
   bool success;
 };
+*/
 
 class RobotMonitor
 {
