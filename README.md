@@ -8,9 +8,9 @@
 
 ## Installation
 
-- http://ceres-solver.org/installation.html (2.x.x)
+- http://ceres-solver.org/installation.html (2.1.0)
 
-- https://github.com/xArm-Developer/xarm_ros (master)
+- https://github.com/xArm-Developer/xarm_ros (master) (commit: c10d5e59dd50109d15e8fbd3da0bae6aeacbb855)
 
 ## Running
 
@@ -27,9 +27,8 @@ $ roslaunch salih_marangoz_thesis ceres_ik_sim.launch
 ### Code Generation
 
 ```bash
-# 1. Make sure the robot description is loaded. (if the simulation is running then it is loaded)
-# 2. This will generate the robot configuration header file. Manually copy the text out (not all of it)
-$ rosrun salih_marangoz_thesis robot_parser_node
+# Make sure the robot description is loaded. (if the simulation is running then it is loaded)
+$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm7
 ```
 
 ### IK Solver/Controller

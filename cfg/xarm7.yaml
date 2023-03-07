@@ -1,0 +1,157 @@
+
+# Objective functions (and weights) see: http://ceres-solver.org/nnls_modeling.html#instances
+# Available: TrivialLoss(), HuberLoss(delta), SoftLOneLoss(delta), CauchyLoss(delta)
+
+#########################################################
+### Common Parameters ###################################
+#########################################################
+
+# Starting from this endpoint to the root, all joints will be the optimization parameter
+endpoint_link: "link_eef"
+
+# Joint trajectory controller topics.
+# Only used for controlling the arm. Not used for kinematic computations, etc.
+joint_controller_command_topic: "/xarm/xarm7_traj_controller/command"
+joint_controller_state_topic: "/xarm/xarm7_traj_controller/state"
+
+# Excludes joints from optimization and control
+exclude_joints:
+  - joint_name: "joint7"
+
+#########################################################
+### Problem Constaints ##################################
+#########################################################
+problem_constraints:
+  # Available values
+  # "disabled"
+  # "minmax" : Applies minimum/maximum position values as constraints
+  # "posdiff" : Applies custom minimum/maximum position values as constraints. Also keeps these values in "minmax" boundaries, so minmax_override may affect the outcome.
+  joint_limiting_method: "minmax"
+  joint_limits_override:
+    - joint_name: "joint2"
+      min_position: 0.5
+    - joint_name: "joint_7"
+      min_position: -2
+      max_position: 1
+  posdiff_default: 0.2
+  posdiff_override:
+    - joint_name: "joint2"
+      neg_diff: -0.3
+      pos_diff: 0.3
+
+
+#########################################################
+### Solver Parameters ###################################
+#########################################################
+# see: http://ceres-solver.org/nnls_solving.html#solver-options
+solver_options:
+  minimizer_type: "TRUST_REGION"
+  linear_solver_type: "DENSE_QR"
+  jacobi_scaling: true
+  minimizer_progress_to_stdout: false
+  # preconditioner_type: "SUBSET"
+  # use_nonmonotonic_steps: true
+  # use_approximate_eigenvalue_bfgs_scaling: true
+  # function_tolerance: "DBL_MIN";
+  # gradient_tolerance: "DBL_MIN";
+  # parameter_tolerance: "DBL_MIN";
+  # max_solver_time_in_seconds: 0.01
+
+#########################################################
+### Objective: Look at Goal #############################
+#########################################################
+look_at_goal:
+  enabled: true
+  loss: "TrivialLoss()"
+  orientation_weight: 2.0
+  distance_weight: 0.1
+  distance_to_target: 1.0
+
+
+#########################################################
+### Objective: Avoid Joint Limits #######################
+#########################################################
+avoid_joint_limits:
+  enabled: true
+  loss: "TrivialLoss()"
+  override: # weight 1.0 by default.
+    - joint_name: "joint1"
+      weight: 0.5
+    - joint_name: "joint2"
+      weight: 0.2
+
+
+#########################################################
+### Objective: Preferred Joint Positions ################
+#########################################################
+preferred_joint_positions:
+  enabled: true
+  loss: "TrivialLoss()"
+  override: # position (limit_max-limit_min)/2 by default. weight (optional) 1.0 by default.
+    - joint_name: "joint1"
+      position: 0.1
+      weight: 0.2
+    - joint_name: "joint2"
+      position: -0.2
+      weight: 0.5
+
+
+#########################################################
+### Objective: Minimal Displacement #####################
+#########################################################
+minimal_displacement:
+  enabled: true
+  loss: "TrivialLoss()"
+  weights: # Higher values cause less movement. weight 1.0 by default.
+    - joint_name: "joint1"
+      weight: 0.5
+    - joint_name: "joint2"
+      weight: 0.2
+
+
+#########################################################
+### Objective: External collision #######################
+#########################################################
+external_collision:
+  enabled: true
+  loss: "TrivialLoss()"
+  proximity_distance: 0.2
+
+
+#########################################################
+### Objective: Self collision ###########################
+#########################################################
+self_collision:
+  enabled: true
+  loss: "TrivialLoss()"
+  apply_horti_tricks: false # hardcoded acm modification trick for horti robot
+  proximity_distance: 0.2
+  objects:
+    - origin_link: "link6"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
+    - origin_link: "link1"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
+    - origin_link: "link1"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
+    - origin_link: "link1"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
+    - origin_link: "link1"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
+    - origin_link: "link1"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
+    - origin_link: "link1"
+      shape: "sphere"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      radius: 0.1
