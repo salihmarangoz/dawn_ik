@@ -58,9 +58,9 @@ void CeresIK::loop()
   {
     // ROBOT MONITOR TEST
     ros::spinOnce();
-    auto state = robot_monitor->getJointLinkState();
-    if (!state.success) continue;
-    std::vector<double> &glt = *(state.global_link_transformations);
+    JointLinkStateConstPtr state = robot_monitor->getJointLinkState();
+    if (state == nullptr) continue;
+    const std::vector<double> &glt = state->link_state.transformations;
 
     auto timestamp = ros::Time::now();
     visualization_msgs::MarkerArray arr;

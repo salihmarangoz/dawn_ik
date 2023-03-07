@@ -32,15 +32,6 @@
 namespace salih_marangoz_thesis
 {
 
-/*
-struct JointLinkState
-{
-  std::shared_ptr<std::vector<double>> global_link_transformations;
-  sensor_msgs::JointStateConstPtr joint_state;
-  bool success;
-};
-*/
-
 class RobotMonitor
 {
 public:
@@ -59,7 +50,7 @@ public:
                );
   ~RobotMonitor();
 
-  const JointLinkState getJointLinkState();
+  const JointLinkStateConstPtr getJointLinkState();
 
   // setter/getter
   int getNumJoints(){return num_joints_;}
@@ -68,16 +59,17 @@ public:
   int getChildLinkIdx(int joint_idx){return joint_child_link_idx_[joint_idx];}
   int getParentLinkIdx(int joint_idx){return joint_parent_link_idx_[joint_idx];}
   int getMessageIdx(int joint_idx){return joint_idx_to_msg_idx_[joint_idx];}
-  const sensor_msgs::JointStateConstPtr getJointState()
-  {
-    msg_mtx_.lock();
-    const sensor_msgs::JointStateConstPtr tmp = last_joint_state_msg_;
-    msg_mtx_.unlock();
-    return tmp;
-  }
+  // const sensor_msgs::JointStateConstPtr getJointState()
+  // {
+  //   msg_mtx_.lock();
+  //   const sensor_msgs::JointStateConstPtr tmp = last_joint_state_msg_;
+  //   msg_mtx_.unlock();
+  //   return tmp;
+  // }
+  
 
 private:
-  JointLinkState computeJointLinkState_();
+  JointLinkStatePtr computeJointLinkState_();
   void jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg);
   void asyncThread_();
 
@@ -100,7 +92,7 @@ private:
   sensor_msgs::JointStateConstPtr last_joint_state_msg_;
   bool joint_state_is_dirty_;
   std::mutex async_mtx_;
-  JointLinkState async_state_;
+  JointLinkStatePtr async_state_;
   boost::thread* async_thread_;
   ros::Subscriber joint_states_sub_;
   int* joint_idx_to_msg_idx_; // len: num_joints_

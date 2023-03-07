@@ -5,4 +5,3 @@ Header header
 sensor_msgs/JointState joint_state
 
 LinkState link_state
-

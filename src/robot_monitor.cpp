@@ -86,19 +86,23 @@ RobotMonitor::jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg)
   // process the message here if async thread is disabled
   if (async_thread_rate_limit_ <= 0)
   {
-    JointLinkState new_state = computeJointLinkState_();
-    joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
-    async_mtx_.lock();
-    async_state_ = new_state;
-    async_mtx_.unlock();
+    // Update internal state
+    JointLinkStatePtr new_state = computeJointLinkState_();
+    if (new_state != nullptr)
+    {
+      joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
+      async_mtx_.lock();
+      async_state_ = new_state;
+      async_mtx_.unlock();
+    }
   }
 }
 
-const JointLinkState
+const JointLinkStateConstPtr
 RobotMonitor::getJointLinkState()
 {
   async_mtx_.lock();
-  JointLinkState tmp = async_state_;
+  JointLinkStatePtr tmp = async_state_;
   async_mtx_.unlock();
   return tmp;
 }
@@ -111,36 +115,36 @@ RobotMonitor::asyncThread_()
   {
     if (joint_state_is_dirty_)
     {
-      JointLinkState new_state = computeJointLinkState_();
-      joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
-      async_mtx_.lock();
-      async_state_ = new_state;
-      async_mtx_.unlock();
+      // Update internal state
+      JointLinkStatePtr new_state = computeJointLinkState_();
+      if (new_state != nullptr)
+      {
+        joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
+        async_mtx_.lock();
+        async_state_ = new_state;
+        async_mtx_.unlock();
+      }
     }
     r.sleep();
   }
 }
 
-JointLinkState
+JointLinkStatePtr
 RobotMonitor::computeJointLinkState_()
 {
-  JointLinkState state;
-  state.success = false;
-
   // If the joint state message is not received
-  if (last_joint_state_msg_ == nullptr) return state;
+  if (last_joint_state_msg_ == nullptr) return nullptr;
+
+  JointLinkStatePtr state = boost::make_shared<JointLinkState>();
 
   // Process the latest joint state msg
   msg_mtx_.lock();
-  sensor_msgs::JointStateConstPtr current_joint_state_msg = last_joint_state_msg_; // hold the joint states msg shared ptr
-  state.joint_state = last_joint_state_msg_;
+  state->joint_state = *last_joint_state_msg_; // copy
   msg_mtx_.unlock();
 
-  // Init link state vector
-  state.global_link_transformations = std::make_shared<std::vector<double>>(num_links_*7);
-
   // recompute kinematic chain
-  std::vector<double> &global_link_transformations = *(state.global_link_transformations);
+  std::vector<double> &global_link_transformations = state->link_state.transformations; // copy reference
+  global_link_transformations.resize(num_links_*7);
   for (int i=0; i<num_joints_; i++)
   {
     int child_link_idx = joint_child_link_idx_[i];
@@ -177,7 +181,7 @@ RobotMonitor::computeJointLinkState_()
 
     if (msg_idx!=-1) // if joint can move
     { 
-      double joint_val = current_joint_state_msg->position[msg_idx];
+      double joint_val = state->joint_state.position[msg_idx];
       
       if (link_can_skip_rotation_[child_link_idx]) // if can skip the rotation then only rotate using the joint position
       {
@@ -212,7 +216,6 @@ RobotMonitor::computeJointLinkState_()
     }
   }
 
-  state.success = true;
   return state;
 }
 
