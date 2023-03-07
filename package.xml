@@ -62,6 +62,7 @@
   <depend>tf2</depend>
   <depend>tf2_eigen</depend>
   <depend>visualization_msgs</depend>
+  <depend>message_runtime</depend>
 
   
 
