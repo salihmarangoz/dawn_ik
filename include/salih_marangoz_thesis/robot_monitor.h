@@ -75,11 +75,11 @@ public:
     return tmp;
   }
 
-public:
-  void jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg);
-  void asyncThread_();
 private:
   JointLinkState computeJointLinkState_();
+  void jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg);
+  void asyncThread_();
+
 private:
   // from the constructor
   ros::NodeHandle nh_;
@@ -107,19 +107,6 @@ private:
 };
 
 } // namespace salih_marangoz_thesis
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif // __ROBOT_MONITOR_H__
