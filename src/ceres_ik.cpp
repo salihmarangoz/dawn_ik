@@ -6,7 +6,7 @@ namespace salih_marangoz_thesis
 CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
   // init robot monitor
-  robot_monitor = std::make_shared<RobotMonitor>(nh);
+  robot_monitor = std::make_shared<RobotMonitor>(nh, priv_nh);
 
   // init planning_scene_monitor
   planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");

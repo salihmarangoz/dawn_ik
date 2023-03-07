@@ -4,7 +4,9 @@ namespace salih_marangoz_thesis
 {
 
 RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
+                           ros::NodeHandle &priv_nh,
                            const std::string joint_states_topic,
+                           const std::string joint_link_state_topic,
                            double async_thread_rate_limit,
                            int num_joints,
                            int num_links,
@@ -15,8 +17,10 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
                            const double* link_transform_quaternion_only,
                            const int* link_can_skip_translation,
                            const int* link_can_skip_rotation
-                           ): nh_(nh), 
+                           ): nh_(nh),
+                              priv_nh_(priv_nh),
                               joint_states_topic_(joint_states_topic),
+                              joint_link_state_topic_(joint_link_state_topic),
                               async_thread_rate_limit_(async_thread_rate_limit),
                               num_joints_(num_joints), 
                               num_links_(num_links), 
@@ -32,9 +36,12 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
   joint_state_is_dirty_ = true;
   joint_idx_to_msg_idx_ = nullptr;
   async_thread_ = nullptr;
-  if (async_thread_rate_limit > 0) 
+  if (async_thread_rate_limit_ > 0) 
     async_thread_ = new boost::thread(boost::bind(&RobotMonitor::asyncThread_, this));
-  joint_states_sub_ = nh_.subscribe(joint_states_topic, 2, &RobotMonitor::jointStateCallback_, this);
+  joint_states_sub_ = nh_.subscribe(joint_states_topic_, 2, &RobotMonitor::jointStateCallback_, this);
+  if (joint_link_state_topic.size() > 0)
+    joint_link_state_pub_ = priv_nh_.advertise<JointLinkState>(joint_link_state_topic_, 2);
+  
 }
 
 RobotMonitor::~RobotMonitor()
@@ -93,6 +100,8 @@ RobotMonitor::jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg)
       joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
       async_mtx_.lock();
       async_state_ = new_state;
+      if (joint_link_state_pub_.getNumSubscribers() > 0)
+        joint_link_state_pub_.publish(new_state);
       async_mtx_.unlock();
     }
   }
@@ -122,6 +131,8 @@ RobotMonitor::asyncThread_()
         joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
         async_mtx_.lock();
         async_state_ = new_state;
+        if (joint_link_state_pub_.getNumSubscribers() > 0)
+          joint_link_state_pub_.publish(new_state);
         async_mtx_.unlock();
       }
     }
@@ -140,6 +151,7 @@ RobotMonitor::computeJointLinkState_()
   // Process the latest joint state msg
   msg_mtx_.lock();
   state->joint_state = *last_joint_state_msg_; // copy
+  state->header = last_joint_state_msg_->header; // copy
   msg_mtx_.unlock();
 
   // recompute kinematic chain

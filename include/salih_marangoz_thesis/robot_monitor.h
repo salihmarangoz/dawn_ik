@@ -17,6 +17,7 @@
 #ifndef ROBOT_MONITOR_NO_DEFAULTS
   #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
   #define ROBOT_MON_DEF_joint_states_topic = std::string("/joint_states")
+  #define ROBOT_MON_DEF_joint_link_state_topic = std::string("int_joint_link_state")
   #define ROBOT_MON_DEF_async_thread_rate_limit = -1 // non-positive: kinematics processed in the callback. positive: kinematics processed in a separate thread with a fixed rate
   #define ROBOT_MON_DEF_num_joints = robot::num_joints
   #define ROBOT_MON_DEF_num_links = robot::num_links
@@ -36,7 +37,9 @@ class RobotMonitor
 {
 public:
   RobotMonitor(ros::NodeHandle &nh,
+               ros::NodeHandle &priv_nh,
                const std::string joint_states_topic ROBOT_MON_DEF_joint_states_topic,
+               const std::string joint_link_state_topic ROBOT_MON_DEF_joint_link_state_topic,
                double async_thread_rate_limit ROBOT_MON_DEF_async_thread_rate_limit,
                int num_joints ROBOT_MON_DEF_num_joints, 
                int num_links ROBOT_MON_DEF_num_links,
@@ -76,7 +79,9 @@ private:
 private:
   // from the constructor
   ros::NodeHandle nh_;
+  ros::NodeHandle priv_nh_;
   const std::string joint_states_topic_;
+  const std::string joint_link_state_topic_;
   double async_thread_rate_limit_;
   int num_joints_;
   int num_links_;
@@ -88,6 +93,7 @@ private:
   const int* link_can_skip_translation_; // len: num_links_
   const int* link_can_skip_rotation_; // len: num_links_
   // internal
+  ros::Publisher joint_link_state_pub_;
   std::mutex msg_mtx_;
   sensor_msgs::JointStateConstPtr last_joint_state_msg_;
   bool joint_state_is_dirty_;
