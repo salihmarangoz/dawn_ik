@@ -18,6 +18,20 @@ joint_controller_state_topic: "/xarm/xarm7_traj_controller/state"
 exclude_joints:
   - joint_name: "joint7"
 
+# joint_name
+# min_position (optional)
+# max_position (optional)
+# no_limit (optional) (dont use with min_position nor max_position)
+joint_position_limits_override:
+  - joint_name: "joint2"
+    min_position: 0.5
+  - joint_name: "joint7"
+    min_position: -2
+    max_position: 1
+  - joint_name: "joint6"
+    no_limit: true
+
+
 #########################################################
 ### Problem Constaints ##################################
 #########################################################
@@ -25,14 +39,8 @@ problem_constraints:
   # Available values
   # "disabled"
   # "minmax" : Applies minimum/maximum position values as constraints
-  # "posdiff" : Applies custom minimum/maximum position values as constraints. Also keeps these values in "minmax" boundaries, so minmax_override may affect the outcome.
+  # "posdiff" : Applies custom minimum/maximum position values as constraints.
   joint_limiting_method: "minmax"
-  joint_limits_override:
-    - joint_name: "joint2"
-      min_position: 0.5
-    - joint_name: "joint_7"
-      min_position: -2
-      max_position: 1
   posdiff_default: 0.2
   posdiff_override:
     - joint_name: "joint2"
