@@ -47,35 +47,6 @@ RobotParser::RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh) : nh(nh)
   exit(0);
 }
 
-void RobotParser::test()
-{
-  ROS_WARN("====================================== TEST ======================================");
-
-  std::vector<Eigen::Isometry3d> m_arr;
-  m_arr.resize(3);
-  m_arr[0] = Eigen::Isometry3d::Identity();
-  m_arr[1] = Eigen::Isometry3d::Identity();
-  m_arr[2] = Eigen::Isometry3d::Identity();
-  m_arr[0].translate(Eigen::Vector3d(0.5, 0.2, 0.3));
-  m_arr[0].rotate(Eigen::AngleAxisd(0.3*M_PI, Eigen::Vector3d::UnitZ()));
-  m_arr[1].translate(Eigen::Vector3d(0.254654, 0.21231, 0.3321));
-  m_arr[1].rotate(Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitX()));
-  m_arr[2].translate(Eigen::Vector3d(0.456121, 0.546546211, 0.1));
-  m_arr[2].rotate(Eigen::AngleAxisd(0.1*M_PI, Eigen::Vector3d::UnitX()));
-  m_arr[2].rotate(Eigen::AngleAxisd(0.9*M_PI, Eigen::Vector3d::UnitY()));
-
-  std::cout << "Test eigenTranslation2Str: " << std::endl << eigenTranslation2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
-
-  std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
-
-  for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
-  {
-    ROS_WARN("%s", (*it_cfg).first.c_str());
-  }
-
-  ROS_WARN("====================================== TEST ======================================");
-}
-
 bool
 RobotParser::readCfg()
 {
@@ -133,144 +104,6 @@ RobotParser::saveCode(const std::string& code)
   } 
 
   return true;
-}
-
-
-std::string RobotParser::strVector2Str(const std::string& variable, const std::vector<std::string>& arr)
-{
-  std::string out = "";
-  out += variable;
-  out += "[";
-  out += std::to_string(arr.size());
-  out += "] = {";
-
-  for (int i=0; i<arr.size(); i++)
-  {
-    out += "\"";
-    out += arr[i];
-    out += "\"";
-
-    if (i!=arr.size()-1)
-    {
-      out += ",";
-    }
-    else
-    {
-      out +="};";
-    }
-  }
-
-  return out;
-}
-
-
-/// @brief Converts full transformations into translation arrays for code generation.
-/// @param variable Variable name. For example: inline const TEST_VARIABLE
-/// @param transformations Full transformations. Only translation part will be used.
-/// @return Translation vectors in x,y,z order. Example output:
-///         inline const TEST_VARIABLE[3][3] = {{0.500000, 0.200000, 0.300000},
-///                                             {0.254654, 0.212310, 0.332100},
-///                                             {0.456121, 0.546546, 0.100000}};
-std::string RobotParser::eigenTranslation2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision, int extra_whitespace)
-{
-  std::ostringstream out_stream;
-  if (precision>=0)
-  {
-    out_stream.precision(precision);
-  }
-
-  std::string first_part = "";
-  first_part += variable;
-  first_part += "[";
-  first_part += std::to_string(transformations.size());
-  first_part += "]";
-  first_part += "[3] = {";
-  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
-  out_stream << first_part;
-
-  for (int i=0; i<transformations.size(); i++)
-  {
-    auto translation = transformations[i].translation();
-    if (i!=0) out_stream << spacing;
-    out_stream << "{" << std::to_string(translation.x()) << ", " << std::to_string(translation.y()) << ", " << std::to_string(translation.z()) << "}";
-    if (i!=transformations.size()-1) out_stream << ",";
-    if (i==transformations.size()-1) out_stream << "};";
-    if (i!=transformations.size()-1) out_stream << std::endl;
-  }
-
-  return out_stream.str();
-}
-
-/// @brief Converts full transformations into quaternion arrays for code generation.
-/// @param variable Variable name. For example: inline const TEST_VARIABLE
-/// @param transformations Full transformations. Only rotation part will be used.
-/// @param precision Floating point precision. Uses default approach if the value is negative.
-/// @return Quaternion vector in w,x,y,z order. Example output:
-///         inline const TEST_VARIABLE[3][4] = {{0.891007, 0.000000, 0.000000, 0.453990},
-///                                             {0.707107, 0.707107, 0.000000, 0.000000},
-///                                             {0.154508, 0.024472, 0.975528, 0.154508}};
-std::string RobotParser::eigenQuaternion2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision, int extra_whitespace)
-{
-  std::ostringstream out_stream;
-  if (precision>=0)
-  {
-    out_stream.precision(precision);
-  }
-
-  std::string first_part = "";
-  first_part += variable;
-  first_part += "[";
-  first_part += std::to_string(transformations.size());
-  first_part += "]";
-  first_part += "[4] = {";
-  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
-  out_stream << first_part;
-
-  for (int i=0; i<transformations.size(); i++)
-  {
-    auto rotation = Eigen::Quaterniond(transformations[i].rotation());
-    if (i!=0) out_stream << spacing;
-    out_stream << "{" << std::to_string(rotation.w()) << ", " << std::to_string(rotation.x()) << ", " << std::to_string(rotation.y()) << ", " << std::to_string(rotation.z()) << "}";
-    if (i!=transformations.size()-1) out_stream << ",";
-    if (i==transformations.size()-1) out_stream << "};";
-    if (i!=transformations.size()-1) out_stream << std::endl;
-  }
-
-  return out_stream.str();
-}
-
-std::string RobotParser::eigenArrayXXi2Str(const std::string& variable, const Eigen::ArrayXXi& mat, int extra_whitespace)
-{
-  std::ostringstream out_stream;
-  std::string first_part = "";
-  first_part += variable;
-  first_part += "[";
-  first_part += std::to_string(mat.rows());
-  first_part += "]";
-  first_part += "[";
-  first_part += std::to_string(mat.cols());
-  first_part += "]";
-  first_part += "= {";
-  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
-  out_stream << first_part;
-
-  for (int i=0; i<mat.rows(); i++)
-  {
-    if (i!=0) out_stream << spacing;
-    out_stream << "{";
-    for (int j=0; j<mat.cols(); j++)
-    {
-      //int val = mat(i,j);
-      out_stream << std::to_string(mat(i,j));
-      if (j==mat.cols()-1 && i!=mat.rows()-1) out_stream << "},";
-      if (j==mat.cols()-1 && i==mat.rows()-1) out_stream << "}";
-      if (j!=mat.cols()-1) out_stream << ",";
-    }
-    if (i==mat.rows()-1) out_stream << "};";
-    if (i!=mat.rows()-1) out_stream << std::endl;
-  }
-
-  return out_stream.str();
 }
 
 bool RobotParser::parse()
@@ -559,6 +392,220 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "#endif // " << header_guard_name << std::endl;
   return out_stream.str();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////// UTILS //////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RobotParser::test()
+{
+  ROS_WARN("====================================== TEST ======================================");
+
+  std::vector<Eigen::Isometry3d> m_arr;
+  m_arr.resize(3);
+  m_arr[0] = Eigen::Isometry3d::Identity();
+  m_arr[1] = Eigen::Isometry3d::Identity();
+  m_arr[2] = Eigen::Isometry3d::Identity();
+  m_arr[0].translate(Eigen::Vector3d(0.5, 0.2, 0.3));
+  m_arr[0].rotate(Eigen::AngleAxisd(0.3*M_PI, Eigen::Vector3d::UnitZ()));
+  m_arr[1].translate(Eigen::Vector3d(0.254654, 0.21231, 0.3321));
+  m_arr[1].rotate(Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitX()));
+  m_arr[2].translate(Eigen::Vector3d(0.456121, 0.546546211, 0.1));
+  m_arr[2].rotate(Eigen::AngleAxisd(0.1*M_PI, Eigen::Vector3d::UnitX()));
+  m_arr[2].rotate(Eigen::AngleAxisd(0.9*M_PI, Eigen::Vector3d::UnitY()));
+
+  std::cout << "Test eigenTranslation2Str: " << std::endl << eigenTranslation2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
+
+  std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
+
+  for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
+  {
+    ROS_WARN("%s", (*it_cfg).first.c_str());
+  }
+
+  ROS_WARN("====================================== TEST ======================================");
+}
+
+
+std::string RobotParser::strVector2Str(const std::string& variable, const std::vector<std::string>& arr)
+{
+  std::string out = "";
+  out += variable;
+  out += "[";
+  out += std::to_string(arr.size());
+  out += "] = {";
+
+  for (int i=0; i<arr.size(); i++)
+  {
+    out += "\"";
+    out += arr[i];
+    out += "\"";
+
+    if (i!=arr.size()-1)
+    {
+      out += ",";
+    }
+    else
+    {
+      out +="};";
+    }
+  }
+
+  return out;
+}
+
+
+/// @brief Converts full transformations into translation arrays for code generation.
+/// @param variable Variable name. For example: inline const TEST_VARIABLE
+/// @param transformations Full transformations. Only translation part will be used.
+/// @return Translation vectors in x,y,z order. Example output:
+///         inline const TEST_VARIABLE[3][3] = {{0.500000, 0.200000, 0.300000},
+///                                             {0.254654, 0.212310, 0.332100},
+///                                             {0.456121, 0.546546, 0.100000}};
+std::string RobotParser::eigenTranslation2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision, int extra_whitespace)
+{
+  std::ostringstream out_stream;
+  if (precision>=0)
+  {
+    out_stream.precision(precision);
+  }
+
+  std::string first_part = "";
+  first_part += variable;
+  first_part += "[";
+  first_part += std::to_string(transformations.size());
+  first_part += "]";
+  first_part += "[3] = {";
+  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
+  out_stream << first_part;
+
+  for (int i=0; i<transformations.size(); i++)
+  {
+    auto translation = transformations[i].translation();
+    if (i!=0) out_stream << spacing;
+    out_stream << "{" << std::to_string(translation.x()) << ", " << std::to_string(translation.y()) << ", " << std::to_string(translation.z()) << "}";
+    if (i!=transformations.size()-1) out_stream << ",";
+    if (i==transformations.size()-1) out_stream << "};";
+    if (i!=transformations.size()-1) out_stream << std::endl;
+  }
+
+  return out_stream.str();
+}
+
+/// @brief Converts full transformations into quaternion arrays for code generation.
+/// @param variable Variable name. For example: inline const TEST_VARIABLE
+/// @param transformations Full transformations. Only rotation part will be used.
+/// @param precision Floating point precision. Uses default approach if the value is negative.
+/// @return Quaternion vector in w,x,y,z order. Example output:
+///         inline const TEST_VARIABLE[3][4] = {{0.891007, 0.000000, 0.000000, 0.453990},
+///                                             {0.707107, 0.707107, 0.000000, 0.000000},
+///                                             {0.154508, 0.024472, 0.975528, 0.154508}};
+std::string RobotParser::eigenQuaternion2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision, int extra_whitespace)
+{
+  std::ostringstream out_stream;
+  if (precision>=0)
+  {
+    out_stream.precision(precision);
+  }
+
+  std::string first_part = "";
+  first_part += variable;
+  first_part += "[";
+  first_part += std::to_string(transformations.size());
+  first_part += "]";
+  first_part += "[4] = {";
+  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
+  out_stream << first_part;
+
+  for (int i=0; i<transformations.size(); i++)
+  {
+    auto rotation = Eigen::Quaterniond(transformations[i].rotation());
+    if (i!=0) out_stream << spacing;
+    out_stream << "{" << std::to_string(rotation.w()) << ", " << std::to_string(rotation.x()) << ", " << std::to_string(rotation.y()) << ", " << std::to_string(rotation.z()) << "}";
+    if (i!=transformations.size()-1) out_stream << ",";
+    if (i==transformations.size()-1) out_stream << "};";
+    if (i!=transformations.size()-1) out_stream << std::endl;
+  }
+
+  return out_stream.str();
+}
+
+std::string RobotParser::eigenArrayXXi2Str(const std::string& variable, const Eigen::ArrayXXi& mat, int extra_whitespace)
+{
+  std::ostringstream out_stream;
+  std::string first_part = "";
+  first_part += variable;
+  first_part += "[";
+  first_part += std::to_string(mat.rows());
+  first_part += "]";
+  first_part += "[";
+  first_part += std::to_string(mat.cols());
+  first_part += "]";
+  first_part += "= {";
+  std::string spacing = std::string(first_part.size()+extra_whitespace, ' ');
+  out_stream << first_part;
+
+  for (int i=0; i<mat.rows(); i++)
+  {
+    if (i!=0) out_stream << spacing;
+    out_stream << "{";
+    for (int j=0; j<mat.cols(); j++)
+    {
+      //int val = mat(i,j);
+      out_stream << std::to_string(mat(i,j));
+      if (j==mat.cols()-1 && i!=mat.rows()-1) out_stream << "},";
+      if (j==mat.cols()-1 && i==mat.rows()-1) out_stream << "}";
+      if (j!=mat.cols()-1) out_stream << ",";
+    }
+    if (i==mat.rows()-1) out_stream << "};";
+    if (i!=mat.rows()-1) out_stream << std::endl;
+  }
+
+  return out_stream.str();
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 } // namespace salih_marangoz_thesis
