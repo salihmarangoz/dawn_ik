@@ -6,6 +6,7 @@
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <salih_marangoz_thesis/utils.h>
+#include <salih_marangoz_thesis/yaml.h>
 
 namespace salih_marangoz_thesis
 {
@@ -70,7 +71,7 @@ public:
 
   RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   void test();
-  bool parseCurrentRobot();
+  bool parse();
   std::string generateCodeForParsedRobot();
 
   // String utilities

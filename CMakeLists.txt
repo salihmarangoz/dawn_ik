@@ -12,8 +12,8 @@ set(CMAKE_CXX_FLAGS "-O3")
 #set(NDEBUG "1")
 
 # Memory error sanitizer
-#add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-#add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -168,6 +168,7 @@ target_link_libraries(ceres_ik_node ceres_ik)
 ## robot_parser library
 add_library(robot_parser
   src/robot_parser.cpp
+  src/yaml.cpp
 )
 add_dependencies(robot_parser ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(robot_parser
