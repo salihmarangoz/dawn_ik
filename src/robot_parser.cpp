@@ -5,10 +5,64 @@ namespace salih_marangoz_thesis
 
 RobotParser::RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh) : nh(nh), priv_nh(priv_nh)
 {
+  robot_configuration_folder = ros::package::getPath("salih_marangoz_thesis") + "/robot_configuration";
+  generated_code_destination = robot_configuration_folder + "/autogen_test.h";
+  if (std::filesystem::exists(generated_code_destination))
+  {
+    int i=0;
+    std::string backup_path = generated_code_destination + ".old." + std::to_string(i);
+    while(std::filesystem::exists(backup_path))
+    {
+      i++;
+      backup_path = generated_code_destination + ".old." + std::to_string(i);
+    }
+
+    std::filesystem::rename(generated_code_destination, backup_path);
+  }
+
+  readCfg();
   test();
   //parse();
   //std::cout << generateCodeForParsedRobot();
 }
+
+
+void
+RobotParser::readCfg()
+{
+  // EXAMPLE USAGE:
+  // Yaml::Node& joint_position_limits_override = cfg["joint_position_limits_override"];
+  // for(auto it = joint_position_limits_override.Begin(); it != joint_position_limits_override.End(); it++)
+  // {
+  //   ROS_WARN("%s", (*it).second["joint_name"].As<std::string>().c_str() );
+  //   if ( ! (*it).second["min_position"].IsNone() )
+  //     ROS_WARN("min_position %f", (*it).second["min_position"].As<double>() );
+  //   if ( ! (*it).second["max_position"].IsNone() )
+  //     ROS_WARN("max_position %f", (*it).second["max_position"].As<double>() );
+  //   if ( ! (*it).second["no_limit"].IsNone() )
+  //     ROS_WARN("no_limit %d", (*it).second["no_limit"].As<bool>() );
+  // }
+
+  // Load robot configuration yaml file
+  std::string cfg_filename;
+  if (!priv_nh.getParam("cfg", cfg_filename))
+  {
+    ROS_FATAL("Configuration file not found!");
+    exit(-1);
+  }
+  std::string cfg_filepath = ros::package::getPath("salih_marangoz_thesis") + "/cfg/" + cfg_filename + ".yaml";
+  ROS_WARN("Loading cfg: %s", cfg_filepath.c_str());
+  try
+  {
+      Yaml::Parse(cfg, cfg_filepath.c_str()); // Use with .c_str(). See: https://github.com/jimmiebergmann/mini-yaml/issues/10
+  }
+  catch (const Yaml::Exception e)
+  {
+      std::cout << "Exception " << e.Type() << ": " << e.what() << std::endl;
+      return;
+  }
+}
+
 
 std::string RobotParser::strVector2Str(const std::string& variable, const std::vector<std::string>& arr)
 {
@@ -453,40 +507,10 @@ void RobotParser::test()
 
   std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
 
-  //std::string cfg_path;
-  //priv_nh.param("cfg", cfg_path);
-  std::string cfg_path = "/veriler/salih/Desktop/master_thesis/catkin_ws/src/salih_marangoz_thesis/cfg/xarm7.yaml";
-  Yaml::Node cfg;
-  try
-  {
-      Yaml::Parse(cfg, cfg_path.c_str()); // https://github.com/jimmiebergmann/mini-yaml/issues/10
-  }
-  catch (const Yaml::Exception e)
-  {
-      std::cout << "Exception " << e.Type() << ": " << e.what() << std::endl;
-      return;
-  }
-
   for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
   {
     ROS_WARN("%s", (*it_cfg).first.c_str());
   }
-
-  Yaml::Node& joint_position_limits_override = cfg["joint_position_limits_override"];
-  for(auto it = joint_position_limits_override.Begin(); it != joint_position_limits_override.End(); it++)
-  {
-    ROS_WARN("%s", (*it).second["joint_name"].As<std::string>().c_str() );
-    if ( ! (*it).second["min_position"].IsNone() )
-      ROS_WARN("min_position %f", (*it).second["min_position"].As<double>() );
-    if ( ! (*it).second["max_position"].IsNone() )
-      ROS_WARN("max_position %f", (*it).second["max_position"].As<double>() );
-    if ( ! (*it).second["no_limit"].IsNone() )
-      ROS_WARN("no_limit %d", (*it).second["no_limit"].As<bool>() );
-  }
-
-  std::string testpath = ros::package::getPath("salih_marangoz_thesis") + "/cfg/" + "xarm7" + ".yaml";
-  ROS_WARN("%s", testpath.c_str());
-
 }
 
 

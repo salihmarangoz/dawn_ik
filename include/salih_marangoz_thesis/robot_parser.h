@@ -5,8 +5,12 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
+#include <filesystem>
+
 #include <salih_marangoz_thesis/utils.h>
 #include <salih_marangoz_thesis/yaml.h>
+
 
 namespace salih_marangoz_thesis
 {
@@ -69,9 +73,14 @@ public:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
   robot_model_loader::RobotModelLoaderPtr robot_model_loader;
 
+  Yaml::Node cfg;
+  std::string robot_configuration_folder;
+  std::string generated_code_destination;
+
   RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   void test();
   bool parse();
+  void readCfg();
   std::string generateCodeForParsedRobot();
 
   // String utilities
