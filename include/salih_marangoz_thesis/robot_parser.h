@@ -7,6 +7,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 #include <filesystem>
+#include <iostream>
 
 #include <salih_marangoz_thesis/utils.h>
 #include <salih_marangoz_thesis/yaml.h>
@@ -74,14 +75,13 @@ public:
   robot_model_loader::RobotModelLoaderPtr robot_model_loader;
 
   Yaml::Node cfg;
-  std::string robot_configuration_folder;
-  std::string generated_code_destination;
 
   RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   void test();
   bool parse();
-  void readCfg();
+  bool readCfg();
   std::string generateCodeForParsedRobot();
+  bool saveCode(const std::string& code);
 
   // String utilities
   std::string eigenTranslation2Str(const std::string& variable, const std::vector<Eigen::Isometry3d>& transformations, int precision=-1, int extra_whitespace=0);

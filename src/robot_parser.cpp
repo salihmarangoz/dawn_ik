@@ -1,54 +1,90 @@
 #include <salih_marangoz_thesis/robot_parser.h>
 
+// EXAMPLE YAML USAGE:
+// Yaml::Node& joint_position_limits_override = cfg["joint_position_limits_override"];
+// for(auto it = joint_position_limits_override.Begin(); it != joint_position_limits_override.End(); it++)
+// {
+//   ROS_WARN("%s", (*it).second["joint_name"].As<std::string>().c_str() );
+//   if ( ! (*it).second["min_position"].IsNone() )
+//     ROS_WARN("min_position %f", (*it).second["min_position"].As<double>() );
+//   if ( ! (*it).second["max_position"].IsNone() )
+//     ROS_WARN("max_position %f", (*it).second["max_position"].As<double>() );
+//   if ( ! (*it).second["no_limit"].IsNone() )
+//     ROS_WARN("no_limit %d", (*it).second["no_limit"].As<bool>() );
+// }
+
 namespace salih_marangoz_thesis
 {
 
 RobotParser::RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh) : nh(nh), priv_nh(priv_nh)
 {
-  robot_configuration_folder = ros::package::getPath("salih_marangoz_thesis") + "/robot_configuration";
-  generated_code_destination = robot_configuration_folder + "/autogen_test.h";
-  if (std::filesystem::exists(generated_code_destination))
+  // Read robot configuration from the given yaml file
+  if (!readCfg())
   {
-    int i=0;
-    std::string backup_path = generated_code_destination + ".old." + std::to_string(i);
-    while(std::filesystem::exists(backup_path))
-    {
-      i++;
-      backup_path = generated_code_destination + ".old." + std::to_string(i);
-    }
-
-    std::filesystem::rename(generated_code_destination, backup_path);
+    ROS_FATAL("Reading yaml failed! Terminating...");
+    exit(-1);
   }
 
-  readCfg();
-  test();
-  //parse();
+  // Parse robot model using MoveIt and modify accordingly with the yaml file
+  if (!parse())
+  {
+    ROS_FATAL("Parsing failed! Terminating...");
+    exit(-1);
+  }
+
   //std::cout << generateCodeForParsedRobot();
+
+  // Save the generated code inside the package
+  if (!saveCode(generateCodeForParsedRobot()))
+  {
+    ROS_FATAL("Saving the generated file failed! Terminating...");
+    exit(-1);
+  }
+
+  test();
+
+  ROS_INFO("Finished succesfully!");
+  exit(0);
 }
 
+void RobotParser::test()
+{
+  ROS_WARN("====================================== TEST ======================================");
 
-void
+  std::vector<Eigen::Isometry3d> m_arr;
+  m_arr.resize(3);
+  m_arr[0] = Eigen::Isometry3d::Identity();
+  m_arr[1] = Eigen::Isometry3d::Identity();
+  m_arr[2] = Eigen::Isometry3d::Identity();
+  m_arr[0].translate(Eigen::Vector3d(0.5, 0.2, 0.3));
+  m_arr[0].rotate(Eigen::AngleAxisd(0.3*M_PI, Eigen::Vector3d::UnitZ()));
+  m_arr[1].translate(Eigen::Vector3d(0.254654, 0.21231, 0.3321));
+  m_arr[1].rotate(Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitX()));
+  m_arr[2].translate(Eigen::Vector3d(0.456121, 0.546546211, 0.1));
+  m_arr[2].rotate(Eigen::AngleAxisd(0.1*M_PI, Eigen::Vector3d::UnitX()));
+  m_arr[2].rotate(Eigen::AngleAxisd(0.9*M_PI, Eigen::Vector3d::UnitY()));
+
+  std::cout << "Test eigenTranslation2Str: " << std::endl << eigenTranslation2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
+
+  std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
+
+  for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
+  {
+    ROS_WARN("%s", (*it_cfg).first.c_str());
+  }
+
+  ROS_WARN("====================================== TEST ======================================");
+}
+
+bool
 RobotParser::readCfg()
 {
-  // EXAMPLE USAGE:
-  // Yaml::Node& joint_position_limits_override = cfg["joint_position_limits_override"];
-  // for(auto it = joint_position_limits_override.Begin(); it != joint_position_limits_override.End(); it++)
-  // {
-  //   ROS_WARN("%s", (*it).second["joint_name"].As<std::string>().c_str() );
-  //   if ( ! (*it).second["min_position"].IsNone() )
-  //     ROS_WARN("min_position %f", (*it).second["min_position"].As<double>() );
-  //   if ( ! (*it).second["max_position"].IsNone() )
-  //     ROS_WARN("max_position %f", (*it).second["max_position"].As<double>() );
-  //   if ( ! (*it).second["no_limit"].IsNone() )
-  //     ROS_WARN("no_limit %d", (*it).second["no_limit"].As<bool>() );
-  // }
-
   // Load robot configuration yaml file
   std::string cfg_filename;
   if (!priv_nh.getParam("cfg", cfg_filename))
   {
     ROS_FATAL("Configuration file not found!");
-    exit(-1);
+    return false;
   }
   std::string cfg_filepath = ros::package::getPath("salih_marangoz_thesis") + "/cfg/" + cfg_filename + ".yaml";
   ROS_WARN("Loading cfg: %s", cfg_filepath.c_str());
@@ -59,8 +95,44 @@ RobotParser::readCfg()
   catch (const Yaml::Exception e)
   {
       std::cout << "Exception " << e.Type() << ": " << e.what() << std::endl;
-      return;
+      return false;
   }
+  return true;
+}
+
+bool
+RobotParser::saveCode(const std::string& code)
+{
+  std::string robot_configuration_folder = ros::package::getPath("salih_marangoz_thesis") + "/include/salih_marangoz_thesis/robot_configuration"; // TODO: hardcoded
+  std::string generated_code_destination = robot_configuration_folder + "/autogen_test.h"; // TODO: hardcoded
+
+  ROS_INFO("Generated code will be saved to: %s", generated_code_destination.c_str());
+  if (std::filesystem::exists(generated_code_destination))
+  {
+    int i=0;
+    std::string backup_path = generated_code_destination + ".old." + std::to_string(i);
+    while(std::filesystem::exists(backup_path))
+    {
+      i++;
+      backup_path = generated_code_destination + ".old." + std::to_string(i);
+    }
+    std::filesystem::rename(generated_code_destination, backup_path);
+    ROS_WARN("Found a previously generated code. Saved a backup: %s", backup_path.c_str());
+  }
+
+  std::ofstream myfile (generated_code_destination);
+  if (myfile.is_open())
+  {
+    myfile << code;
+    myfile.close();
+  }
+  else
+  {
+    ROS_FATAL("Couldn't save the generated file. File: %s", generated_code_destination.c_str());
+    return false;
+  } 
+
+  return true;
 }
 
 
@@ -219,6 +291,7 @@ bool RobotParser::parse()
 
   const std::vector<const moveit::core::JointModel*> joint_models = robot_model->getJointModels();
   num_joints = joint_models.size();
+  if (num_joints == 0) return false;
 
   ROS_INFO("Available links in the robot model:");
   std::vector<std::string> all_links = robot_model->getLinkModelNames(); // WARN: Assuming that getLinkModelNames returns links in order with the indexes, starting from zero
@@ -485,32 +558,6 @@ std::string RobotParser::generateCodeForParsedRobot()
   // header guardend
   out_stream << "#endif // " << header_guard_name << std::endl;
   return out_stream.str();
-}
-
-
-void RobotParser::test()
-{
-  std::vector<Eigen::Isometry3d> m_arr;
-  m_arr.resize(3);
-  m_arr[0] = Eigen::Isometry3d::Identity();
-  m_arr[1] = Eigen::Isometry3d::Identity();
-  m_arr[2] = Eigen::Isometry3d::Identity();
-  m_arr[0].translate(Eigen::Vector3d(0.5, 0.2, 0.3));
-  m_arr[0].rotate(Eigen::AngleAxisd(0.3*M_PI, Eigen::Vector3d::UnitZ()));
-  m_arr[1].translate(Eigen::Vector3d(0.254654, 0.21231, 0.3321));
-  m_arr[1].rotate(Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitX()));
-  m_arr[2].translate(Eigen::Vector3d(0.456121, 0.546546211, 0.1));
-  m_arr[2].rotate(Eigen::AngleAxisd(0.1*M_PI, Eigen::Vector3d::UnitX()));
-  m_arr[2].rotate(Eigen::AngleAxisd(0.9*M_PI, Eigen::Vector3d::UnitY()));
-
-  std::cout << "Test eigenTranslation2Str: " << std::endl << eigenTranslation2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
-
-  std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
-
-  for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
-  {
-    ROS_WARN("%s", (*it_cfg).first.c_str());
-  }
 }
 
 
