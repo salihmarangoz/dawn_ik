@@ -240,18 +240,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   options.linear_solver_type = ceres::DENSE_QR;
   options.minimizer_type = ceres::TRUST_REGION; // LINE_SEARCH methods don't support bounds
   options.minimizer_progress_to_stdout = false;
-  // experimental
-  //options.preconditioner_type = ceres::SUBSET;
   options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
-  //options.use_nonmonotonic_steps = true;
-  //options.use_approximate_eigenvalue_bfgs_scaling = true;
-
-
-  //options.function_tolerance = DBL_MIN;
-  //options.gradient_tolerance = DBL_MIN;
-  //options.parameter_tolerance = DBL_MIN;
-  //options.max_solver_time_in_seconds = 1./100.; // 100hz
-
 
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
