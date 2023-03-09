@@ -118,22 +118,13 @@ minimal_displacement:
 
 
 #########################################################
-### Objective: External collision #######################
+### Objective: Collision ################################
 #########################################################
-external_collision:
+collision:
   enabled: true
   loss: "TrivialLoss()"
   proximity_distance: 0.2
-
-
-#########################################################
-### Objective: Self collision ###########################
-#########################################################
-self_collision:
-  enabled: true
-  loss: "TrivialLoss()"
-  proximity_distance: 0.2
-  objects:
+  self_collision_objects:
     - origin_link: "link6"
       shape: "sphere"
       translation: [0.1, 0.2, 0.3] # x,y,z
@@ -174,4 +165,4 @@ self_collision:
 ### Extra ###############################################
 #########################################################
 extra:
-  horti_acm_tricks: false # hardcoded acm modification trick for horti robot
+  horti_acm_tricks: false # hardcoded acm modification trick for horti robot #DONE

@@ -102,9 +102,8 @@ void CeresIK::loop()
       arr.markers.push_back(marker);
     }
     marker_array_pub.publish(arr);
-
-    r.sleep();
-    continue;
+    //r.sleep();
+    //continue;
 
     if (!update(robot_state))
     {

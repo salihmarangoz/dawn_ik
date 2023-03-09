@@ -80,6 +80,8 @@ RobotParser::saveCode(const std::string& code)
   ROS_INFO("Generated code will be saved to: %s", generated_code_destination.c_str());
   if (std::filesystem::exists(generated_code_destination))
   {
+    // TODO: check if the code needs an update. if not, then describe it and exit by returning true
+
     int i=0;
     std::string backup_path = generated_code_destination + ".old." + std::to_string(i);
     while(std::filesystem::exists(backup_path))
@@ -188,14 +190,17 @@ bool RobotParser::parse()
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
-      // TODO: Extra rules for horti robot
+      // Extra rules for horti robot
       // Discard collision checking between other arms
-      if (all_links[i].find("arm_") != std::string::npos && all_links[j].find("arm_") != std::string::npos)
+      if (cfg["extra"]["horti_acm_tricks"].As<bool>())
       {
-        ROS_FATAL_ONCE("Applying extra rules for horti robot!!!");
-        ROS_WARN("Discarding collision checking between %s and %s", all_links[i].c_str(), all_links[j].c_str());
-        processed_acm(i,j) = 1;
-        continue;
+        if (all_links[i].find("arm_") != std::string::npos && all_links[j].find("arm_") != std::string::npos)
+        {
+          ROS_FATAL_ONCE("Applying extra rules for horti robot!!!");
+          ROS_WARN("Discarding collision checking between %s and %s", all_links[i].c_str(), all_links[j].c_str());
+          processed_acm(i,j) = 1;
+          continue;
+        }
       }
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
