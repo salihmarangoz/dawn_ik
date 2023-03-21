@@ -60,7 +60,6 @@ private:
 
 
 
-
   const std::string joint_states_topic_;
   const std::string joint_link_state_topic_;
   double async_thread_rate_limit_;

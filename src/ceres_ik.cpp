@@ -92,9 +92,9 @@ void CeresIK::loop()
       marker.pose.orientation.y = 0;
       marker.pose.orientation.z = 0;
       marker.pose.orientation.w = 1.0;
-      marker.scale.x = obj.radius;
-      marker.scale.y = obj.radius;
-      marker.scale.z = obj.radius;
+      marker.scale.x = obj.radius*2;
+      marker.scale.y = obj.radius*2;
+      marker.scale.z = obj.radius*2;
       marker.color.a = 0.75; // Don't forget to set the alpha!
       marker.color.r = 0.0;
       marker.color.g = 0.0;
@@ -118,7 +118,6 @@ void CeresIK::loop()
     {
       joint_controller->setJointPositions(robot_state.getVariablePositions());
     }
-
 
     visual_tools->publishRobotState(robot_state);
     r.sleep();
@@ -223,12 +222,12 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     }
 
     // TODO: ALTERNATIVE WAY?
-    double min_val = const_target_positions[i] - 0.2;
-    double max_val = const_target_positions[i] + 0.2;
+    double min_val = const_target_positions[i] - 0.1;
+    double max_val = const_target_positions[i] + 0.1;
     if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];
     if (robot::joint_max_position[joint_i] < max_val) max_val = robot::joint_max_position[joint_i];
-    problem.SetParameterLowerBound(target_positions, i, min_val); 
-    problem.SetParameterUpperBound(target_positions, i, max_val); 
+    //problem.SetParameterLowerBound(target_positions, i, min_val); 
+    //problem.SetParameterUpperBound(target_positions, i, max_val); 
 
     // STANDARD WAY OF SETTING JOINT LIMITS
     //problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
@@ -237,7 +236,9 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
 
   ceres::Solver::Options options;
   options.linear_solver_type = ceres::DENSE_QR;
-  options.minimizer_type = ceres::TRUST_REGION; // LINE_SEARCH methods don't support bounds
+  //options.minimizer_type = ceres::TRUST_REGION; // LINE_SEARCH methods don't support bounds
+  options.minimizer_type = ceres::LINE_SEARCH;
+  options.line_search_direction_type = ceres::BFGS;
   options.minimizer_progress_to_stdout = false;
   options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
 
@@ -255,8 +256,8 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
 
   // collision debug
-  auto marker_array = utils::visualizeCollisions<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
-  marker_array_pub.publish(marker_array);
+  //auto marker_array = utils::visualizeCollisions<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
+  //marker_array_pub.publish(marker_array);
 
   return summary.IsSolutionUsable();
 }

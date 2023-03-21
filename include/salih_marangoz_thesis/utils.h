@@ -229,9 +229,9 @@ visualization_msgs::MarkerArray visualizeCollisions(const moveit::core::RobotSta
     marker.pose.orientation.y = 0;
     marker.pose.orientation.z = 0;
     marker.pose.orientation.w = 1.0;
-    marker.scale.x = obj.radius;
-    marker.scale.y = obj.radius;
-    marker.scale.z = obj.radius;
+    marker.scale.x = obj.radius*2;
+    marker.scale.y = obj.radius*2;
+    marker.scale.z = obj.radius*2;
     marker.color.a = 0.75; // Don't forget to set the alpha!
     marker.color.r = 0.0;
     marker.color.g = 0.0;

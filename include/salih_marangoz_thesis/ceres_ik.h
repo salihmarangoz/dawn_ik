@@ -378,7 +378,7 @@ struct CollisionAvoidanceGoal {
     ///////////////////////////////////////////////////////////////////////////////////////
 
     // TODO: testing collision
-    const double dist_threshold = 0.1; // TODO: move to robot conf
+    const double dist_threshold = 0.05; // TODO: move to robot conf
 
     // Compute collision positions
     T collision_pos[3*utils::countOf(robot::collisions)]; // w.r.t. world frame
@@ -397,23 +397,47 @@ struct CollisionAvoidanceGoal {
     }
 
     // Compute collision pairs
-    for (int i=0; i<robot::num_links; i++)
-    {
-      for (int j=0; j<robot::num_links; j++)
-      {
-        for (int k=0; k<utils::countOf(robot::collisions); k++)
-        {
-          if (robot::processed_acm[i][j] == 0)
-          {
-            const robot::Collision &obj1 = robot::collisions[i];
-            const robot::Collision &obj2 = robot::collisions[j];
+    // for (int i=0; i<robot::num_links; i++)
+    // {
+    //   for (int j=0; j<robot::num_links; j++)
+    //   {
+    //     for (int k=0; k<utils::countOf(robot::collisions); k++)
+    //     {
+    //       if (robot::processed_acm[i][j] == 0)
+    //       {
+    //         const robot::Collision &obj1 = robot::collisions[i];
+    //         const robot::Collision &obj2 = robot::collisions[j];
             
 
-            residuals[k] = utils::distSphere2Sphere(&(collision_pos[3*i]), obj1.radius, &(collision_pos[3*j]), obj2.radius);
-            if (residuals[k]>dist_threshold) residuals[k] = T(dist_threshold);
-            residuals[k] = dist_threshold - residuals[k];
-          }
-        }
+    //         residuals[k] = utils::distSphere2Sphere(&(collision_pos[3*i]), obj1.radius, &(collision_pos[3*j]), obj2.radius);
+    //         if (residuals[k]>dist_threshold) residuals[k] = T(dist_threshold);
+    //         residuals[k] = dist_threshold - residuals[k];
+    //       }
+    //     }
+    //   }
+    // }
+
+    // TODO: check all pairs
+    for (int i=0; i<utils::countOf(robot::collisions); i++)
+    {
+      for (int j=0; j<utils::countOf(robot::collisions); j++)
+      {
+        int k = i*COUNTOF(robot::collisions) + j;
+        residuals[k] = T(0.0);
+
+        if (i == j) continue;
+        if (robot::collisions[i].link_idx == robot::collisions[j].link_idx) continue;
+        int link_i = robot::collisions[i].link_idx;
+        int link_j = robot::collisions[j].link_idx;
+        if (robot::processed_acm[link_i][link_j] == 1) continue;
+
+        const robot::Collision &obj1 = robot::collisions[i];
+        const robot::Collision &obj2 = robot::collisions[j];
+        residuals[k] = utils::distSphere2Sphere(&(collision_pos[3*i]), obj1.radius, &(collision_pos[3*j]), obj2.radius);
+        
+        if (residuals[k]>dist_threshold) residuals[k] = T(dist_threshold);
+        //if (residuals[k] <= 0) return false;
+        residuals[k] = dist_threshold - residuals[k];
       }
     }
 
@@ -424,7 +448,7 @@ struct CollisionAvoidanceGoal {
    // the client code.
    static ceres::CostFunction* Create(const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
    {
-     return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new CollisionAvoidanceGoal(joint_idx_to_target_idx, variable_positions)));
    }
 
