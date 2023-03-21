@@ -204,7 +204,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
 
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
-  ceres::CauchyLoss *center_joints_loss = new ceres::CauchyLoss(0.1); // goal weight
+  ceres::SoftLOneLoss *center_joints_loss = new ceres::SoftLOneLoss(0.005); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
