@@ -27,6 +27,36 @@ Note: This section can be confusing. Please check the [Meetings](#meetings) sect
 
 Note: Some meeting notes may not be available.
 
+### 29 Mar 2023
+
+- Tested `perceptive_mpc` with docker image. Unable to compile due to various errors.
+
+  ```bash
+  $ docker pull rslethz/perceptive_mpc:v0.3
+  
+  $ docker container run -it --rm --privileged --name collision_avoidance_demo \
+   -e DISPLAY=$DISPLAY \
+   --device /dev/dri \
+   --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=QT_X11_NO_MITSHM=1 \
+   --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+   --net=host \
+   --volume="$XAUTH:$XAUTH" \
+   --runtime=nvidia \
+   --env="XAUTHORITY=$XAUTH" \
+   rslethz/perceptive_mpc:v0.3 ./src/perceptive_mpc/scripts/run_demo_collision_avoidance.sh
+  
+  $ docker exec collision_avoidance_demo ./src/perceptive_mpc/scripts/load_map.sh
+  ```
+
+- I am thinking about discarding the idea of using BVH. It is good to merge two primitives but this is no different than using simplified meshes:
+  - MoveIt generating BVH models from primitive shapes: http://docs.ros.org/en/fuerte/api/fcl/html/geometric__shape__to__BVH__model_8h.html
+  - Similar to how MoveIt works: https://github.com/humanoid-path-planner/hpp-fcl/issues/340
+- hpp-fcl provides a fusion of collision/distance function. See the image: http://docs.ros.org/en/melodic/api/hpp-fcl/html/index.html
+    - break_distance: If real distance is higher than this value, distance will be computed to the Bouding Volume (if exists). If real distance is lower than this value, the Bounding Volume will be broken down to its elements. I don't know it this is useful for my thesis.
+    - distance_upper_bound: Distance above which GJK solver makes an early stopping. GJK stops searching for the closest points when it proves that the distance between two geometries is above this threshold.
+
+- hpp-fcl also provides break_distance. But I don't think this is useful in my case. 
+
 ### xx Mar 2023
 
 - Controlling the arm using joint trajectory controller. State feed is also faster this way. Instead of receiving robot state from moveit, updating the state using the feed of the controller is much faster. 
