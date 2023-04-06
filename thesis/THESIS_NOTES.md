@@ -34,6 +34,8 @@ Note: Some meeting notes may not be available.
   ```bash
   $ docker pull rslethz/perceptive_mpc:v0.3
   
+  $ xhost local:root
+  
   $ docker container run -it --rm --privileged --name collision_avoidance_demo \
    -e DISPLAY=$DISPLAY \
    --device /dev/dri \
