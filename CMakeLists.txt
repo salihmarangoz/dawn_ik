@@ -40,6 +40,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(Ceres REQUIRED COMPONENTS EigenSparse SparseLinearAlgebraLibrary LAPACK SuiteSparse SchurSpecializations)
 
+find_package(hpp-fcl REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -143,6 +144,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${hpp-fcl_INCLUDE_DIRS}
 )
 
 
@@ -183,6 +185,14 @@ add_dependencies(robot_parser_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_
 target_link_libraries(robot_parser_node robot_parser)
 
 
+add_executable(test_node src/test.cpp)
+add_dependencies(test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_node   
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  Ceres::ceres
+  ${hpp-fcl_LIBRARIES}
+)
 
 
 #############
