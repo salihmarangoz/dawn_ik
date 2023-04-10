@@ -460,9 +460,10 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "// ACM" << std::endl;
   out_stream << prefix << eigenArrayXXi2Str("int processed_acm", processed_acm, prefix.size());
   out_stream << std::endl;
+  out_stream << std::endl;
 
-  // Ceres Solver
-  out_stream << "// Ceres Solver" << std::endl;
+  // Solver Options
+  out_stream << "// Solver Options" << std::endl;
   out_stream << "static inline void setSolverOptions(ceres::Solver::Options &options)" << std::endl;
   out_stream << "{" << std::endl;
   if (cfg["solver_options"].IsMap())
@@ -480,6 +481,22 @@ std::string RobotParser::generateCodeForParsedRobot()
   }
   out_stream << "}" << std::endl;
   out_stream << std::endl;
+
+  // Problem Constraints
+  out_stream << "inline static void setProblemConstraints(ceres::Problem &problem, double *targets_ptr, double *targets_init)" << std::endl;
+  out_stream << "{" << std::endl;
+  // // joint1
+  // problem.SetParameterLowerBound(targets, 0, -0.5);
+  // problem.SetParameterUpperBound(targets, 0, 0.5);
+
+  // // joint2
+  // problem.SetParameterLowerBound(targets, 1, -0.5);
+  // problem.SetParameterUpperBound(targets, 1, 0.5);
+
+  // // joint3
+  // problem.SetParameterLowerBound(targets, 2, -0.5);
+  // problem.SetParameterUpperBound(targets, 2, 0.5);
+  out_stream << "}" << std::endl;
 
   // namespace end
   out_stream << "} // namespace " << namespace_name << std::endl;

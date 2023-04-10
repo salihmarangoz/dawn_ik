@@ -18,6 +18,8 @@ exclude_joints:
 #########################################################
 ### Problem Constaints ##################################
 #########################################################
+#NOT-DONE!!!
+# Must be disabled if not supported by the minimizer type
 problem_constraints:
   # Available values
   # "disabled"
