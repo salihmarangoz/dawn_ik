@@ -137,7 +137,7 @@ bool RobotParser::parse()
   endpoint_link_idx = endpoint_link->getLinkIndex();
   if (endpoint_link_idx<=0)
   {
-    ROS_FATAL("endpoint_link_idx is %d. Something looks wrong!");
+    ROS_FATAL("endpoint_link_idx is %d. Something looks wrong!", endpoint_link_idx);
     return false;
   }
 
@@ -401,10 +401,21 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "#include <string>" << std::endl;
   out_stream << "#include <Eigen/Dense>" << std::endl;
   out_stream << "#include <ceres/ceres.h>" << std::endl;
+  out_stream << "#include <hpp/fcl/shape/geometric_shapes.h>" << std::endl;
   out_stream << std::endl;
 
   // using namespace
   out_stream << "using namespace ceres;" << std::endl;
+  out_stream << std::endl;
+
+  // supported shapes
+  out_stream << "using hpp::fcl::CollisionObject;" << std::endl;
+  out_stream << "// supported collision shapes:" << std::endl;
+  out_stream << "using hpp::fcl::Box;" << std::endl;
+  out_stream << "using hpp::fcl::Sphere;" << std::endl;
+  out_stream << "using hpp::fcl::Capsule;" << std::endl;
+  out_stream << "using hpp::fcl::Cylinder;" << std::endl;
+  out_stream << "using hpp::fcl::Plane;" << std::endl;
   out_stream << std::endl;
 
   // namespace start
@@ -482,6 +493,31 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "}" << std::endl;
   out_stream << std::endl;
 
+  out_stream << "// Collision Objects" << std::endl;
+  out_stream << "template<typename T>\n"
+                "CollisionObject* inflatedCollisionObject(const T &shape, double inflation)\n"
+                "{\n"
+                "  return new CollisionObject(std::make_shared<T>(shape.inflated(inflation).first));\n"
+                "}\n" << std::endl;
+  out_stream << "static inline std::vector<CollisionObject*> getRobotCollisionObjects()" << std::endl;
+  out_stream << "{" << std::endl;
+  out_stream << "  const int inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
+  out_stream << "  std::vector<CollisionObject*> objects;" << std::endl;
+  out_stream << std::endl;
+  if (cfg["proximity"]["objects"].IsSequence())
+  {
+    out_stream << "  objects.reserve(" << cfg["proximity"]["objects"].Size() << ")" << std::endl;
+    for(auto it_cfg = cfg["proximity"]["objects"].Begin(); it_cfg != cfg["proximity"]["objects"].End(); it_cfg++)
+    {
+      auto item = (*it_cfg).second;
+      out_stream << "  objects.push_back( inflatedCollisionObject(" << item["shape"].As<std::string>() << ", inflation) );" << std::endl;
+    }
+  }
+  out_stream << std::endl;
+  out_stream << "  return objects;" << std::endl;
+  out_stream << "}" << std::endl;
+  out_stream << std::endl;
+
   // Problem Constraints
   out_stream << "inline static void setProblemConstraints(ceres::Problem &problem, double *targets_ptr, double *targets_init)" << std::endl;
   out_stream << "{" << std::endl;
@@ -497,6 +533,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   // problem.SetParameterLowerBound(targets, 2, -0.5);
   // problem.SetParameterUpperBound(targets, 2, 0.5);
   out_stream << "}" << std::endl;
+  out_stream << std::endl;
 
   // namespace end
   out_stream << "} // namespace " << namespace_name << std::endl;
