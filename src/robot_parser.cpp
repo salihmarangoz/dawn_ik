@@ -338,22 +338,25 @@ bool RobotParser::parse()
     bool curr_discard = false;
 
     // Exclude joints according to the given yaml
-    for(auto it_cfg = cfg["exclude_joints"].Begin(); it_cfg != cfg["exclude_joints"].End(); it_cfg++)
+    if (cfg["exclude_joints"].IsSequence())
     {
-      std::string excluded_joint_name = (*it_cfg).second.As<std::string>();
-      auto excluded_joint_model = robot_state.getJointModel(excluded_joint_name);
-      if (excluded_joint_model != nullptr && excluded_joint_model->getJointIndex() == curr_joint_idx)
+      for(auto it_cfg = cfg["exclude_joints"].Begin(); it_cfg != cfg["exclude_joints"].End(); it_cfg++)
       {
-        ROS_WARN("Discarded joint idx %d according to the YAML configuration", curr_joint_idx);
-        curr_discard = true;
-        break;
+        std::string excluded_joint_name = (*it_cfg).second.As<std::string>();
+        auto excluded_joint_model = robot_state.getJointModel(excluded_joint_name);
+        if (excluded_joint_model != nullptr && excluded_joint_model->getJointIndex() == curr_joint_idx)
+        {
+          ROS_WARN("Discarded joint %s according to the YAML configuration", joint_names[curr_joint_idx].c_str());
+          curr_discard = true;
+          break;
+        }
       }
     }
 
     // Exclude joints if no variable is available (e.g. static joints)
     if (joint_idx_to_variable_idx[curr_joint_idx] < 0)
     {
-      ROS_WARN("Discarded joint idx %d because it has no variable to control.", curr_joint_idx);
+      ROS_WARN("Discarded joint idx %s because it has no variable to control.", joint_names[curr_joint_idx].c_str());
       curr_discard = true;
     }
 
@@ -398,6 +401,10 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "#include <string>" << std::endl;
   out_stream << "#include <Eigen/Dense>" << std::endl;
   out_stream << "#include <ceres/ceres.h>" << std::endl;
+  out_stream << std::endl;
+
+  // using namespace
+  out_stream << "using namespace ceres;" << std::endl;
   out_stream << std::endl;
 
   // namespace start
@@ -452,6 +459,26 @@ std::string RobotParser::generateCodeForParsedRobot()
   // ACM
   out_stream << "// ACM" << std::endl;
   out_stream << prefix << eigenArrayXXi2Str("int processed_acm", processed_acm, prefix.size());
+  out_stream << std::endl;
+
+  // Ceres Solver
+  out_stream << "// Ceres Solver" << std::endl;
+  out_stream << "static inline void setSolverOptions(ceres::Solver::Options &options)" << std::endl;
+  out_stream << "{" << std::endl;
+  if (cfg["solver_options"].IsMap())
+  {
+    for(auto it_cfg = cfg["solver_options"].Begin(); it_cfg != cfg["solver_options"].End(); it_cfg++)
+    {
+      std::string key = (*it_cfg).first;
+      std::string value = (*it_cfg).second.As<std::string>();
+      out_stream << "  options." << key << " = " << value << ";" << std::endl;
+    }
+  }
+  else
+  {
+    ROS_FATAL("There was a problem while parsing solver_options !!!");
+  }
+  out_stream << "}" << std::endl;
   out_stream << std::endl;
 
   // namespace end
