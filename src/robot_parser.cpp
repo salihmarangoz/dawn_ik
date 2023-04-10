@@ -225,8 +225,8 @@ bool RobotParser::parse()
       if (j>i)
         processed_acm(i,j) = processed_acm(j,i);
 
-  num_collision_pairs = processed_acm.size() - processed_acm.sum();
-  ROS_INFO("Total number of collision pairs: %d", num_collision_pairs);
+  num_acm_link_pairs = processed_acm.size() - processed_acm.sum();
+  ROS_INFO("Total number of collision link pairs in the ACM: %d", num_acm_link_pairs);
   std::cout << processed_acm << std::endl;
 
 
@@ -380,6 +380,62 @@ bool RobotParser::parse()
   }
   ROS_WARN("---- end ----");
 
+  // Parsing collision objects
+  num_objects = 0;
+  for(auto it_cfg = cfg["proximity"]["objects"].Begin(); it_cfg != cfg["proximity"]["objects"].End(); it_cfg++)
+  {
+    auto item = (*it_cfg).second;
+    auto item_link_name = item["link"].As<std::string>();
+    auto item_translation = parseNumericArrayFromString<double>(item["translation"].As<std::string>());
+    auto item_rotation = parseNumericArrayFromString<double>(item["rotation"].As<std::string>());
+
+    // handle empty and wrong input
+    if (item_translation.size() == 0)
+    {
+      item_translation.push_back(0.0);
+      item_translation.push_back(0.0);
+      item_translation.push_back(0.0);
+    }
+    if (item_translation.size() != 3)
+    {
+      ROS_FATAL("Wrong object translation: %s", item["translation"].As<std::string>().c_str());
+      return false;
+    }
+
+    // handle empty and wrong input
+    if (item_rotation.size() == 0)
+    {
+      item_rotation.push_back(0.0);
+      item_rotation.push_back(0.0);
+      item_rotation.push_back(0.0);
+    }
+    if (item_rotation.size() != 3)
+    {
+      ROS_FATAL("Wrong object rotation: %s", item["rotation"].As<std::string>().c_str());
+      return false;
+    }
+
+    Eigen::Translation3d translation(item_translation[0], item_translation[1], item_translation[2]);
+    Eigen::Matrix3d rotation; 
+    rotation = Eigen::AngleAxisd(item_rotation[0], Eigen::Vector3d::UnitX()) * 
+               Eigen::AngleAxisd(item_rotation[1], Eigen::Vector3d::UnitY()) * 
+               Eigen::AngleAxisd(item_rotation[2], Eigen::Vector3d::UnitZ());
+    Eigen::Isometry3d transform(translation * Eigen::Quaterniond(rotation));
+
+    auto item_link_model = robot_state.getLinkModel(item_link_name);
+    if (item_link_model == nullptr)
+    {
+      ROS_FATAL("link not found while parsing collision objects: %s", item_link_name.c_str());
+      return false;
+    }
+
+    object_idx_to_link_idx.push_back(item_link_model->getLinkIndex());
+    object_can_skip_translation.push_back( transform.translation().isZero() );
+    object_can_skip_rotation.push_back( transform.rotation().isIdentity() );
+    object_transform.push_back(transform);
+    num_objects++;
+  }
+
   return true;
 }
 
@@ -423,13 +479,22 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "{" << std::endl;
   out_stream << std::endl;
 
+  // util
+  out_stream << "// Util" << std::endl;
+  out_stream << "template<typename T>\n"
+                "CollisionObject* inflatedCollisionObject(const T &shape, double inflation)\n"
+                "{\n"
+                "  return new CollisionObject(std::make_shared<T>(shape.inflated(inflation).first));\n"
+                "}\n" << std::endl;
+
   // Constants
   out_stream << "// Constants" << std::endl;
   out_stream << prefix << "int endpoint_link_idx = " << endpoint_link_idx << ";" << std::endl;
   out_stream << prefix << "int num_joints = " << num_joints << ";" << std::endl;
   out_stream << prefix << "int num_variables = " << num_variables << ";" << std::endl;
   out_stream << prefix << "int num_links = " << num_links << ";" << std::endl;
-  out_stream << prefix << "int num_collision_pairs = " << num_collision_pairs << ";" << std::endl;
+  out_stream << prefix << "int num_objects = " << num_objects << ";" << std::endl;
+  out_stream << prefix << "int num_acm_link_pairs = " << num_acm_link_pairs << ";" << std::endl;
   out_stream << prefix << "int num_targets = " << target_idx_to_joint_idx.size() << ";" << std::endl;
   out_stream << std::endl;
 
@@ -439,6 +504,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << prefix << primitiveVector2Str("int variable_idx_to_joint_idx", variable_idx_to_joint_idx) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_idx_to_target_idx", joint_idx_to_target_idx) << std::endl;
   out_stream << prefix << primitiveVector2Str("int target_idx_to_joint_idx", target_idx_to_joint_idx) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int object_idx_to_link_idx", object_idx_to_link_idx) << std::endl;
   out_stream << std::endl;
 
   // Joint info
@@ -469,8 +535,55 @@ std::string RobotParser::generateCodeForParsedRobot()
 
   // ACM
   out_stream << "// ACM" << std::endl;
-  out_stream << prefix << eigenArrayXXi2Str("int processed_acm", processed_acm, prefix.size());
+  out_stream << prefix << eigenArrayXXi2Str("int acm", processed_acm, prefix.size());
   out_stream << std::endl;
+  out_stream << std::endl;
+
+  // Collision objects
+  out_stream << "// Collision objects info" << std::endl;
+  out_stream << prefix << eigenTranslation2Str("double object_transform_translation_only", object_transform, 10, prefix.size()) << std::endl;
+  out_stream << prefix << eigenQuaternion2Str("double object_transform_quaternion_only", object_transform, 10, prefix.size()) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int object_can_skip_translation", object_can_skip_translation) << " // bool" << std::endl;
+  out_stream << prefix << primitiveVector2Str("int object_can_skip_rotation", object_can_skip_rotation) << " // bool" << std::endl;
+  out_stream << std::endl;
+
+  // Collision objects function
+  out_stream << "// Collision Objects Function" << std::endl;
+  out_stream << "static inline std::vector<CollisionObject*> getRobotCollisionObjects()" << std::endl;
+  out_stream << "{" << std::endl;
+  out_stream << "  const int inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
+  out_stream << "  std::vector<CollisionObject*> objects;" << std::endl;
+  out_stream << std::endl;
+  if (cfg["proximity"]["objects"].IsSequence())
+  {
+    out_stream << "  objects.reserve(" << cfg["proximity"]["objects"].Size() << ");" << std::endl;
+    for(auto it_cfg = cfg["proximity"]["objects"].Begin(); it_cfg != cfg["proximity"]["objects"].End(); it_cfg++)
+    {
+      auto item = (*it_cfg).second;
+      out_stream << "  objects.push_back( inflatedCollisionObject(" << item["shape"].As<std::string>() << ", inflation) );" << std::endl;
+    }
+  }
+  out_stream << std::endl;
+  out_stream << "  return objects;" << std::endl;
+  out_stream << "}" << std::endl;
+  out_stream << std::endl;
+
+  // Problem constraint function
+  out_stream << "// Collision Constraint Function" << std::endl;
+  out_stream << "inline static void setProblemConstraints(ceres::Problem &problem, double *targets_ptr, double *targets_init)" << std::endl;
+  out_stream << "{" << std::endl;
+  // // joint1
+  // problem.SetParameterLowerBound(targets, 0, -0.5);
+  // problem.SetParameterUpperBound(targets, 0, 0.5);
+
+  // // joint2
+  // problem.SetParameterLowerBound(targets, 1, -0.5);
+  // problem.SetParameterUpperBound(targets, 1, 0.5);
+
+  // // joint3
+  // problem.SetParameterLowerBound(targets, 2, -0.5);
+  // problem.SetParameterUpperBound(targets, 2, 0.5);
+  out_stream << "}" << std::endl;
   out_stream << std::endl;
 
   // Solver Options
@@ -490,48 +603,6 @@ std::string RobotParser::generateCodeForParsedRobot()
   {
     ROS_FATAL("There was a problem while parsing solver_options !!!");
   }
-  out_stream << "}" << std::endl;
-  out_stream << std::endl;
-
-  out_stream << "// Collision Objects" << std::endl;
-  out_stream << "template<typename T>\n"
-                "CollisionObject* inflatedCollisionObject(const T &shape, double inflation)\n"
-                "{\n"
-                "  return new CollisionObject(std::make_shared<T>(shape.inflated(inflation).first));\n"
-                "}\n" << std::endl;
-  out_stream << "static inline std::vector<CollisionObject*> getRobotCollisionObjects()" << std::endl;
-  out_stream << "{" << std::endl;
-  out_stream << "  const int inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
-  out_stream << "  std::vector<CollisionObject*> objects;" << std::endl;
-  out_stream << std::endl;
-  if (cfg["proximity"]["objects"].IsSequence())
-  {
-    out_stream << "  objects.reserve(" << cfg["proximity"]["objects"].Size() << ")" << std::endl;
-    for(auto it_cfg = cfg["proximity"]["objects"].Begin(); it_cfg != cfg["proximity"]["objects"].End(); it_cfg++)
-    {
-      auto item = (*it_cfg).second;
-      out_stream << "  objects.push_back( inflatedCollisionObject(" << item["shape"].As<std::string>() << ", inflation) );" << std::endl;
-    }
-  }
-  out_stream << std::endl;
-  out_stream << "  return objects;" << std::endl;
-  out_stream << "}" << std::endl;
-  out_stream << std::endl;
-
-  // Problem Constraints
-  out_stream << "inline static void setProblemConstraints(ceres::Problem &problem, double *targets_ptr, double *targets_init)" << std::endl;
-  out_stream << "{" << std::endl;
-  // // joint1
-  // problem.SetParameterLowerBound(targets, 0, -0.5);
-  // problem.SetParameterUpperBound(targets, 0, 0.5);
-
-  // // joint2
-  // problem.SetParameterLowerBound(targets, 1, -0.5);
-  // problem.SetParameterUpperBound(targets, 1, 0.5);
-
-  // // joint3
-  // problem.SetParameterLowerBound(targets, 2, -0.5);
-  // problem.SetParameterUpperBound(targets, 2, 0.5);
   out_stream << "}" << std::endl;
   out_stream << std::endl;
 

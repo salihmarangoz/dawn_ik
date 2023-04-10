@@ -2,6 +2,9 @@
 # Objective functions (and weights) see: http://ceres-solver.org/nnls_modeling.html#instances
 # Available: TrivialLoss(), HuberLoss(delta), SoftLOneLoss(delta), CauchyLoss(delta)
 
+# NOTE:
+# Current YAML parser can't parse inline arrays like [1,2,3]. I have added an exception for handling just for numeric arrays (for translation, rotation, etc.).
+
 #########################################################
 ### Common Parameters ###################################
 #########################################################
@@ -116,6 +119,13 @@ minimal_displacement:
 # Cylinder(radius, length_z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Cylinder.html
 # Plane(a,b,c,d): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Plane.html
 # Cone is not supported. Because the misplacement caused by inflation is not implemented in this project.
+
+# Object parameters:
+# - link: Link name as a string. Mandatory.
+# - shape: Shape from available shapes with its parameter. Mandatory.
+# - translation: local translation w.r.t. the link origin in XYZ format. Optional. Assumes (0,0,0) if not given.
+# - rotation: local rotation w.r.t. the link origin in RPY format. Optional. Assumes (0,0,0) if not given.
+
 proximity:
   weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
@@ -123,23 +133,21 @@ proximity:
   objects:
     - link: "link1"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      rotation: [0.1, 0.2, 0.3] # r p y
       
     - link: "link2"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      rotation: [0.1, 0.2, 0.3] # r p y
+      translation: [0.1, 0.2, 0.3]
+      rotation: [0.1, 0.2, 0.3]
 
     - link: "link3"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      rotation: [0.1, 0.2, 0.3] # r p y
+      translation: [0.1, 0.2, 0.3]
+      rotation: [0.1, 0.2, 0.3]
 
     - link: "link4"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      rotation: [0.1, 0.2, 0.3] # r p y
+      translation: [0.1, 0.2, 0.3]
+      rotation: [0.1, 0.2, 0.3]
 
 
 #########################################################

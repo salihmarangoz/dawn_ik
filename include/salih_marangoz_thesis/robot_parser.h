@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <iostream>
 #include <cassert>
+#include <sstream>
+#include <cctype> // std::isdigit()
 
 #include <salih_marangoz_thesis/utils.h>
 #include <salih_marangoz_thesis/yaml.h>
@@ -39,15 +41,18 @@ public:
   int num_joints;
   int num_variables;
   int num_links;
-  int num_collision_pairs;
+  int num_objects;
+  int num_acm_link_pairs; // number of zeros in the acm matrix
   // int num_targets; // GET FROM targets !!!
   int endpoint_link_idx; // FROM YAML
+  
 
   // Mapping vectors
   std::vector<int> joint_idx_to_variable_idx; // -1 if no variable available. Can be used as joint_has_variable vector
   std::vector<int> variable_idx_to_joint_idx;
   std::vector<int> joint_idx_to_target_idx; // -1 if no target available.
   std::vector<int> target_idx_to_joint_idx;
+  std::vector<int> object_idx_to_link_idx;
 
   // Joint info
   std::vector<std::string> joint_names;
@@ -66,13 +71,18 @@ public:
   // Link info
   std::vector<std::string> link_names;
   std::vector<int> link_parent_joint_idx;
-  std::vector<Eigen::Isometry3d> link_transform; 
+  std::vector<Eigen::Isometry3d> link_transform;
   std::vector<int> link_can_skip_translation;  // bool
   std::vector<int> link_can_skip_rotation;  // bool
 
   // ACM
   Eigen::ArrayXXi processed_acm;
   
+  // Collision object info
+  std::vector<Eigen::Isometry3d> object_transform;
+  std::vector<int> object_can_skip_translation;
+  std::vector<int> object_can_skip_rotation;
+
 
   /////////////////////////////////////////////////////////////////////
 
@@ -117,10 +127,32 @@ public:
 
   std::vector<int> findPartialChain(const int endpoint_link);
 
+  std::string removeNonNumericalChars(const std::string &str)
+  {
+      std::string result;
+      for (char c : str) if (std::isdigit(c) || c == '.') result.push_back(c);
+      return result;
+  }
+
+  template<typename T>
+  std::vector<T> parseNumericArrayFromString(const std::string &str, const char separator=',')
+  {
+      std::vector<T> result;
+      std::stringstream ss(str);
+      std::string item;
+
+      while (std::getline(ss, item, separator))
+      {
+          T value;
+          std::istringstream iss(removeNonNumericalChars(item));
+          iss >> value;
+          result.push_back(value);
+      }
+      
+      return result;
+  }
+
 };
-
-
-
 
 } // namespace salih_marangoz_thesis
 
