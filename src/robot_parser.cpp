@@ -356,7 +356,7 @@ bool RobotParser::parse()
     // Exclude joints if no variable is available (e.g. static joints)
     if (joint_idx_to_variable_idx[curr_joint_idx] < 0)
     {
-      ROS_WARN("Discarded joint idx %s because it has no variable to control.", joint_names[curr_joint_idx].c_str());
+      ROS_WARN("Discarded joint %s because it has no variable to control.", joint_names[curr_joint_idx].c_str());
       curr_discard = true;
     }
 
@@ -582,31 +582,31 @@ std::string RobotParser::generateCodeForParsedRobot()
 
 void RobotParser::test()
 {
-  ROS_WARN("====================================== TEST ======================================");
+  // ROS_WARN("====================================== TEST ======================================");
 
-  std::vector<Eigen::Isometry3d> m_arr;
-  m_arr.resize(3);
-  m_arr[0] = Eigen::Isometry3d::Identity();
-  m_arr[1] = Eigen::Isometry3d::Identity();
-  m_arr[2] = Eigen::Isometry3d::Identity();
-  m_arr[0].translate(Eigen::Vector3d(0.5, 0.2, 0.3));
-  m_arr[0].rotate(Eigen::AngleAxisd(0.3*M_PI, Eigen::Vector3d::UnitZ()));
-  m_arr[1].translate(Eigen::Vector3d(0.254654, 0.21231, 0.3321));
-  m_arr[1].rotate(Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitX()));
-  m_arr[2].translate(Eigen::Vector3d(0.456121, 0.546546211, 0.1));
-  m_arr[2].rotate(Eigen::AngleAxisd(0.1*M_PI, Eigen::Vector3d::UnitX()));
-  m_arr[2].rotate(Eigen::AngleAxisd(0.9*M_PI, Eigen::Vector3d::UnitY()));
+  // std::vector<Eigen::Isometry3d> m_arr;
+  // m_arr.resize(3);
+  // m_arr[0] = Eigen::Isometry3d::Identity();
+  // m_arr[1] = Eigen::Isometry3d::Identity();
+  // m_arr[2] = Eigen::Isometry3d::Identity();
+  // m_arr[0].translate(Eigen::Vector3d(0.5, 0.2, 0.3));
+  // m_arr[0].rotate(Eigen::AngleAxisd(0.3*M_PI, Eigen::Vector3d::UnitZ()));
+  // m_arr[1].translate(Eigen::Vector3d(0.254654, 0.21231, 0.3321));
+  // m_arr[1].rotate(Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitX()));
+  // m_arr[2].translate(Eigen::Vector3d(0.456121, 0.546546211, 0.1));
+  // m_arr[2].rotate(Eigen::AngleAxisd(0.1*M_PI, Eigen::Vector3d::UnitX()));
+  // m_arr[2].rotate(Eigen::AngleAxisd(0.9*M_PI, Eigen::Vector3d::UnitY()));
 
-  std::cout << "Test eigenTranslation2Str: " << std::endl << eigenTranslation2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
+  // std::cout << "Test eigenTranslation2Str: " << std::endl << eigenTranslation2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
 
-  std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
+  // std::cout << "Test eigenQuaternion2Str: " << std::endl << eigenQuaternion2Str("inline const TEST_VARIABLE", m_arr) << std::endl;
 
-  for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
-  {
-    ROS_WARN("%s", (*it_cfg).first.c_str());
-  }
+  // for(auto it_cfg = cfg.Begin(); it_cfg != cfg.End(); it_cfg++)
+  // {
+  //   ROS_WARN("%s", (*it_cfg).first.c_str());
+  // }
 
-  ROS_WARN("====================================== TEST ======================================");
+  // ROS_WARN("====================================== TEST ======================================");
 }
 
 
