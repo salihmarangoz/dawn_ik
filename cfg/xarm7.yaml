@@ -6,10 +6,12 @@
 ### Common Parameters ###################################
 #########################################################
 
+#DONE
 # Starting from this endpoint to the root, all joints will be the optimization parameter
-endpoint_link: "link_eef" #DONE
+endpoint_link: "link_eef"
 
-# Excludes joints from optimization and control
+#DONE
+# Excludes joints from optimization and control 
 exclude_joints:
   - "joint7"
 
@@ -24,7 +26,7 @@ problem_constraints:
   joint_limiting_method: "minmax"
   posdiff_default: 0.2
   posdiff_override:
-    - joint_name: "joint2"
+    - joint: "joint2"
       neg_diff: -0.3
       pos_diff: 0.3
 
@@ -32,25 +34,30 @@ problem_constraints:
 #########################################################
 ### Solver Parameters ###################################
 #########################################################
+#DONE
 # see: http://ceres-solver.org/nnls_solving.html#solver-options
+# also available values: DBL_MIN, DBL_MAX
 solver_options:
-  minimizer_type: "TRUST_REGION"
-  linear_solver_type: "DENSE_QR"
+  minimizer_type: LINE_SEARCH
+  #minimizer_type: TRUST_REGION # LINE_SEARCH methods don't support bounds
+  linear_solver_type: DENSE_QR
   jacobi_scaling: true
   minimizer_progress_to_stdout: false
-  # preconditioner_type: "SUBSET"
-  # use_nonmonotonic_steps: true
-  # use_approximate_eigenvalue_bfgs_scaling: true
-  # function_tolerance: "DBL_MIN";
-  # gradient_tolerance: "DBL_MIN";
-  # parameter_tolerance: "DBL_MIN";
-  # max_solver_time_in_seconds: 0.01
+  line_search_direction_type: BFGS
+  minimizer_progress_to_stdout: false
+  use_inner_iterations: true # COORDINATE_DESCENT
+  use_approximate_eigenvalue_bfgs_scaling: true
+  max_solver_time_in_seconds: 0.01
+  eta: DBL_MIN
+  function_tolerance: DBL_MIN
+  gradient_tolerance: DBL_MIN
+  parameter_tolerance: DBL_MIN
 
 #########################################################
 ### Objective: Look at Goal #############################
 #########################################################
 look_at_goal:
-  enabled: true
+  weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
   orientation_weight: 2.0
   distance_weight: 0.1
@@ -61,89 +68,81 @@ look_at_goal:
 ### Objective: Avoid Joint Limits #######################
 #########################################################
 avoid_joint_limits:
-  enabled: true
+  weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
   override: # weight 1.0 by default.
-    - joint_name: "joint1"
+    - joint: "joint1"
       weight: 0.5
-    - joint_name: "joint2"
-      weight: 0.2
+    - joint: "joint2"
+      weight: 0.5
 
 
 #########################################################
 ### Objective: Preferred Joint Positions ################
 #########################################################
 preferred_joint_positions:
-  enabled: true
+  weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
   override: # position (limit_min+limit_max)/2 by default. weight (optional) 1.0 by default.
-    - joint_name: "joint1"
+    - joint: "joint1"
       position: 0.1
       weight: 0.2
-    - joint_name: "joint2"
+    - joint: "joint2"
       position: -0.2
       weight: 0.5
-
 
 #########################################################
 ### Objective: Minimal Displacement #####################
 #########################################################
 minimal_displacement:
-  enabled: true
+  weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
-  weights: # Higher values cause less movement. weight 1.0 by default.
-    - joint_name: "joint1"
+  override: # Higher values cause less movement. weight 1.0 by default.
+    - joint: "joint1"
       weight: 0.5
-    - joint_name: "joint2"
+    - joint: "joint2"
       weight: 0.2
 
 
 #########################################################
-### Objective: Collision ################################
+### Objective: Proximity ################################
 #########################################################
-collision:
-  enabled: true
+# Available shapes:
+# Box(x,y,z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Box.html
+# Sphere(radius): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Sphere.html
+# Capsule(radius_, length_z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Capsule.html
+# Cylinder(radius, length_z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Cylinder.html
+# Plane(a,b,c,d): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Plane.html
+# Cone is not supported. Because the misplacement caused by inflation is not implemented in this project.
+proximity:
+  weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
-  proximity_distance: 0.2
-  robot_collision_model:
-    - origin_link: "link6"
-      shape: "sphere"
+  inflation: 0.2
+  objects:
+    - link: "link1"
+      shape: "Sphere(0.1)"
       translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
-
-    - origin_link: "link1"
-      shape: "sphere"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
-
-    - origin_link: "link1"
-      shape: "sphere"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
-
-    - origin_link: "link1"
-      shape: "sphere"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
-
-    - origin_link: "link1"
-      shape: "sphere"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
-
-    - origin_link: "link1"
-      shape: "sphere"
-      translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
+      rotation: [0.1, 0.2, 0.3] # r p y
       
-    - origin_link: "link1"
-      shape: "sphere"
+    - link: "link2"
+      shape: "Sphere(0.1)"
       translation: [0.1, 0.2, 0.3] # x,y,z
-      radius: 0.1
+      rotation: [0.1, 0.2, 0.3] # r p y
+
+    - link: "link3"
+      shape: "Sphere(0.1)"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      rotation: [0.1, 0.2, 0.3] # r p y
+
+    - link: "link4"
+      shape: "Sphere(0.1)"
+      translation: [0.1, 0.2, 0.3] # x,y,z
+      rotation: [0.1, 0.2, 0.3] # r p y
 
 
 #########################################################
 ### Extra ###############################################
 #########################################################
+#DONE
 extra:
-  horti_acm_tricks: false # hardcoded acm modification trick for horti robot
+  horti_acm_tricks: false # hardcoded acm modification trick for horti robot. TODO: this should be automated
