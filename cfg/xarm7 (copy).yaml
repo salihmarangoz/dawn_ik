@@ -7,11 +7,30 @@
 #########################################################
 
 # Starting from this endpoint to the root, all joints will be the optimization parameter
-endpoint_link: "link_eef" #DONE
+endpoint_link: "link_eef"
+
+# Joint trajectory controller topics.
+# Only used for controlling the arm. Not used for kinematic computations, etc.
+joint_controller_command_topic: "/xarm/xarm7_traj_controller/command"
+joint_controller_state_topic: "/xarm/xarm7_traj_controller/state"
 
 # Excludes joints from optimization and control
 exclude_joints:
-  - "joint7"
+  - joint_name: "joint7"
+
+# joint_name
+# min_position (optional)
+# max_position (optional)
+# no_limit (optional) (dont use with min_position nor max_position)
+joint_position_limits_override:
+  - joint_name: "joint2"
+    min_position: 0.5
+  - joint_name: "joint7"
+    min_position: -2
+    max_position: 1
+  - joint_name: "joint6"
+    no_limit: true
+
 
 #########################################################
 ### Problem Constaints ##################################
@@ -105,7 +124,7 @@ collision:
   enabled: true
   loss: "TrivialLoss()"
   proximity_distance: 0.2
-  robot_collision_model:
+  self_collision_objects:
     - origin_link: "link6"
       shape: "sphere"
       translation: [0.1, 0.2, 0.3] # x,y,z

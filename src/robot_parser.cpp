@@ -128,6 +128,19 @@ bool RobotParser::parse()
   num_joints = joint_models.size();
   if (num_joints == 0) return false;
 
+  auto endpoint_link = robot_state.getLinkModel(cfg["endpoint_link"].As<std::string>());
+  if (endpoint_link == nullptr)
+  {
+    ROS_FATAL("endpoint_link is not available!");
+    return false;
+  }
+  endpoint_link_idx = endpoint_link->getLinkIndex();
+  if (endpoint_link_idx<=0)
+  {
+    ROS_FATAL("endpoint_link_idx is %d. Something looks wrong!");
+    return false;
+  }
+
   ROS_INFO("Available links in the robot model:");
   std::vector<std::string> all_links = robot_model->getLinkModelNames(); // WARN: Assuming that getLinkModelNames returns links in order with the indexes, starting from zero
   num_links = all_links.size();
@@ -317,6 +330,53 @@ bool RobotParser::parse()
   }
   variable_idx_to_joint_idx.resize(num_variables);
 
+  // Find partial chain to get targets, exclude targets according to yaml, exclude static targets
+  auto tmp_targets = findPartialChain(endpoint_link_idx);
+  for (int i=0; i<tmp_targets.size(); i++)
+  {
+    int curr_joint_idx = tmp_targets[i];
+    bool curr_discard = false;
+
+    // Exclude joints according to the given yaml
+    for(auto it_cfg = cfg["exclude_joints"].Begin(); it_cfg != cfg["exclude_joints"].End(); it_cfg++)
+    {
+      std::string excluded_joint_name = (*it_cfg).second.As<std::string>();
+      auto excluded_joint_model = robot_state.getJointModel(excluded_joint_name);
+      if (excluded_joint_model != nullptr && excluded_joint_model->getJointIndex() == curr_joint_idx)
+      {
+        ROS_WARN("Discarded joint idx %d according to the YAML configuration", curr_joint_idx);
+        curr_discard = true;
+        break;
+      }
+    }
+
+    // Exclude joints if no variable is available (e.g. static joints)
+    if (joint_idx_to_variable_idx[curr_joint_idx] < 0)
+    {
+      ROS_WARN("Discarded joint idx %d because it has no variable to control.", curr_joint_idx);
+      curr_discard = true;
+    }
+
+    if (!curr_discard)
+      target_idx_to_joint_idx.push_back(curr_joint_idx);
+  }
+  // Also include the reverse mapping
+  joint_idx_to_target_idx.resize(num_joints, -1);
+  for (int i=0; i<target_idx_to_joint_idx.size(); i++)
+  {
+    int joint_idx = target_idx_to_joint_idx[i];
+    joint_idx_to_target_idx[joint_idx] = i;
+  }
+
+  // Debug targets
+  ROS_WARN("Joint optimization targets from root to endpoint link are:");
+  for (int i=0; i<target_idx_to_joint_idx.size(); i++)
+  {
+    int joint_idx = target_idx_to_joint_idx[i];
+    ROS_INFO("Joint: %s", joint_names[joint_idx].c_str());
+  }
+  ROS_WARN("---- end ----");
+
   return true;
 }
 
@@ -337,6 +397,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "#include <vector>" << std::endl;
   out_stream << "#include <string>" << std::endl;
   out_stream << "#include <Eigen/Dense>" << std::endl;
+  out_stream << "#include <ceres/ceres.h>" << std::endl;
   out_stream << std::endl;
 
   // namespace start
@@ -346,16 +407,20 @@ std::string RobotParser::generateCodeForParsedRobot()
 
   // Constants
   out_stream << "// Constants" << std::endl;
+  out_stream << prefix << "int endpoint_link_idx = " << endpoint_link_idx << ";" << std::endl;
   out_stream << prefix << "int num_joints = " << num_joints << ";" << std::endl;
   out_stream << prefix << "int num_variables = " << num_variables << ";" << std::endl;
   out_stream << prefix << "int num_links = " << num_links << ";" << std::endl;
   out_stream << prefix << "int num_collision_pairs = " << num_collision_pairs << ";" << std::endl;
+  out_stream << prefix << "int num_targets = " << target_idx_to_joint_idx.size() << ";" << std::endl;
   out_stream << std::endl;
 
   // Mapping vectors
   out_stream << "// Mapping vectors" << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_idx_to_variable_idx", joint_idx_to_variable_idx) << " // -1 if no variable available. Can be used as joint_has_variable vector" << std::endl;
   out_stream << prefix << primitiveVector2Str("int variable_idx_to_joint_idx", variable_idx_to_joint_idx) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_idx_to_target_idx", joint_idx_to_target_idx) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int target_idx_to_joint_idx", target_idx_to_joint_idx) << std::endl;
   out_stream << std::endl;
 
   // Joint info
@@ -601,16 +666,39 @@ std::string RobotParser::eigenArrayXXi2Str(const std::string& variable, const Ei
   return out_stream.str();
 }
 
+std::vector<int> RobotParser::findPartialChain(const int endpoint_link)
+{
+    assert(endpoint_link < num_links && "endpoint_link is out of bounds");
+    assert(endpoint_link >= 0 && "endpoint_link must be non-negative");
 
-
-
-
-
-
-
-
-
-
+    int j_idx = link_parent_joint_idx[endpoint_link];
+    std::vector<int> inv_chain;
+    std::vector<bool> check;
+    for (int k=0; k<num_joints; k++)
+    {
+        inv_chain.push_back(-1);
+        check.push_back(false);
+    }
+    int p_idx=0;
+    while (j_idx > 0)
+    {
+        assert(check[j_idx] == false && "detected loop in the kinematic tree");
+        check[j_idx] = true;
+        inv_chain[p_idx] = j_idx;
+        j_idx = link_parent_joint_idx[ joint_parent_link_idx[j_idx] ]; // find the parent joint
+        p_idx++;
+    }
+    int size = p_idx+1;
+    assert(size <= num_joints && "partial chain can't be larger than the full chain");
+    std::vector<int> partial_chain;
+    partial_chain.resize(size);
+    for (int i=0; i<size; i++)
+    {
+        partial_chain[i] = inv_chain[size-i-1];
+    }
+    partial_chain[0] = 0; // quick fix
+    return partial_chain;
+}
 
 
 } // namespace salih_marangoz_thesis

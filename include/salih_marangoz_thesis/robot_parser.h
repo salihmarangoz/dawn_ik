@@ -8,6 +8,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <cassert>
 
 #include <salih_marangoz_thesis/utils.h>
 #include <salih_marangoz_thesis/yaml.h>
@@ -39,10 +40,14 @@ public:
   int num_variables;
   int num_links;
   int num_collision_pairs;
+  // int num_targets; // GET FROM targets !!!
+  int endpoint_link_idx; // FROM YAML
 
   // Mapping vectors
   std::vector<int> joint_idx_to_variable_idx; // -1 if no variable available. Can be used as joint_has_variable vector
   std::vector<int> variable_idx_to_joint_idx;
+  std::vector<int> joint_idx_to_target_idx; // -1 if no target available.
+  std::vector<int> target_idx_to_joint_idx;
 
   // Joint info
   std::vector<std::string> joint_names;
@@ -67,6 +72,8 @@ public:
 
   // ACM
   Eigen::ArrayXXi processed_acm;
+  
+
   /////////////////////////////////////////////////////////////////////
 
   ros::NodeHandle nh;
@@ -108,7 +115,11 @@ public:
     return out;
   }
 
+  std::vector<int> findPartialChain(const int endpoint_link);
+
 };
+
+
 
 
 } // namespace salih_marangoz_thesis
