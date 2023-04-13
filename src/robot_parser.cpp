@@ -549,9 +549,9 @@ std::string RobotParser::generateCodeForParsedRobot()
 
   // Collision objects function
   out_stream << "// Collision Objects Function" << std::endl;
+  out_stream << "const int inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
   out_stream << "static inline std::vector<CollisionObject*> getRobotCollisionObjects()" << std::endl;
   out_stream << "{" << std::endl;
-  out_stream << "  const int inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
   out_stream << "  std::vector<CollisionObject*> objects;" << std::endl;
   out_stream << std::endl;
   if (cfg["proximity"]["objects"].IsSequence())
