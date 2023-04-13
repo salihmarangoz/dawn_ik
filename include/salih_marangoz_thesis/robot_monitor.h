@@ -52,6 +52,7 @@ private:
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
   ros::Subscriber joint_state_sub;
+  ros::Publisher visualization_pub;
   boost::thread* link_state_thread;
   boost::thread* collision_state_thread;
   boost::thread* visualization_thread;

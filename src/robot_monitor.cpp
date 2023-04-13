@@ -14,6 +14,7 @@ namespace salih_marangoz_thesis
 
 RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh)
 {
+  visualization_pub = priv_nh.advertise<visualization_msgs::Marker>( "robot_monitor_visualization", 0 );
   joint_state_sub = nh.subscribe("/joint_states", 2, &RobotMonitor::jointStateCallback, this);
   link_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateLinkThread, this));
   collision_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateCollisionThread, this));
@@ -273,47 +274,76 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
 void
 RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstPtr& msg)
 {
+  if (visualization_pub.getNumSubscribers() <= 0) return;
+
   visualization_msgs::MarkerArray arr;
 
-  // Visualize robot collision body
-  
-  for (int i=0; i<utils::countOf(robot::collisions); i++)
+  // ========================= Visualize internal collision objects =========================
+  int id_counter=0;
+  for (int i=0; i<robot::num_objects; i++)
   {
-    visualization_msgs::Marker marker;
-    const robot::Collision &obj = robot::collisions[i];
+    CollisionObject* curr_object = int_collision_objects[i];
+    auto curr_translation = curr_object->getTranslation();
+    auto curr_rotation = Eigen::Quaterniond(curr_object->getRotation());
 
-    double obj_pos[3];
-    double result[3];
-    obj_pos[0] = obj.x;
-    obj_pos[1] = obj.y;
-    obj_pos[2] = obj.z;
-    utils::computeLinkTranslation(&(glt[7*obj.link_idx]),
-                                  &(glt[7*obj.link_idx+3]),
-                                  obj_pos,
-                                  result);
+    if (curr_object->getNodeType() == hpp::fcl::GEOM_SPHERE)
+    {
+      const Sphere& shape = static_cast<const Sphere&>(*(curr_object->collisionGeometry()));
 
-    marker.header = msg->header;
-    marker.ns = "collisions";
-    marker.id = i;
-    marker.type = visualization_msgs::Marker::SPHERE;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = result[0];
-    marker.pose.position.y = result[1];
-    marker.pose.position.z = result[2];
-    marker.pose.orientation.x = 0;
-    marker.pose.orientation.y = 0;
-    marker.pose.orientation.z = 0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = obj.radius*2;
-    marker.scale.y = obj.radius*2;
-    marker.scale.z = obj.radius*2;
-    marker.color.a = 0.75; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 1.0;
-    arr.markers.push_back(marker);
+      visualization_msgs::Marker marker;
+      marker.header = msg->header;
+      marker.ns = "robot_collision_body";
+      marker.id = id_counter++;
+      marker.type = visualization_msgs::Marker::SPHERE;
+      marker.scale.x = shape.radius*2;
+      marker.scale.y = shape.radius*2;
+      marker.scale.z = shape.radius*2;
+      marker.pose.position.x = curr_translation.x();
+      marker.pose.position.y = curr_translation.y();
+      marker.pose.position.z = curr_translation.z();
+      marker.pose.orientation.x = curr_rotation.x();
+      marker.pose.orientation.y = curr_rotation.y();
+      marker.pose.orientation.z = curr_rotation.z();
+      marker.pose.orientation.w = curr_rotation.w();
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.color.a = 0.75; // Don't forget to set the alpha!
+      marker.color.r = 0.0;
+      marker.color.g = 0.0;
+      marker.color.b = 1.0;
+      arr.markers.push_back(marker);
+    }
+    else if (curr_object->getNodeType() == hpp::fcl::GEOM_CAPSULE)
+    {
+      ROS_WARN("GEOM_CAPSULE TODO"); // TODO
+    }
+    else if (curr_object->getNodeType() == hpp::fcl::GEOM_BOX)
+    {
+      ROS_WARN("GEOM_BOX TODO"); // TODO
+    }
+    else if (curr_object->getNodeType() == hpp::fcl::GEOM_CYLINDER)
+    {
+      ROS_WARN("GEOM_CYLINDER TODO"); // TODO
+    }
+    else if (curr_object->getNodeType() == hpp::fcl::GEOM_PLANE)
+    {
+      ROS_WARN("GEOM_PLANE TODO"); // TODO
+    }
+    else
+    {
+      ROS_ERROR_THROTTLE(1.0, "Unknown collision shape. Can't visualize!");
+      continue;
+    }
+
   }
-  marker_array_pub.publish(arr);
+
+  // ========================= Visualize internal-internal collision pairs =========================
+  // TODO
+
+  // ========================= Visualize external collision objects =========================
+
+  // ========================= Visualize internal-external collision pairs =========================
+
+  visualization_pub.publish(arr);
 }
 
 
