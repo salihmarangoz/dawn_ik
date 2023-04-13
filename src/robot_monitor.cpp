@@ -210,7 +210,8 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
   std::scoped_lock lock_collision_managers(int_collision_manager_mtx, ext_collision_manager_mtx);
   
   JointLinkCollisionStatePtr state = boost::make_shared<JointLinkCollisionState>();
-  state->joint_state = *msg; // copy
+  state->joint_state = msg->joint_state; // copy
+  state->link_state = msg->link_state; // copy
   state->header = msg->header; // copy
 
   if (int_collision_objects.size() <= 0) int_collision_objects = robot::getRobotCollisionObjects(); // init int_collision_objects if not initialized
@@ -265,8 +266,11 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
   if (int_collision_manager.size() <= 0) int_collision_manager.registerObjects(int_collision_objects); // init collision manager if not initialized
   int_collision_manager.update();
 
-
   // TODO: handle external objects
+
+  // TODO: find self collision pairs
+
+  // TODO: find external collision pairs
 
   return state;
 }
