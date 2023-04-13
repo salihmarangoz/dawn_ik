@@ -448,6 +448,7 @@ struct CollisionAvoidanceGoal {
    // the client code.
    static ceres::CostFunction* Create(const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
    {
+     //return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new CollisionAvoidanceGoal(joint_idx_to_target_idx, variable_positions)));
    }
