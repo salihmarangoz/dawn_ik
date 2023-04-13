@@ -1,3 +1,3 @@
 catkin_ws
 external
-include/salih_marangoz_thesis/robot_configuration/autogen_test.h
+#include/salih_marangoz_thesis/robot_configuration/autogen_test.h
