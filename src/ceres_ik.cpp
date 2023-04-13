@@ -57,53 +57,51 @@ void CeresIK::loop()
   while (ros::ok())
   {
     // ROBOT MONITOR TEST
-    ros::spinOnce();
-    JointLinkStateConstPtr state = robot_monitor->getJointLinkState();
-    if (state == nullptr) continue;
-    const std::vector<double> &glt = state->link_state.transformations;
+    // ros::spinOnce();
+    // JointLinkStateConstPtr state = robot_monitor->getJointLinkState();
+    // if (state == nullptr) continue;
+    // const std::vector<double> &glt = state->link_state.transformations;
 
-    auto timestamp = ros::Time::now();
-    visualization_msgs::MarkerArray arr;
-    for (int i=0; i<utils::countOf(robot::collisions); i++)
-    {
-      visualization_msgs::Marker marker;
-      const robot::Collision &obj = robot::collisions[i];
+    // auto timestamp = ros::Time::now();
+    // visualization_msgs::MarkerArray arr;
+    // for (int i=0; i<utils::countOf(robot::collisions); i++)
+    // {
+    //   visualization_msgs::Marker marker;
+    //   const robot::Collision &obj = robot::collisions[i];
 
-      double obj_pos[3];
-      double result[3];
-      obj_pos[0] = obj.x;
-      obj_pos[1] = obj.y;
-      obj_pos[2] = obj.z;
-      utils::computeLinkTranslation(&(glt[7*obj.link_idx]),
-                                    &(glt[7*obj.link_idx+3]),
-                                    obj_pos,
-                                    result);
+    //   double obj_pos[3];
+    //   double result[3];
+    //   obj_pos[0] = obj.x;
+    //   obj_pos[1] = obj.y;
+    //   obj_pos[2] = obj.z;
+    //   utils::computeLinkTranslation(&(glt[7*obj.link_idx]),
+    //                                 &(glt[7*obj.link_idx+3]),
+    //                                 obj_pos,
+    //                                 result);
 
-      marker.header.frame_id = "world";
-      marker.header.stamp = timestamp;
-      marker.ns = "collisions";
-      marker.id = i;
-      marker.type = visualization_msgs::Marker::SPHERE;
-      marker.action = visualization_msgs::Marker::ADD;
-      marker.pose.position.x = result[0];
-      marker.pose.position.y = result[1];
-      marker.pose.position.z = result[2];
-      marker.pose.orientation.x = 0;
-      marker.pose.orientation.y = 0;
-      marker.pose.orientation.z = 0;
-      marker.pose.orientation.w = 1.0;
-      marker.scale.x = obj.radius*2;
-      marker.scale.y = obj.radius*2;
-      marker.scale.z = obj.radius*2;
-      marker.color.a = 0.75; // Don't forget to set the alpha!
-      marker.color.r = 0.0;
-      marker.color.g = 0.0;
-      marker.color.b = 1.0;
-      arr.markers.push_back(marker);
-    }
-    marker_array_pub.publish(arr);
-    //r.sleep();
-    //continue;
+    //   marker.header.frame_id = "world";
+    //   marker.header.stamp = timestamp;
+    //   marker.ns = "collisions";
+    //   marker.id = i;
+    //   marker.type = visualization_msgs::Marker::SPHERE;
+    //   marker.action = visualization_msgs::Marker::ADD;
+    //   marker.pose.position.x = result[0];
+    //   marker.pose.position.y = result[1];
+    //   marker.pose.position.z = result[2];
+    //   marker.pose.orientation.x = 0;
+    //   marker.pose.orientation.y = 0;
+    //   marker.pose.orientation.z = 0;
+    //   marker.pose.orientation.w = 1.0;
+    //   marker.scale.x = obj.radius*2;
+    //   marker.scale.y = obj.radius*2;
+    //   marker.scale.z = obj.radius*2;
+    //   marker.color.a = 0.75; // Don't forget to set the alpha!
+    //   marker.color.r = 0.0;
+    //   marker.color.g = 0.0;
+    //   marker.color.b = 1.0;
+    //   arr.markers.push_back(marker);
+    // }
+    // marker_array_pub.publish(arr);
 
     if (!update(robot_state))
     {
@@ -241,6 +239,13 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   options.line_search_direction_type = ceres::BFGS;
   options.minimizer_progress_to_stdout = false;
   options.jacobi_scaling = true; // TODO: this was used in bio_ik, I think
+  options.use_inner_iterations = true; // COORDINATE_DESCENT
+  options.use_approximate_eigenvalue_bfgs_scaling = true;
+  options.max_solver_time_in_seconds = 0.01; // 100hz
+  options.eta = DBL_MIN;
+  options.function_tolerance = DBL_MIN;
+  options.gradient_tolerance = DBL_MIN;
+  options.parameter_tolerance = DBL_MIN;
 
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
