@@ -29,6 +29,23 @@ template< class Type, ptrdiff_t n > ptrdiff_t countOf( Type (&)[n] ) { return n;
 #define COUNTOF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// MATH UTILS ///////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+void eulerToMatrix(double a, double b, double c, Eigen::Matrix3d& R) {
+  double c1 = cos(a);
+  double c2 = cos(b);
+  double c3 = cos(c);
+  double s1 = sin(a);
+  double s2 = sin(b);
+  double s3 = sin(c);
+
+  R << c1 * c2, -c2 * s1, s2, c3 * s1 + c1 * s2 * s3, c1 * c3 - s1 * s2 * s3,
+      -c2 * s3, s1 * s3 - c1 * c3 * s2, c3 * s1 * s2 + c1 * s3, c2 * c3;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// CERES UTILS //////////////////////////////////////////////////////
@@ -39,7 +56,7 @@ template< class Type, ptrdiff_t n > ptrdiff_t countOf( Type (&)[n] ) { return n;
 // Computes translation of the link
 // Refrain from using this function if link_translation is all zero.
 template <typename T>
-inline void computeLinkTranslation(const T current_translation[3], const T current_rotation[4], const T link_translation[3], T result[3])
+inline void computeLinkTranslation(const T* current_translation, const T* current_rotation, const T* link_translation, T* result)
 {
   T rotated_pt[3];
   ceres::QuaternionRotatePoint(current_rotation, link_translation, rotated_pt); // maybe safe option with UnitQuaternionRotatePoint ???
@@ -54,7 +71,7 @@ inline void computeLinkTranslation(const T current_translation[3], const T curre
 // ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
 // WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
-inline void computeLinkRotation(const T current_rotation[4], const T& joint_value, T result[4])
+inline void computeLinkRotation(const T* current_rotation, const T& joint_value, T* result)
 {
   T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
   angle_axis[0] = T(0.0);
@@ -70,7 +87,7 @@ inline void computeLinkRotation(const T current_rotation[4], const T& joint_valu
 // ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
 // WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
-inline void computeLinkRotation(const T current_rotation[4], const T link_rotation[4], const T& joint_value, T result[4])
+inline void computeLinkRotation(const T* current_rotation, const T* link_rotation, const T& joint_value, T* result)
 {
   T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
   angle_axis[0] = T(0.0);
@@ -86,42 +103,21 @@ inline void computeLinkRotation(const T current_rotation[4], const T link_rotati
 // Computes rotation of the link without the joint (including rotation of the link)
 // WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
-inline void computeLinkRotation(const T current_rotation[4], const T link_rotation[4], T result[4])
+inline void computeLinkRotation(const T* current_rotation, const T* link_rotation, T* result)
 {
   ceres::QuaternionProduct(current_rotation, link_rotation, result);
 }
 
-/*
-  while(ros::ok())
-  {
-    double fs[3] = {0,0,0};
-    double ss[3] = {1,1,1};
-    double dist = utils::distSphere2Sphere(fs, 0.1, ss, 0.2);
-    ROS_WARN("dist: %f", dist);
-  }
-*/
+
+// double fs[3] = {0,0,0};
+// double ss[3] = {1,1,1};
+// double dist = utils::distSphere2Sphere(fs, 0.1, ss, 0.2);
 template <typename T>
-inline T distSphere2Sphere(const T first_sphere_pos[3], double first_sphere_radius, const T second_sphere_pos[3], double second_sphere_radius)
+inline T distSphere2Sphere(const T* first_sphere_pos, double first_sphere_radius, const T* second_sphere_pos, double second_sphere_radius)
 {
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> first_sphere_pos_e(first_sphere_pos);
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> second_sphere_pos_e(second_sphere_pos);
   return (first_sphere_pos_e - second_sphere_pos_e).norm() - first_sphere_radius - second_sphere_radius;
-}
-
-template <typename T>
-inline T distPoint2Sphere(const T point_pos[3], const T sphere_pos[3], double sphere_radius)
-{
-  Eigen::Map<const Eigen::Matrix<T, 3, 1>> point_pos_e(point_pos);
-  Eigen::Map<const Eigen::Matrix<T, 3, 1>> sphere_pos_e(sphere_pos);
-  return (point_pos_e - sphere_pos_e).norm() - sphere_radius;
-}
-
-template <typename T>
-inline T distPoint2Point(const T first_point_pos[3], const T second_point_pos[3])
-{
-  Eigen::Map<const Eigen::Matrix<T, 3, 1>> first_point_pos_e(first_point_pos);
-  Eigen::Map<const Eigen::Matrix<T, 3, 1>> second_point_pos_e(second_point_pos);
-  return (first_point_pos_e - second_point_pos_e).norm();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
