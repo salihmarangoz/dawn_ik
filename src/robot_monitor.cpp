@@ -3,165 +3,137 @@
 namespace salih_marangoz_thesis
 {
 
-RobotMonitor::RobotMonitor(ros::NodeHandle &nh,
-                           ros::NodeHandle &priv_nh,
-                           const std::string joint_states_topic,
-                           const std::string joint_link_state_topic,
-                           double async_thread_rate_limit,
-                           int num_joints,
-                           int num_links,
-                           const std::string* joint_names,
-                           const int* joint_child_link_idx,
-                           const int* joint_parent_link_idx,
-                           const double* link_transform_translation_only,
-                           const double* link_transform_quaternion_only,
-                           const int* link_can_skip_translation,
-                           const int* link_can_skip_rotation
-                           ): nh_(nh),
-                              priv_nh_(priv_nh),
-                              joint_states_topic_(joint_states_topic),
-                              joint_link_state_topic_(joint_link_state_topic),
-                              async_thread_rate_limit_(async_thread_rate_limit),
-                              num_joints_(num_joints), 
-                              num_links_(num_links), 
-                              joint_names_(joint_names),
-                              joint_child_link_idx_(joint_child_link_idx),
-                              joint_parent_link_idx_(joint_parent_link_idx),
-                              link_transform_translation_only_(link_transform_translation_only),
-                              link_transform_quaternion_only_(link_transform_quaternion_only),
-                              link_can_skip_translation_(link_can_skip_translation),
-                              link_can_skip_rotation_(link_can_skip_rotation)
+// const JointLinkStateConstPtr
+// RobotMonitor::getJointLinkState()
+// {
+//   async_mtx_.lock();
+//   JointLinkStatePtr tmp = async_state_;
+//   async_mtx_.unlock();
+//   return tmp;
+// }
+
+RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh)
 {
-  last_joint_state_msg_ = nullptr;
-  joint_state_is_dirty_ = true;
-  joint_idx_to_msg_idx_ = nullptr;
-  async_thread_ = nullptr;
-  if (async_thread_rate_limit_ > 0) 
-    async_thread_ = new boost::thread(boost::bind(&RobotMonitor::asyncThread_, this));
-  joint_states_sub_ = nh_.subscribe(joint_states_topic_, 2, &RobotMonitor::jointStateCallback_, this);
-  if (joint_link_state_topic.size() > 0)
-    joint_link_state_pub_ = priv_nh_.advertise<JointLinkState>(joint_link_state_topic_, 2);
-  
+  joint_state_sub = nh.subscribe("/joint_states", 2, &RobotMonitor::jointStateCallback, this);
+  link_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateLinkThread, this));
+  collision_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateCollisionThread, this));
+  visualization_thread = new boost::thread(boost::bind(&RobotMonitor::updateVisualizationThread, this));
 }
 
 RobotMonitor::~RobotMonitor()
 {
-  if (joint_idx_to_msg_idx_ != nullptr) delete[] joint_idx_to_msg_idx_;
-
-  if (async_thread_ != nullptr)
-  {
-    async_thread_->join();
-    delete async_thread_;
-  }
+  link_state_thread->join();
+  delete link_state_thread;
+  collision_state_thread->join();
+  delete collision_state_thread;
 }
 
 void
-RobotMonitor::jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg)
+RobotMonitor::jointStateCallback(const sensor_msgs::JointStateConstPtr& msg)
 {
-  // sanity checks
   ROS_INFO_ONCE("RobotMonitor: Received joint state!");
-  if (last_joint_state_msg_ != nullptr)
-  {
-    double update_freq = 1. / (msg->header.stamp - last_joint_state_msg_->header.stamp).toSec();
-    if (update_freq < 50) ROS_WARN_THROTTLE(5.0, "RobotMonitor: Joint state update freq is low: %f", update_freq); // fixed 50hz threshold is good, I think
-  }
+  last_joint_state_mtx.lock();
+  last_joint_state_msg = msg;
+  last_joint_state_mtx.unlock();
 
-  // cache joint_idx_to_msg_idx_
-  if (joint_idx_to_msg_idx_ == nullptr)
-  {
-    joint_idx_to_msg_idx_ = new int[num_joints_];
-    for (int i=0; i<num_joints_; i++)
-    { 
-      ptrdiff_t pos = find(msg->name.begin(), msg->name.end(), joint_names_[i]) - msg->name.begin();
-      if(pos < msg->name.size())
-      {
-        joint_idx_to_msg_idx_[i] = pos; // i->joint_idx, pos->msg_idx
-      }
-      else
-      {
-        joint_idx_to_msg_idx_[i] = -1;
-      }
-    }
-  }
-
-  // save the message
-  msg_mtx_.lock();
-  last_joint_state_msg_ = msg;
-  joint_state_is_dirty_ = true;
-  msg_mtx_.unlock();
-
-  // process the message here if async thread is disabled
-  if (async_thread_rate_limit_ <= 0)
-  {
-    // Update internal state
-    JointLinkStatePtr new_state = computeJointLinkState_();
-    if (new_state != nullptr)
+  for (int i=0; i<robot::num_joints; i++)
+  { 
+    ptrdiff_t pos = find(msg->name.begin(), msg->name.end(), robot::joint_names[i]) - msg->name.begin();
+    if(pos < msg->name.size())
     {
-      joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
-      async_mtx_.lock();
-      async_state_ = new_state;
-      if (joint_link_state_pub_.getNumSubscribers() > 0)
-        joint_link_state_pub_.publish(new_state);
-      async_mtx_.unlock();
+      joint_idx_to_msg_idx[i] = pos; // i->joint_idx, pos->msg_idx
+    }
+    else
+    {
+      joint_idx_to_msg_idx[i] = -1;
     }
   }
-}
-
-const JointLinkStateConstPtr
-RobotMonitor::getJointLinkState()
-{
-  async_mtx_.lock();
-  JointLinkStatePtr tmp = async_state_;
-  async_mtx_.unlock();
-  return tmp;
 }
 
 void
-RobotMonitor::asyncThread_()
+RobotMonitor::updateLinkThread()
 {
-  ros::Rate r(async_thread_rate_limit_);
+  ros::Rate r(100.0); // TODO
   while (ros::ok())
   {
-    if (joint_state_is_dirty_)
-    {
-      // Update internal state
-      JointLinkStatePtr new_state = computeJointLinkState_();
-      if (new_state != nullptr)
-      {
-        joint_state_is_dirty_ = false; // assumed that locking msg_mtx_ is not necessary
-        async_mtx_.lock();
-        async_state_ = new_state;
-        if (joint_link_state_pub_.getNumSubscribers() > 0)
-          joint_link_state_pub_.publish(new_state);
-        async_mtx_.unlock();
-      }
-    }
+    if (last_joint_state_msg == nullptr){r.sleep(); continue;}
+
+    last_joint_state_mtx.lock();
+    sensor_msgs::JointStateConstPtr cached_joint_state_msg = last_joint_state_msg;
+    last_joint_state_mtx.unlock();
+    
+    JointLinkStatePtr new_state = computeJointLinkState(cached_joint_state_msg);
+    if (new_state == nullptr){r.sleep(); continue;}
+
+    last_joint_link_state_mtx.lock();
+    last_joint_link_state_msg = new_state;
+    last_joint_link_state_mtx.unlock();
+  
+    ROS_INFO_ONCE("RobotMonitor: Computed link state!");
     r.sleep();
   }
 }
 
-JointLinkStatePtr
-RobotMonitor::computeJointLinkState_()
+void
+RobotMonitor::updateCollisionThread()
 {
-  // If the joint state message is not received
-  if (last_joint_state_msg_ == nullptr) return nullptr;
+  ros::Rate r(100.0); // TODO
+  while (ros::ok())
+  {
+    if (last_joint_link_state_msg == nullptr){r.sleep(); continue;}
 
+    last_joint_link_state_mtx.lock();
+    JointLinkStateConstPtr cached_joint_link_state_msg = last_joint_link_state_msg;
+    last_joint_link_state_mtx.unlock();
+    
+    JointLinkCollisionStatePtr new_state = computeJointLinkCollisionState(cached_joint_link_state_msg);
+    if (new_state == nullptr){r.sleep(); continue;}
+
+    last_joint_link_collision_state_mtx.lock();
+    last_joint_link_collision_state_msg = new_state;
+    last_joint_link_collision_state_mtx.unlock();
+
+    ROS_INFO_ONCE("RobotMonitor: Computed collision state!");
+    r.sleep();
+  }
+}
+
+void
+RobotMonitor::updateVisualizationThread()
+{
+  ros::Rate r(60.0); // 60fps is more than enough!
+  while (ros::ok())
+  {
+    if (last_joint_link_collision_state_msg == nullptr){r.sleep(); continue;}
+
+    last_joint_link_state_mtx.lock();
+    JointLinkCollisionStateConstPtr cached_joint_link_collision_state_mtx = last_joint_link_collision_state_msg;
+    last_joint_link_state_mtx.unlock();
+    
+    computeAndPublishVisualization(cached_joint_link_collision_state_mtx);
+
+    ROS_INFO_ONCE("RobotMonitor: Published visualization!");
+    r.sleep();
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+JointLinkStatePtr
+RobotMonitor::computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg)
+{
   JointLinkStatePtr state = boost::make_shared<JointLinkState>();
-
-  // Process the latest joint state msg
-  msg_mtx_.lock();
-  state->joint_state = *last_joint_state_msg_; // copy
-  state->header = last_joint_state_msg_->header; // copy
-  msg_mtx_.unlock();
+  state->joint_state = *msg; // copy
+  state->header = msg->header; // copy
 
   // recompute kinematic chain
   std::vector<double> &global_link_transformations = state->link_state.transformations; // copy reference
-  global_link_transformations.resize(num_links_*7);
-  for (int i=0; i<num_joints_; i++)
+  global_link_transformations.resize(robot::num_links*7);
+  for (int i=0; i<robot::num_joints; i++)
   {
-    int child_link_idx = joint_child_link_idx_[i];
-    int parent_link_idx = joint_parent_link_idx_[i];
-    int msg_idx = joint_idx_to_msg_idx_[i];
+    int child_link_idx = robot::joint_child_link_idx[i];
+    int parent_link_idx = robot::joint_parent_link_idx[i];
+    int msg_idx = joint_idx_to_msg_idx[i];
 
     // init
     if (parent_link_idx == -1)
@@ -177,7 +149,7 @@ RobotMonitor::computeJointLinkState_()
     }
 
     // Translation
-    if (link_can_skip_translation_[child_link_idx])
+    if (robot::link_can_skip_translation[child_link_idx])
     {
         global_link_transformations[7*child_link_idx+0] = global_link_transformations[7*parent_link_idx+0];
         global_link_transformations[7*child_link_idx+1] = global_link_transformations[7*parent_link_idx+1];
@@ -187,7 +159,7 @@ RobotMonitor::computeJointLinkState_()
     {
       utils::computeLinkTranslation(&(global_link_transformations[7*parent_link_idx]), // translation
                                     &(global_link_transformations[7*parent_link_idx+3]),  // rotation
-                                    &(link_transform_translation_only_[3*child_link_idx]), 
+                                    &(robot::link_transform_translation_only[3*child_link_idx][0]), 
                                     &(global_link_transformations[7*child_link_idx]));
     }
 
@@ -195,7 +167,7 @@ RobotMonitor::computeJointLinkState_()
     { 
       double joint_val = state->joint_state.position[msg_idx];
       
-      if (link_can_skip_rotation_[child_link_idx]) // if can skip the rotation then only rotate using the joint position
+      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then only rotate using the joint position
       {
         utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]),
                                   joint_val, 
@@ -204,14 +176,14 @@ RobotMonitor::computeJointLinkState_()
       else // if link has rotation and joint has rotation, then we need to rotate using both
       {
         utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]), 
-                                  &(link_transform_quaternion_only_[4*child_link_idx]), 
+                                  &(robot::link_transform_quaternion_only[4*child_link_idx][0]), 
                                   joint_val, 
                                   &(global_link_transformations[7*child_link_idx+3]));
       }
     }
     else // if joint is static
     {
-      if (link_can_skip_rotation_[child_link_idx]) // if can skip the rotation then no need to do anything
+      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
       {
         global_link_transformations[7*child_link_idx+3] = global_link_transformations[7*parent_link_idx+3];
         global_link_transformations[7*child_link_idx+4] = global_link_transformations[7*parent_link_idx+4];
@@ -221,7 +193,7 @@ RobotMonitor::computeJointLinkState_()
       else // if link has a rotation, only compute that
       {
         utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]), // global parent rotation
-                                  &(link_transform_quaternion_only_[4*child_link_idx]), // local child rotation
+                                  &(robot::link_transform_quaternion_only[4*child_link_idx][0]), // local child rotation
                                   &(global_link_transformations[7*child_link_idx+3]));  // global child rotation
       }
 
@@ -229,6 +201,119 @@ RobotMonitor::computeJointLinkState_()
   }
 
   return state;
+}
+
+JointLinkCollisionStatePtr
+RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
+{
+  std::scoped_lock lock_collision_managers(int_collision_manager_mtx, ext_collision_manager_mtx);
+  
+  JointLinkCollisionStatePtr state = boost::make_shared<JointLinkCollisionState>();
+  state->joint_state = *msg; // copy
+  state->header = msg->header; // copy
+
+  if (int_collision_objects.size() <= 0) int_collision_objects = robot::getRobotCollisionObjects(); // init int_collision_objects if not initialized
+
+  // update internal collision objects
+  // TODO: optimize using these, maybe? robot::object_can_skip_rotation[i]; ;
+  for (int object_idx=0; object_idx<robot::num_objects; object_idx++)
+  {
+    int link_idx = robot::object_idx_to_link_idx[object_idx];
+    bool can_skip_translation = robot::object_can_skip_translation[object_idx];
+    bool can_skip_rotation = robot::object_can_skip_rotation[object_idx];
+    const double* link_translation = &(msg->link_state.transformations[7*link_idx]);
+    const double* link_rotation = &(msg->link_state.transformations[7*link_idx+3]);
+    const double* object_translation = &(robot::object_transform_translation_only[object_idx][0]);
+    const double* object_rotation = &(robot::object_transform_quaternion_only[object_idx][0]);
+
+    double final_object_translation[3];
+    double final_object_rotation[3];
+
+    robot::object_transform_translation_only[object_idx];
+
+    // compute translation
+    if (robot::object_can_skip_translation[object_idx])
+    {
+      final_object_translation[0] = link_translation[0];
+      final_object_translation[1] = link_translation[1];
+      final_object_translation[2] = link_translation[2];
+    }
+    else
+    {
+      utils::computeLinkTranslation(link_translation, link_rotation, object_translation, final_object_translation);
+    }
+
+    // compute rotation
+    if (robot::object_can_skip_rotation[object_idx])
+    {
+      final_object_rotation[3] = link_translation[3];
+      final_object_rotation[4] = link_translation[4];
+      final_object_rotation[5] = link_translation[5];
+      final_object_rotation[6] = link_translation[6];
+    }
+    else
+    {
+      utils::computeLinkRotation(link_rotation, object_rotation, final_object_rotation);
+    }
+
+    int_collision_objects[object_idx]->setTranslation(Vec3f(final_object_translation[0], final_object_translation[1], final_object_translation[2]));
+    int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(final_object_rotation).toRotationMatrix());
+    int_collision_objects[object_idx]->computeAABB();
+  }
+
+  if (int_collision_manager.size() <= 0) int_collision_manager.registerObjects(int_collision_objects); // init collision manager if not initialized
+  int_collision_manager.update();
+
+
+  // TODO: handle external objects
+
+  return state;
+}
+
+void
+RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstPtr& msg)
+{
+  visualization_msgs::MarkerArray arr;
+
+  // Visualize robot collision body
+  
+  for (int i=0; i<utils::countOf(robot::collisions); i++)
+  {
+    visualization_msgs::Marker marker;
+    const robot::Collision &obj = robot::collisions[i];
+
+    double obj_pos[3];
+    double result[3];
+    obj_pos[0] = obj.x;
+    obj_pos[1] = obj.y;
+    obj_pos[2] = obj.z;
+    utils::computeLinkTranslation(&(glt[7*obj.link_idx]),
+                                  &(glt[7*obj.link_idx+3]),
+                                  obj_pos,
+                                  result);
+
+    marker.header = msg->header;
+    marker.ns = "collisions";
+    marker.id = i;
+    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = result[0];
+    marker.pose.position.y = result[1];
+    marker.pose.position.z = result[2];
+    marker.pose.orientation.x = 0;
+    marker.pose.orientation.y = 0;
+    marker.pose.orientation.z = 0;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = obj.radius*2;
+    marker.scale.y = obj.radius*2;
+    marker.scale.z = obj.radius*2;
+    marker.color.a = 0.75; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    arr.markers.push_back(marker);
+  }
+  marker_array_pub.publish(arr);
 }
 
 

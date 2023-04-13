@@ -3,32 +3,29 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
+#include <salih_marangoz_thesis/JointLinkState.h>
+#include <salih_marangoz_thesis/JointLinkCollisionState.h>
+
+#include <hpp/fcl/collision.h>
+#include <hpp/fcl/broadphase/broadphase.h>
+using hpp::fcl::DynamicAABBTreeCollisionManager;
+using hpp::fcl::FCL_REAL;
+using hpp::fcl::Transform3f;
+using hpp::fcl::Vec3f;
+using hpp::fcl::CollisionObject;
+using hpp::fcl::Matrix3f;
 
 #include <algorithm> // std::find
 #include <vector>
 #include <string>
 #include <boost/thread.hpp>
 #include <mutex>
+#include <chrono>
+using namespace std::chrono;
 
 #include <salih_marangoz_thesis/utils.h> // computeLinkTranslation, computeLinkRotation
-#include <salih_marangoz_thesis/JointLinkState.h>
+#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
 
-
-#ifndef ROBOT_MONITOR_NO_DEFAULTS
-  #include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
-  #define ROBOT_MON_DEF_joint_states_topic = std::string("/joint_states")
-  #define ROBOT_MON_DEF_joint_link_state_topic = std::string("int_joint_link_state")
-  #define ROBOT_MON_DEF_async_thread_rate_limit = -1 // non-positive: kinematics processed in the callback. positive: kinematics processed in a separate thread with a fixed rate
-  #define ROBOT_MON_DEF_num_joints = robot::num_joints
-  #define ROBOT_MON_DEF_num_links = robot::num_links
-  #define ROBOT_MON_DEF_joint_names = robot::joint_names
-  #define ROBOT_MON_DEF_joint_child_link_idx = robot::joint_child_link_idx
-  #define ROBOT_MON_DEF_joint_parent_link_idx = robot::joint_parent_link_idx
-  #define ROBOT_MON_DEF_link_transform_translation_only = (double*)robot::link_transform_translation_only // knowing that 2D C arrays are contiguous
-  #define ROBOT_MON_DEF_link_transform_quaternion_only = (double*)robot::link_transform_quaternion_only // knowing that 2D C arrays are contiguous
-  #define ROBOT_MON_DEF_link_can_skip_translation = robot::link_can_skip_translation
-  #define ROBOT_MON_DEF_link_can_skip_rotation = robot::link_can_skip_rotation
-#endif
 
 namespace salih_marangoz_thesis
 {
@@ -36,72 +33,47 @@ namespace salih_marangoz_thesis
 class RobotMonitor
 {
 public:
-  RobotMonitor(ros::NodeHandle &nh,
-               ros::NodeHandle &priv_nh,
-               const std::string joint_states_topic ROBOT_MON_DEF_joint_states_topic,
-               const std::string joint_link_state_topic ROBOT_MON_DEF_joint_link_state_topic,
-               double async_thread_rate_limit ROBOT_MON_DEF_async_thread_rate_limit,
-               int num_joints ROBOT_MON_DEF_num_joints, 
-               int num_links ROBOT_MON_DEF_num_links,
-               const std::string* joint_names ROBOT_MON_DEF_joint_names,
-               const int* joint_child_link_idx ROBOT_MON_DEF_joint_child_link_idx,
-               const int* joint_parent_link_idx ROBOT_MON_DEF_joint_parent_link_idx,
-               const double* link_transform_translation_only ROBOT_MON_DEF_link_transform_translation_only,
-               const double* link_transform_quaternion_only ROBOT_MON_DEF_link_transform_quaternion_only,
-               const int* link_can_skip_translation ROBOT_MON_DEF_link_can_skip_translation,
-               const int* link_can_skip_rotation ROBOT_MON_DEF_link_can_skip_rotation
-               );
+  RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   ~RobotMonitor();
 
-  const JointLinkStateConstPtr getJointLinkState();
+private:
+  void jointStateCallback(const sensor_msgs::JointStateConstPtr& msg);
 
-  // setter/getter
-  int getNumJoints(){return num_joints_;}
-  int getNumLinks(){return num_links_;}
-  const std::string* getJointNames(){return joint_names_;}
-  int getChildLinkIdx(int joint_idx){return joint_child_link_idx_[joint_idx];}
-  int getParentLinkIdx(int joint_idx){return joint_parent_link_idx_[joint_idx];}
-  int getMessageIdx(int joint_idx){return joint_idx_to_msg_idx_[joint_idx];}
-  // const sensor_msgs::JointStateConstPtr getJointState()
-  // {
-  //   msg_mtx_.lock();
-  //   const sensor_msgs::JointStateConstPtr tmp = last_joint_state_msg_;
-  //   msg_mtx_.unlock();
-  //   return tmp;
-  // }
-  
+  void updateLinkThread();
+  JointLinkStatePtr computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg);
+
+  void updateCollisionThread();
+  JointLinkCollisionStatePtr computeJointLinkCollisionState(const JointLinkStateConstPtr& msg);
+
+  void updateVisualizationThread();
+  void computeAndPublishVisualization(const JointLinkCollisionStateConstPtr& msg);
 
 private:
-  JointLinkStatePtr computeJointLinkState_();
-  void jointStateCallback_(const sensor_msgs::JointStateConstPtr& msg);
-  void asyncThread_();
+  ros::NodeHandle nh;
+  ros::NodeHandle priv_nh;
+  ros::Subscriber joint_state_sub;
+  boost::thread* link_state_thread;
+  boost::thread* collision_state_thread;
+  boost::thread* visualization_thread;
 
-private:
-  // from the constructor
-  ros::NodeHandle nh_;
-  ros::NodeHandle priv_nh_;
-  const std::string joint_states_topic_;
-  const std::string joint_link_state_topic_;
-  double async_thread_rate_limit_;
-  int num_joints_;
-  int num_links_;
-  const std::string* joint_names_; // len: num_joints_
-  const int* joint_child_link_idx_; // len: num_joints_
-  const int* joint_parent_link_idx_; // len: num_joints_
-  const double* link_transform_translation_only_; // len: num_links_*3
-  const double* link_transform_quaternion_only_; // len: num_links_*4
-  const int* link_can_skip_translation_; // len: num_links_
-  const int* link_can_skip_rotation_; // len: num_links_
-  // internal
-  ros::Publisher joint_link_state_pub_;
-  std::mutex msg_mtx_;
-  sensor_msgs::JointStateConstPtr last_joint_state_msg_;
-  bool joint_state_is_dirty_;
-  std::mutex async_mtx_;
-  JointLinkStatePtr async_state_;
-  boost::thread* async_thread_;
-  ros::Subscriber joint_states_sub_;
-  int* joint_idx_to_msg_idx_; // len: num_joints_
+  std::mutex int_collision_manager_mtx;
+  DynamicAABBTreeCollisionManager int_collision_manager;
+  std::vector<CollisionObject*> int_collision_objects;
+
+  std::mutex ext_collision_manager_mtx;
+  DynamicAABBTreeCollisionManager ext_collision_manager;
+  std::vector<CollisionObject*> ext_collision_objects;
+
+  std::mutex last_joint_state_mtx;
+  sensor_msgs::JointStateConstPtr last_joint_state_msg;
+  int joint_idx_to_msg_idx[robot::num_joints];
+
+  std::mutex last_joint_link_state_mtx;
+  JointLinkStatePtr last_joint_link_state_msg;
+
+  std::mutex last_joint_link_collision_state_mtx;
+  JointLinkCollisionStatePtr last_joint_link_collision_state_msg;
+
 };
 
 } // namespace salih_marangoz_thesis
