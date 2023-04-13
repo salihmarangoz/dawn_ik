@@ -56,53 +56,6 @@ void CeresIK::loop()
   ros::Rate r(500);
   while (ros::ok())
   {
-    // ROBOT MONITOR TEST
-    // ros::spinOnce();
-    // JointLinkStateConstPtr state = robot_monitor->getJointLinkState();
-    // if (state == nullptr) continue;
-    // const std::vector<double> &glt = state->link_state.transformations;
-
-    // auto timestamp = ros::Time::now();
-    // visualization_msgs::MarkerArray arr;
-    // for (int i=0; i<utils::countOf(robot::collisions); i++)
-    // {
-    //   visualization_msgs::Marker marker;
-    //   const robot::Collision &obj = robot::collisions[i];
-
-    //   double obj_pos[3];
-    //   double result[3];
-    //   obj_pos[0] = obj.x;
-    //   obj_pos[1] = obj.y;
-    //   obj_pos[2] = obj.z;
-    //   utils::computeLinkTranslation(&(glt[7*obj.link_idx]),
-    //                                 &(glt[7*obj.link_idx+3]),
-    //                                 obj_pos,
-    //                                 result);
-
-    //   marker.header.frame_id = "world";
-    //   marker.header.stamp = timestamp;
-    //   marker.ns = "collisions";
-    //   marker.id = i;
-    //   marker.type = visualization_msgs::Marker::SPHERE;
-    //   marker.action = visualization_msgs::Marker::ADD;
-    //   marker.pose.position.x = result[0];
-    //   marker.pose.position.y = result[1];
-    //   marker.pose.position.z = result[2];
-    //   marker.pose.orientation.x = 0;
-    //   marker.pose.orientation.y = 0;
-    //   marker.pose.orientation.z = 0;
-    //   marker.pose.orientation.w = 1.0;
-    //   marker.scale.x = obj.radius*2;
-    //   marker.scale.y = obj.radius*2;
-    //   marker.scale.z = obj.radius*2;
-    //   marker.color.a = 0.75; // Don't forget to set the alpha!
-    //   marker.color.r = 0.0;
-    //   marker.color.g = 0.0;
-    //   marker.color.b = 1.0;
-    //   arr.markers.push_back(marker);
-    // }
-    // marker_array_pub.publish(arr);
-
     if (!update(robot_state))
     {
       ROS_ERROR("Can't find a solution!");

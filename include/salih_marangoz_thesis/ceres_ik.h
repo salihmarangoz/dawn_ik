@@ -381,8 +381,8 @@ struct CollisionAvoidanceGoal {
     const double dist_threshold = 0.05; // TODO: move to robot conf
 
     // Compute collision positions
-    T collision_pos[3*utils::countOf(robot::collisions)]; // w.r.t. world frame
-    for (int i=0; i<utils::countOf(robot::collisions); i++)
+    T collision_pos[3*robot::num_objects]; // w.r.t. world frame
+    for (int i=0; i<robot::num_objects; i++)
     {
     const robot::Collision &obj = robot::collisions[i];
 
@@ -401,7 +401,7 @@ struct CollisionAvoidanceGoal {
     // {
     //   for (int j=0; j<robot::num_links; j++)
     //   {
-    //     for (int k=0; k<utils::countOf(robot::collisions); k++)
+    //     for (int k=0; k<robot::num_objects; k++)
     //     {
     //       if (robot::processed_acm[i][j] == 0)
     //       {
@@ -418,9 +418,9 @@ struct CollisionAvoidanceGoal {
     // }
 
     // TODO: check all pairs
-    for (int i=0; i<utils::countOf(robot::collisions); i++)
+    for (int i=0; i<robot::num_objects; i++)
     {
-      for (int j=0; j<utils::countOf(robot::collisions); j++)
+      for (int j=0; j<robot::num_objects; j++)
       {
         int k = i*COUNTOF(robot::collisions) + j;
         residuals[k] = T(0.0);
