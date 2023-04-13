@@ -76,9 +76,9 @@ add_message_files(
   DIRECTORY msg
   FILES
   LinkState.msg
-  ProximityState.msg
+  CollisionState.msg
   JointLinkState.msg
-  JointLinkProximityState.msg
+  JointLinkCollisionState.msg
   SolverSummary.msg
 )
 
@@ -147,51 +147,31 @@ include_directories(
   ${hpp-fcl_INCLUDE_DIRS}
 )
 
-
-## ceres_ik library
-add_library(ceres_ik
+## ceres_ik_node executable
+add_executable(ceres_ik_node 
+  src/ceres_ik_node.cpp
   src/ceres_ik.cpp
   src/joint_trajectory_control_interface.cpp
   src/robot_monitor.cpp
-#  src/proximity_monitor.cpp
 )
-add_dependencies(ceres_ik ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ceres_ik
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  Ceres::ceres
-)
-
-## ceres_ik_node executable
-add_executable(ceres_ik_node src/ceres_ik_node.cpp)
 add_dependencies(ceres_ik_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ceres_ik_node ceres_ik)
-
-
-## robot_parser library
-add_library(robot_parser
-  src/robot_parser.cpp
-  src/yaml.cpp
-)
-add_dependencies(robot_parser ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(robot_parser
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
-
-## robot_parser_node executable
-add_executable(robot_parser_node src/robot_parser_node.cpp)
-add_dependencies(robot_parser_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(robot_parser_node robot_parser)
-
-
-add_executable(test_node src/test.cpp)
-add_dependencies(test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_node   
+target_link_libraries(ceres_ik_node
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   Ceres::ceres
   ${hpp-fcl_LIBRARIES}
+)
+
+## robot_parser_node executable
+add_executable(robot_parser_node 
+  src/robot_parser_node.cpp
+  src/robot_parser.cpp
+  src/yaml.cpp
+)
+add_dependencies(robot_parser_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robot_parser_node
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 
@@ -240,6 +220,15 @@ target_link_libraries(test_node
 #############
 ## Testing ##
 #############
+
+add_executable(test_node src/test.cpp)
+add_dependencies(test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_node   
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  Ceres::ceres
+  ${hpp-fcl_LIBRARIES}
+)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_salih_marangoz_thesis.cpp)
