@@ -120,7 +120,7 @@ const int object_can_skip_translation[10] = {0,0,0,0,0,0,0,0,0,1}; // bool
 const int object_can_skip_rotation[10] = {1,1,1,1,1,1,1,1,1,1}; // bool
 
 // Collision Objects Function
-const int inflation = 0.2;
+const double inflation = 0.15;
 static inline std::vector<CollisionObject*> getRobotCollisionObjects()
 {
   std::vector<CollisionObject*> objects;
