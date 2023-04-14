@@ -134,21 +134,32 @@ proximity:
   objects:
     - link: "link1"
       shape: "Sphere(0.1)"
-      
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
     - link: "link2"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3]
-      rotation: [0.1, 0.2, 0.3]
-
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
     - link: "link3"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3]
-      rotation: [0.1, 0.2, 0.3]
-
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
     - link: "link4"
       shape: "Sphere(0.1)"
-      translation: [0.1, 0.2, 0.3]
-      rotation: [0.1, 0.2, 0.3]
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
+    - link: "link5"
+      shape: "Sphere(0.1)"
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
+    - link: "link6"
+      shape: "Sphere(0.1)"
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
+    - link: "link7"
+      shape: "Sphere(0.1)"
+      translation: [0.01, 0.01, 0.01]
+      rotation: [0.01, 0.01, 0.01]
 
 
 #########################################################
