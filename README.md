@@ -38,10 +38,14 @@ Make sure the robot description is loaded. (if the simulation is running then it
 
 ```bash
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm7
+# or
+$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=horti
 ```
 
 ### Solver/Controller
 
 ```bash
-$ roslaunch salih_marangoz_thesis ceres_ik_node.launch
+$ roslaunch salih_marangoz_thesis xarm7_solver.launch
+# or
+$ roslaunch salih_marangoz_thesis horti_solver.launch
 ```

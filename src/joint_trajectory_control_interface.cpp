@@ -101,8 +101,8 @@ JointTrajectoryControlInterface::stateCallback_(const control_msgs::JointTraject
 {
   ROS_INFO_ONCE("JointTrajectoryControlInterface: initialized!");
   // init command_ (... mostly)
-  if (state_ == nullptr)
-  {
+  //if (state_ == nullptr)
+  //{
     //command_.header.frame_id = msg->header.frame_id; // not used
     command_.joint_names = msg->joint_names;
     trajectory_msgs::JointTrajectoryPoint p;
@@ -119,7 +119,7 @@ JointTrajectoryControlInterface::stateCallback_(const control_msgs::JointTraject
       for (int i=0; i<msg->joint_names.size(); i++) p.positions.push_back(0.0);
     }
     command_.points.push_back(p);
-  }
+  //}
 
   state_ = msg;
 }

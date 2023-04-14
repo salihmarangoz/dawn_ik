@@ -45,10 +45,6 @@ public:
   Eigen::Vector3d endpoint;
   Eigen::Quaterniond direction;
 
-  ros::Publisher vis_pub;
-
-  ros::Publisher marker_array_pub;
-
   CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   moveit::core::RobotState getCurrentRobotState();
   void loop();
@@ -114,7 +110,7 @@ struct CenterJointsGoal {
 };
 
 struct EndpointGoal {
-  EndpointGoal(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions) : endpoint(endpoint), direction(direction), joint_idx_to_target_idx(joint_idx_to_target_idx), variable_positions(variable_positions) {}
+  EndpointGoal(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const double* variable_positions) : endpoint(endpoint), direction(direction), variable_positions(variable_positions) {}
 
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
@@ -140,7 +136,7 @@ struct EndpointGoal {
     {
       int child_link_idx = robot::joint_child_link_idx[i];
       int parent_link_idx = robot::joint_parent_link_idx[i];
-      int target_idx = joint_idx_to_target_idx[i];
+      int target_idx = robot::joint_idx_to_target_idx[i];
       int variable_idx = robot::joint_idx_to_variable_idx[i];
 
       // init
@@ -256,21 +252,20 @@ struct EndpointGoal {
 
    // Factory to hide the construction of the CostFunction object from
    // the client code.
-   static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
+   static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const double* variable_positions)
    {
      return (new ceres::AutoDiffCostFunction<EndpointGoal, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new EndpointGoal(endpoint, direction, joint_idx_to_target_idx, variable_positions)));
+                 new EndpointGoal(endpoint, direction, variable_positions)));
    }
 
   const Eigen::Vector3d endpoint;
   const Eigen::Quaterniond direction;
-  const int (&joint_idx_to_target_idx)[robot::num_joints];
   const double* variable_positions;
 };
 
 /*
 struct CollisionAvoidanceGoal {
-  CollisionAvoidanceGoal(const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions) : joint_idx_to_target_idx(joint_idx_to_target_idx), variable_positions(variable_positions) {}
+  CollisionAvoidanceGoal(const double* variable_positions) : variable_positions(variable_positions) {}
 
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
@@ -296,7 +291,7 @@ struct CollisionAvoidanceGoal {
     {
       int child_link_idx = robot::joint_child_link_idx[i];
       int parent_link_idx = robot::joint_parent_link_idx[i];
-      int target_idx = joint_idx_to_target_idx[i];
+      int target_idx = robot::joint_idx_to_target_idx[i];
       int variable_idx = robot::joint_idx_to_variable_idx[i];
 
       // init
@@ -446,14 +441,13 @@ struct CollisionAvoidanceGoal {
 
    // Factory to hide the construction of the CostFunction object from
    // the client code.
-   static ceres::CostFunction* Create(const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions)
+   static ceres::CostFunction* Create(const double* variable_positions)
    {
      //return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new CollisionAvoidanceGoal(joint_idx_to_target_idx, variable_positions)));
+                 new CollisionAvoidanceGoal(variable_positions)));
    }
 
-  const int (&joint_idx_to_target_idx)[robot::num_joints];
   const double* variable_positions;
 };*/
 

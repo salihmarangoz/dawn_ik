@@ -19,11 +19,8 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
 
   // TODO
   endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &CeresIK::subscriberCallback, this);
-  vis_pub = priv_nh.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
 
-  marker_array_pub = priv_nh.advertise<visualization_msgs::MarkerArray>("visualization_array", 0);
-
-  joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh, "/xarm/xarm7_traj_controller");
+  joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh);
   joint_controller->start("");
 
   loop(); // TODO
@@ -52,7 +49,6 @@ void CeresIK::loop()
 {
   moveit::core::RobotState robot_state = getCurrentRobotState();
 
-
   ros::Rate r(500);
   while (ros::ok())
   {
@@ -74,8 +70,8 @@ void CeresIK::loop()
     r.sleep();
 
     // TODO: control robot
-    if (controller_state!=nullptr)
-      robot_state.setVariablePositions(controller_state->actual.positions.data());
+    //if (controller_state!=nullptr)
+    //  robot_state.setVariablePositions(controller_state->actual.positions.data());
   }
 }
 
@@ -128,15 +124,6 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     target_centers[i] = 0.5 * (robot::joint_max_position[joint_i] + robot::joint_min_position[joint_i]);
   }
 
-  // Generate joint_idx_to_target_idx
-  int joint_idx_to_target_idx[robot::num_joints];
-  for (int i=0; i<robot::num_joints; i++) joint_idx_to_target_idx[i] = -1; // set to -1 by default
-  for (int i=0; i<robot::num_targets; i++)
-  {
-    const int joint_i = robot::target_idx_to_joint_idx[i];
-    joint_idx_to_target_idx[joint_i] = i;
-  }
-
   // TODO: Find the partial kinematic tree for the endpoint goal
   // int current_joint_idx = robot::endpoint_joint_idx;
   // .....
@@ -144,13 +131,11 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
 
   ceres::Problem problem;
 
-  //Eigen::Vector3d endpoint;
-  //endpoint << 0.3 , 0.2 , 0.2;
-  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, joint_idx_to_target_idx, variable_positions);
+  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, variable_positions);
   ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
 /*
-  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(joint_idx_to_target_idx, variable_positions);
+  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions);
   //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
 */
@@ -197,12 +182,10 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     const int joint_idx = robot::target_idx_to_joint_idx[i];
     const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
     variable_positions[variable_idx] = target_positions[i];
+
+    // int state_idx = current_state.getVariablePosition(robot::joint_names[joint_idx]) !!!!!!!!!!!
   }
   current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
-
-  // collision debug
-  //auto marker_array = utils::visualizeCollisions<double>(current_state, joint_idx_to_target_idx, target_positions, variable_positions);
-  //marker_array_pub.publish(marker_array);
 
   return summary.IsSolutionUsable();
 }

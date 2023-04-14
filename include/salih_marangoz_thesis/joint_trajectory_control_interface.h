@@ -15,7 +15,7 @@ namespace salih_marangoz_thesis
 class JointTrajectoryControlInterface
 {
 public:
-  JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic); // TODO: mimic rqt_joint_trajectory_controller ? 
+  JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic = "joint"); // TODO: mimic rqt_joint_trajectory_controller ? 
   bool start(const std::string& controller);
   bool stop();
   void setSpeedScaling(double scale); // scale: [0.0-1.0]
