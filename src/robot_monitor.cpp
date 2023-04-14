@@ -14,7 +14,7 @@ namespace salih_marangoz_thesis
 
 RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh)
 {
-  visualization_pub = priv_nh.advertise<visualization_msgs::Marker>( "robot_monitor_visualization", 0 );
+  visualization_pub = priv_nh.advertise<visualization_msgs::MarkerArray>( "robot_monitor_visualization", 0 );
   joint_state_sub = nh.subscribe("/joint_states", 2, &RobotMonitor::jointStateCallback, this);
   link_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateLinkThread, this));
   collision_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateCollisionThread, this));
@@ -126,6 +126,8 @@ RobotMonitor::computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg)
   JointLinkStatePtr state = boost::make_shared<JointLinkState>();
   state->joint_state = *msg; // copy
   state->header = msg->header; // copy
+
+  state->header.frame_id = "world"; // TODO
 
   // recompute kinematic chain
   std::vector<double> &global_link_transformations = state->link_state.transformations; // copy reference
@@ -248,10 +250,10 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
     // compute rotation
     if (robot::object_can_skip_rotation[object_idx])
     {
-      final_object_rotation[3] = link_translation[3];
-      final_object_rotation[4] = link_translation[4];
-      final_object_rotation[5] = link_translation[5];
-      final_object_rotation[6] = link_translation[6];
+      final_object_rotation[0] = link_translation[3];
+      final_object_rotation[1] = link_translation[4];
+      final_object_rotation[2] = link_translation[5];
+      final_object_rotation[3] = link_translation[6];
     }
     else
     {
@@ -284,6 +286,7 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
 
   // ========================= Visualize internal collision objects =========================
   int id_counter=0;
+  arr.markers.reserve(robot::num_objects);
   for (int i=0; i<robot::num_objects; i++)
   {
     CollisionObject* curr_object = int_collision_objects[i];
@@ -296,7 +299,7 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
 
       visualization_msgs::Marker marker;
       marker.header = msg->header;
-      marker.ns = "robot_collision_body";
+      marker.ns = std::string("robot_collision_body");
       marker.id = id_counter++;
       marker.type = visualization_msgs::Marker::SPHERE;
       marker.scale.x = (shape.radius - robot::inflation)*2;
@@ -337,7 +340,6 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
       ROS_ERROR_THROTTLE(1.0, "Unknown collision shape. Can't visualize!");
       continue;
     }
-
   }
 
   // ========================= Visualize internal-internal collision pairs =========================

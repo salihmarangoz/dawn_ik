@@ -13,6 +13,8 @@
 # Starting from this endpoint to the root, all joints will be the optimization parameter
 endpoint_link: "link_eef"
 
+world_frame: "world"
+
 #DONE
 # Excludes joints from optimization and control 
 exclude_joints:
