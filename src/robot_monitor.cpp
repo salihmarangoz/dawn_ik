@@ -399,9 +399,9 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
   internal_collision_marker.type = visualization_msgs::Marker::LINE_LIST;
   internal_collision_marker.action = visualization_msgs::Marker::ADD;
   internal_collision_marker.color.a = 1.0; // Don't forget to set the alpha!
-  internal_collision_marker.color.r = 0.0;
+  internal_collision_marker.color.r = 1.0;
   internal_collision_marker.color.g = 0.0;
-  internal_collision_marker.color.b = 1.0;
+  internal_collision_marker.color.b = 0.0;
   internal_collision_marker.pose.orientation.w = 1.0; // bug?
   internal_collision_marker.scale.x = 0.005;
   internal_collision_marker.points.reserve(msg->collision_state.int_pair_a.size()*2);
