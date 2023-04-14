@@ -130,7 +130,7 @@ minimal_displacement:
 proximity:
   weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
-  inflation: 0.15
+  inflation: 0.075
   objects:
     - link: "link_base"
       shape: "Sphere(0.05)"

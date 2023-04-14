@@ -30,6 +30,21 @@ using namespace std::chrono;
 namespace salih_marangoz_thesis
 {
 
+struct CollisionCallBackCollect : hpp::fcl::CollisionCallBackBase {
+  typedef std::pair<CollisionObject*, CollisionObject*> CollisionPair;
+  CollisionCallBackCollect();
+  bool collide(CollisionObject* o1, CollisionObject* o2);
+  size_t numCollisionPairs() const;
+  const std::vector<CollisionPair>& getCollisionPairs() const;
+  void init();
+  bool exist(const CollisionPair& pair) const;
+  virtual ~CollisionCallBackCollect(){};
+
+ protected:
+  std::vector<CollisionPair> collision_pairs;
+  size_t max_size;
+};
+
 class RobotMonitor
 {
 public:

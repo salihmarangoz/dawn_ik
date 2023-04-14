@@ -3,6 +3,30 @@
 namespace salih_marangoz_thesis
 {
 
+CollisionCallBackCollect::CollisionCallBackCollect(){}
+
+bool CollisionCallBackCollect::collide(CollisionObject* o1, CollisionObject* o2) {
+  collision_pairs.push_back(std::make_pair(o1, o2));
+  return false;
+}
+
+size_t CollisionCallBackCollect::numCollisionPairs() const {
+  return collision_pairs.size();
+}
+
+const std::vector<CollisionCallBackCollect::CollisionPair>&
+CollisionCallBackCollect::getCollisionPairs() const {
+  return collision_pairs;
+}
+
+void CollisionCallBackCollect::init() { collision_pairs.clear(); }
+
+bool CollisionCallBackCollect::exist(const CollisionPair& pair) const {
+  return std::find(collision_pairs.begin(), collision_pairs.end(), pair) != collision_pairs.end();
+}
+
+////////////////////////////////////////////////////////////////////
+
 // const JointLinkStateConstPtr
 // RobotMonitor::getJointLinkState()
 // {
@@ -216,7 +240,15 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
   state->link_state = msg->link_state; // copy
   state->header = msg->header; // copy
 
-  if (int_collision_objects.size() <= 0) int_collision_objects = robot::getRobotCollisionObjects(); // init int_collision_objects if not initialized
+  // init int_collision_objects if not initialized
+  if (int_collision_objects.size() <= 0)
+  {
+    int_collision_objects = robot::getRobotCollisionObjects();
+    for (int i=0; i<int_collision_objects.size(); i++)
+    {
+      int_collision_objects[i]->setUserData((void*)i);
+    }
+  }
 
   // update internal collision objects
   // TODO: optimize using these, maybe? robot::object_can_skip_rotation[i]; ;
@@ -271,6 +303,23 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
   // TODO: handle external objects
 
   // TODO: find self collision pairs
+  CollisionCallBackCollect self_collision_callback;
+  int_collision_manager.collide(&self_collision_callback);
+  state->collision_state.int_pair_a.reserve(self_collision_callback.numCollisionPairs()); // uses more memory, but faster
+  state->collision_state.int_pair_b.reserve(self_collision_callback.numCollisionPairs()); // uses more memory, but faster
+  for (auto &pair : self_collision_callback.getCollisionPairs())
+  {
+    int first_object_idx = intptr_t(pair.first->getUserData());
+    int second_object_idx = intptr_t(pair.second->getUserData());
+    int first_link_idx = robot::object_idx_to_link_idx[first_object_idx];
+    int second_link_idx = robot::object_idx_to_link_idx[second_object_idx];
+
+    if (first_link_idx == second_link_idx) continue; // skip collisions in the same link
+    if (robot::acm[first_link_idx][second_link_idx]) continue; // skip if the collision is allowed
+
+    state->collision_state.int_pair_a.push_back(first_object_idx);
+    state->collision_state.int_pair_b.push_back(second_object_idx);
+  }
 
   // TODO: find external collision pairs
 
@@ -343,7 +392,39 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
   }
 
   // ========================= Visualize internal-internal collision pairs =========================
-  // TODO
+  visualization_msgs::Marker internal_collision_marker;
+  internal_collision_marker.header = msg->header;
+  internal_collision_marker.ns = std::string("internal_collision");
+  internal_collision_marker.id = 0;
+  internal_collision_marker.type = visualization_msgs::Marker::LINE_LIST;
+  internal_collision_marker.action = visualization_msgs::Marker::ADD;
+  internal_collision_marker.color.a = 1.0; // Don't forget to set the alpha!
+  internal_collision_marker.color.r = 0.0;
+  internal_collision_marker.color.g = 0.0;
+  internal_collision_marker.color.b = 1.0;
+  internal_collision_marker.pose.orientation.w = 1.0; // bug?
+  internal_collision_marker.scale.x = 0.005;
+  internal_collision_marker.points.reserve(msg->collision_state.int_pair_a.size()*2);
+  for (int i=0; i<msg->collision_state.int_pair_a.size(); i++)
+  {
+    int object_idx_a = msg->collision_state.int_pair_a[i];
+    int object_idx_b = msg->collision_state.int_pair_b[i];
+    const auto& translation_a = int_collision_objects[object_idx_a]->getTranslation();
+    const auto& translation_b = int_collision_objects[object_idx_b]->getTranslation();
+
+    geometry_msgs::Point point_a;
+    point_a.x = translation_a.x();
+    point_a.y = translation_a.y();
+    point_a.z = translation_a.z();
+    internal_collision_marker.points.push_back(point_a);
+
+    geometry_msgs::Point point_b;
+    point_b.x = translation_b.x();
+    point_b.y = translation_b.y();
+    point_b.z = translation_b.z();
+    internal_collision_marker.points.push_back(point_b);
+  }
+  arr.markers.push_back(internal_collision_marker);
 
   // ========================= Visualize external collision objects =========================
 
