@@ -268,7 +268,7 @@ struct EndpointGoal {
   const double* variable_positions;
 };
 
-
+/*
 struct CollisionAvoidanceGoal {
   CollisionAvoidanceGoal(const int (&joint_idx_to_target_idx)[robot::num_joints], const double* variable_positions) : joint_idx_to_target_idx(joint_idx_to_target_idx), variable_positions(variable_positions) {}
 
@@ -455,7 +455,7 @@ struct CollisionAvoidanceGoal {
 
   const int (&joint_idx_to_target_idx)[robot::num_joints];
   const double* variable_positions;
-};
+};*/
 
 
 } // namespace salih_marangoz_thesis

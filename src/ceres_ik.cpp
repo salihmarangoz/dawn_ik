@@ -149,11 +149,11 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, joint_idx_to_target_idx, variable_positions);
   ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
-
+/*
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(joint_idx_to_target_idx, variable_positions);
   //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
-
+*/
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
   ceres::SoftLOneLoss *center_joints_loss = new ceres::SoftLOneLoss(0.005); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);

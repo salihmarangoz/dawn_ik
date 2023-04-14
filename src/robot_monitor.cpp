@@ -299,9 +299,9 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
       marker.ns = "robot_collision_body";
       marker.id = id_counter++;
       marker.type = visualization_msgs::Marker::SPHERE;
-      marker.scale.x = shape.radius*2;
-      marker.scale.y = shape.radius*2;
-      marker.scale.z = shape.radius*2;
+      marker.scale.x = (shape.radius - robot::inflation)*2;
+      marker.scale.y = (shape.radius - robot::inflation)*2;
+      marker.scale.z = (shape.radius - robot::inflation)*2;
       marker.pose.position.x = curr_translation.x();
       marker.pose.position.y = curr_translation.y();
       marker.pose.position.z = curr_translation.z();
