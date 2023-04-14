@@ -130,18 +130,13 @@ inline static void setProblemConstraints(ceres::Problem &problem, double *target
 // Solver Options
 static inline void setSolverOptions(ceres::Solver::Options &options)
 {
-  options.eta = DBL_MIN;
-  options.function_tolerance = DBL_MIN;
-  options.gradient_tolerance = DBL_MIN;
   options.jacobi_scaling = true;
   options.line_search_direction_type = BFGS;
   options.linear_solver_type = DENSE_QR;
   options.max_solver_time_in_seconds = 0.01;
   options.minimizer_progress_to_stdout = false;
   options.minimizer_type = LINE_SEARCH;
-  options.parameter_tolerance = DBL_MIN;
   options.use_approximate_eigenvalue_bfgs_scaling = true;
-  options.use_inner_iterations = true;
 }
 
 } // namespace robot

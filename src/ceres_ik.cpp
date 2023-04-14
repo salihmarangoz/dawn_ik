@@ -189,7 +189,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   robot::setSolverOptions(options);
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  std::cout << summary.FullReport() << "\n";
+  //std::cout << summary.FullReport() << "\n";
 
   // Update robot state
   for (int i=0; i<robot::num_targets; i++)

@@ -160,7 +160,7 @@ RobotMonitor::computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg)
     {
       utils::computeLinkTranslation(&(global_link_transformations[7*parent_link_idx]), // translation
                                     &(global_link_transformations[7*parent_link_idx+3]),  // rotation
-                                    &(robot::link_transform_translation_only[3*child_link_idx][0]), 
+                                    &(robot::link_transform_translation_only[child_link_idx][0]), 
                                     &(global_link_transformations[7*child_link_idx]));
     }
 
@@ -177,7 +177,7 @@ RobotMonitor::computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg)
       else // if link has rotation and joint has rotation, then we need to rotate using both
       {
         utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]), 
-                                  &(robot::link_transform_quaternion_only[4*child_link_idx][0]), 
+                                  &(robot::link_transform_quaternion_only[child_link_idx][0]), 
                                   joint_val, 
                                   &(global_link_transformations[7*child_link_idx+3]));
       }
@@ -194,7 +194,7 @@ RobotMonitor::computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg)
       else // if link has a rotation, only compute that
       {
         utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]), // global parent rotation
-                                  &(robot::link_transform_quaternion_only[4*child_link_idx][0]), // local child rotation
+                                  &(robot::link_transform_quaternion_only[child_link_idx][0]), // local child rotation
                                   &(global_link_transformations[7*child_link_idx+3]));  // global child rotation
       }
 
@@ -229,7 +229,7 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
     const double* object_rotation = &(robot::object_transform_quaternion_only[object_idx][0]);
 
     double final_object_translation[3];
-    double final_object_rotation[3];
+    double final_object_rotation[4];
 
     robot::object_transform_translation_only[object_idx];
 

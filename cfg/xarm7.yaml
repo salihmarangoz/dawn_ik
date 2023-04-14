@@ -49,14 +49,13 @@ solver_options:
   jacobi_scaling: true
   minimizer_progress_to_stdout: false
   line_search_direction_type: BFGS
-  minimizer_progress_to_stdout: false
-  use_inner_iterations: true # COORDINATE_DESCENT
+  #use_inner_iterations: true # COORDINATE_DESCENT
   use_approximate_eigenvalue_bfgs_scaling: true
   max_solver_time_in_seconds: 0.01
-  eta: DBL_MIN
-  function_tolerance: DBL_MIN
-  gradient_tolerance: DBL_MIN
-  parameter_tolerance: DBL_MIN
+  #eta: DBL_MIN
+  #function_tolerance: DBL_MIN
+  #gradient_tolerance: DBL_MIN
+  #parameter_tolerance: DBL_MIN
 
 #########################################################
 ### Objective: Look at Goal #############################
