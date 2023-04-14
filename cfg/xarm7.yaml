@@ -132,35 +132,40 @@ proximity:
   loss: "TrivialLoss()"
   inflation: 0.2
   objects:
-    - link: "link1"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
-    - link: "link2"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
-    - link: "link3"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
-    - link: "link4"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
-    - link: "link5"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
-    - link: "link6"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
-    - link: "link7"
-      shape: "Sphere(0.1)"
-      translation: [0.01, 0.01, 0.01]
-      rotation: [0.01, 0.01, 0.01]
+    - link: "link_base"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.05]
+    - link: "link_base"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.15]
+    - link: "link_base"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.25]
 
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.1, 0.08]
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.08]
+
+    - link: "link5"
+      shape: "Sphere(0.04)"
+      translation: [0.0, 0.05, 0.0]
+    - link: "link5"
+      shape: "Sphere(0.04)"
+      translation: [0.0, 0.04, -0.08]
+
+    - link: "link6"
+      shape: "Sphere(0.04)"
+      translation: [0.0, 0.0, 0.01]
+    - link: "link6"
+      shape: "Sphere(0.04)"
+      translation: [0.08, 0.0, 0.01]
+
+    - link: "link7"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
 
 #########################################################
 ### Extra ###############################################

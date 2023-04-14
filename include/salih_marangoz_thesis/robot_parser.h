@@ -130,7 +130,7 @@ public:
   std::string removeNonNumericalChars(const std::string &str)
   {
       std::string result;
-      for (char c : str) if (std::isdigit(c) || c == '.') result.push_back(c);
+      for (char c : str) if (std::isdigit(c) || c == '.' || c == '-') result.push_back(c);
       return result;
   }
 

@@ -2,7 +2,7 @@
 
 <launch>
 
-  <node name="salih_marangoz_thesis_node" pkg="salih_marangoz_thesis" type="node">
+  <node name="salih_marangoz_thesis_node" pkg="salih_marangoz_thesis" type="ceres_ik_node">
 
   </node>
 
