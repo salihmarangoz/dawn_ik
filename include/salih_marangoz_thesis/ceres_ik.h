@@ -147,178 +147,39 @@ struct EndpointGoal {
   const double* variable_positions;
 };
 
-/*
+
 struct CollisionAvoidanceGoal {
   CollisionAvoidanceGoal(const double* variable_positions) : variable_positions(variable_positions) {}
 
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
-    T global_link_translations[3*robot::num_links];
-    T global_link_rotations[4*robot::num_links];
+    // Compute link transforms
+    T global_link_translations[robot::num_links*3];
+    T global_link_rotations[robot::num_links*4];
+    utils::computeGlobalLinkTransforms(target_values, variable_positions, global_link_translations, global_link_rotations);
 
-    // TODO: convert to function
-    T link_translations[3*robot::num_links];
-    T link_rotations[4*robot::num_links];
-    for (int i=0; i<robot::num_links; i++)
-    {
-      link_translations[3*i+0] = T(robot::link_transform_translation_only[i][0]);
-      link_translations[3*i+1] = T(robot::link_transform_translation_only[i][1]);
-      link_translations[3*i+2] = T(robot::link_transform_translation_only[i][2]);
-      link_rotations[4*i+0] = T(robot::link_transform_quaternion_only[i][0]);
-      link_rotations[4*i+1] = T(robot::link_transform_quaternion_only[i][1]);
-      link_rotations[4*i+2] = T(robot::link_transform_quaternion_only[i][2]);
-      link_rotations[4*i+3] = T(robot::link_transform_quaternion_only[i][3]);
-    }
-
-    for (int i=0; i<robot::num_joints; i++)
-    {
-      int child_link_idx = robot::joint_child_link_idx[i];
-      int parent_link_idx = robot::joint_parent_link_idx[i];
-      int target_idx = robot::joint_idx_to_target_idx[i];
-      int variable_idx = robot::joint_idx_to_variable_idx[i];
-
-      // init
-      if (parent_link_idx == -1)
-      {
-        // TODO: convert to function
-        global_link_translations[3*child_link_idx+0] = T(0.0);
-        global_link_translations[3*child_link_idx+1] = T(0.0);
-        global_link_translations[3*child_link_idx+2] = T(0.0);
-        global_link_rotations[4*child_link_idx+0] = T(1.0);
-        global_link_rotations[4*child_link_idx+1] = T(0.0);
-        global_link_rotations[4*child_link_idx+2] = T(0.0);
-        global_link_rotations[4*child_link_idx+3] = T(0.0);
-        continue;
-      }
-
-      // Translation
-      if (robot::link_can_skip_translation[child_link_idx])
-      {
-          // TODO: convert to function
-          global_link_translations[3*child_link_idx+0] = global_link_translations[3*parent_link_idx+0];
-          global_link_translations[3*child_link_idx+1] = global_link_translations[3*parent_link_idx+1];
-          global_link_translations[3*child_link_idx+2] = global_link_translations[3*parent_link_idx+2];
-      }
-      else
-      {
-        utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), 
-                                      &(global_link_rotations[4*parent_link_idx]), 
-                                      &(link_translations[3*child_link_idx]), 
-                                      &(global_link_translations[3*child_link_idx]));
-      }
-
-      if (variable_idx!=-1) // if joint can move
-      { 
-        T joint_val;
-        if (target_idx!=-1)
-        { // this is an optimization target
-          joint_val = target_values[target_idx];
-        }
-        else
-        { // this is a joint value but not an optimization target
-          joint_val = T(variable_positions[variable_idx]);
-        }
-
-        if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then only rotate using the joint position
-        {
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]),
-                                    joint_val, 
-                                    &(global_link_rotations[4*child_link_idx]));
-        }
-        else // if link has rotation and joint has rotation, then we need to rotate using both
-        {
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
-                                    &(link_rotations[4*child_link_idx]), 
-                                    joint_val, 
-                                    &(global_link_rotations[4*child_link_idx]));
-        }
-      }
-      else // if joint is static
-      {
-        if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
-        {
-          // TODO: convert to function
-          global_link_rotations[4*child_link_idx+0] = global_link_rotations[4*parent_link_idx+0];
-          global_link_rotations[4*child_link_idx+1] = global_link_rotations[4*parent_link_idx+1];
-          global_link_rotations[4*child_link_idx+2] = global_link_rotations[4*parent_link_idx+2];
-          global_link_rotations[4*child_link_idx+3] = global_link_rotations[4*parent_link_idx+3];
-        }
-        else // if link has a rotation, only compute that
-        {
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
-                                    &(link_rotations[4*child_link_idx]),
-                                    &(global_link_rotations[4*child_link_idx]));
-        }
-
-      }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-
-    // TODO: testing collision
-    const double dist_threshold = 0.05; // TODO: move to robot conf
-
-    // Compute collision positions
-    T collision_pos[3*robot::num_objects]; // w.r.t. world frame
-    for (int i=0; i<robot::num_objects; i++)
-    {
-    const robot::Collision &obj = robot::collisions[i];
-
-    T obj_pos[3];  // w.r.t. related link frame
-    obj_pos[0] = T(obj.x);
-    obj_pos[1] = T(obj.y);
-    obj_pos[2] = T(obj.z);
-    utils::computeLinkTranslation(&(global_link_translations[3*obj.link_idx]),
-                                  &(global_link_rotations[4*obj.link_idx]),
-                                  obj_pos,
-                                  &(collision_pos[3*i]));
-    }
+    // Compute internal object positions
+    T global_object_translations[robot::num_objects*3];
+    T global_object_rotations[robot::num_objects*4];
+    utils::computeCollisionTransforms((const T*)global_link_translations,
+                                      (const T*)global_link_rotations,
+                                      (const double*)robot::object_transform_translation_only,
+                                      (const double*)robot::object_transform_quaternion_only,
+                                      (const int*)robot::object_can_skip_translation,
+                                      (const int*)robot::object_can_skip_rotation,
+                                      (const int*)robot::object_idx_to_link_idx,
+                                      robot::num_objects,
+                                      (T*)global_object_translations,
+                                      (T*)global_object_rotations);
 
     // Compute collision pairs
-    // for (int i=0; i<robot::num_links; i++)
-    // {
-    //   for (int j=0; j<robot::num_links; j++)
-    //   {
-    //     for (int k=0; k<robot::num_objects; k++)
-    //     {
-    //       if (robot::processed_acm[i][j] == 0)
-    //       {
-    //         const robot::Collision &obj1 = robot::collisions[i];
-    //         const robot::Collision &obj2 = robot::collisions[j];
-            
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
-    //         residuals[k] = utils::distSphere2Sphere(&(collision_pos[3*i]), obj1.radius, &(collision_pos[3*j]), obj2.radius);
-    //         if (residuals[k]>dist_threshold) residuals[k] = T(dist_threshold);
-    //         residuals[k] = dist_threshold - residuals[k];
-    //       }
-    //     }
-    //   }
-    // }
-
-    // TODO: check all pairs
-    for (int i=0; i<robot::num_objects; i++)
-    {
-      for (int j=0; j<robot::num_objects; j++)
-      {
-        int k = i*COUNTOF(robot::collisions) + j;
-        residuals[k] = T(0.0);
-
-        if (i == j) continue;
-        if (robot::collisions[i].link_idx == robot::collisions[j].link_idx) continue;
-        int link_i = robot::collisions[i].link_idx;
-        int link_j = robot::collisions[j].link_idx;
-        if (robot::processed_acm[link_i][link_j] == 1) continue;
-
-        const robot::Collision &obj1 = robot::collisions[i];
-        const robot::Collision &obj2 = robot::collisions[j];
-        residuals[k] = utils::distSphere2Sphere(&(collision_pos[3*i]), obj1.radius, &(collision_pos[3*j]), obj2.radius);
-        
-        if (residuals[k]>dist_threshold) residuals[k] = T(dist_threshold);
-        //if (residuals[k] <= 0) return false;
-        residuals[k] = dist_threshold - residuals[k];
-      }
-    }
+    // TODO: check DynamicAutoDiffCostFunction examples!!!!!!!!!!!!!!
 
     return true; // TODO: maybe return false if there is a collision?
   }
@@ -327,13 +188,13 @@ struct CollisionAvoidanceGoal {
    // the client code.
    static ceres::CostFunction* Create(const double* variable_positions)
    {
-     //return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-     return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, COUNTOF(robot::collisions)*COUNTOF(robot::collisions), robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //return (new ceres::DynamicNumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::DynamicAutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new CollisionAvoidanceGoal(variable_positions)));
    }
 
   const double* variable_positions;
-};*/
+};
 
 
 } // namespace salih_marangoz_thesis
