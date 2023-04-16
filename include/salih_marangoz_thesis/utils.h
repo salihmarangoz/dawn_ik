@@ -17,7 +17,6 @@
 namespace utils
 {
 
-
 // TODO: Eigen::Map<const Eigen::Matrix<T, 4, 1> > point(input_point);
 // https://groups.google.com/g/ceres-solver/c/7ZH21XX6HWU/m/kX-2n4vbAwAJ
 
@@ -88,6 +87,7 @@ inline T distSphere2Sphere(const T* first_sphere_pos, double first_sphere_radius
   return (first_sphere_pos_e - second_sphere_pos_e).norm() - first_sphere_radius - second_sphere_radius;
 }
 
+// doesnt support autodiff!!!
 template<typename T>
 void eulerToMatrix(double a, double b, double c, Eigen::Matrix3d& R) {
   double c1 = cos(a);
@@ -99,6 +99,140 @@ void eulerToMatrix(double a, double b, double c, Eigen::Matrix3d& R) {
 
   R << c1 * c2, -c2 * s1, s2, c3 * s1 + c1 * s2 * s3, c1 * c3 - s1 * s2 * s3,
       -c2 * s3, s1 * s3 - c1 * c3 * s2, c3 * s1 * s2 + c1 * s3, c2 * c3;
+}
+
+// USAGE:
+// T global_link_translations[3*robot::num_links];
+// T global_link_rotations[4*robot::num_links];
+// utils::computeGlobalLinkTransforms(target_values, variable_positions, global_link_translations, global_link_rotations);
+//
+// Set target_positions=nullptr to use without autograd
+template<typename JetT, typename ConstT>
+inline void computeGlobalLinkTransforms(const JetT* target_positions, const ConstT* variable_positions, JetT* global_link_translations, JetT* global_link_rotations)
+{
+  // Get link transformations from robot configuration
+  JetT link_translations[3*robot::num_links];
+  JetT link_rotations[4*robot::num_links];
+  for (int i=0; i<robot::num_links; i++)
+  {
+    link_translations[3*i+0] = JetT(robot::link_transform_translation_only[i][0]);
+    link_translations[3*i+1] = JetT(robot::link_transform_translation_only[i][1]);
+    link_translations[3*i+2] = JetT(robot::link_transform_translation_only[i][2]);
+    link_rotations[4*i+0] = JetT(robot::link_transform_quaternion_only[i][0]);
+    link_rotations[4*i+1] = JetT(robot::link_transform_quaternion_only[i][1]);
+    link_rotations[4*i+2] = JetT(robot::link_transform_quaternion_only[i][2]);
+    link_rotations[4*i+3] = JetT(robot::link_transform_quaternion_only[i][3]);
+  }
+
+  for (int i=0; i<robot::num_joints; i++)
+  {
+    int child_link_idx = robot::joint_child_link_idx[i];
+    int parent_link_idx = robot::joint_parent_link_idx[i];
+    int target_idx = robot::joint_idx_to_target_idx[i];
+    int variable_idx = robot::joint_idx_to_variable_idx[i];
+
+    // init root link
+    if (parent_link_idx == -1)
+    {
+      global_link_translations[3*child_link_idx+0] = JetT(0.0);
+      global_link_translations[3*child_link_idx+1] = JetT(0.0);
+      global_link_translations[3*child_link_idx+2] = JetT(0.0);
+      global_link_rotations[4*child_link_idx+0] = JetT(1.0);
+      global_link_rotations[4*child_link_idx+1] = JetT(0.0);
+      global_link_rotations[4*child_link_idx+2] = JetT(0.0);
+      global_link_rotations[4*child_link_idx+3] = JetT(0.0);
+      continue;
+    }
+
+    // Translation
+    if (robot::link_can_skip_translation[child_link_idx])
+    {
+      global_link_translations[3*child_link_idx+0] = global_link_translations[3*parent_link_idx+0];
+      global_link_translations[3*child_link_idx+1] = global_link_translations[3*parent_link_idx+1];
+      global_link_translations[3*child_link_idx+2] = global_link_translations[3*parent_link_idx+2];
+    }
+    else
+    {
+      utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), 
+                                    &(global_link_rotations[4*parent_link_idx]), 
+                                    &(link_translations[3*child_link_idx]), 
+                                    &(global_link_translations[3*child_link_idx]));
+    }
+
+    // Rotation
+    if (variable_idx!=-1) // if joint can move
+    { 
+      JetT joint_val;
+      if (target_idx!=-1 && target_positions!=nullptr)
+      { // this is an optimization target
+        joint_val = target_positions[target_idx];
+      }
+      else
+      { // this is a joint value but not an optimization target. But we need to keep building the computation graph
+        joint_val = JetT(variable_positions[variable_idx]);
+      }
+
+      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then only rotate using the joint position
+      {
+        utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]),
+                                  joint_val,
+                                  &(global_link_rotations[4*child_link_idx]));
+      }
+      else // if link has rotation and joint has rotation, then we need to rotate using both
+      {
+        utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
+                                  &(link_rotations[4*child_link_idx]), 
+                                  joint_val,
+                                  &(global_link_rotations[4*child_link_idx]));
+      }
+    }
+    else // if joint is static
+    {
+      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
+      {
+        global_link_rotations[4*child_link_idx+0] = global_link_rotations[4*parent_link_idx+0];
+        global_link_rotations[4*child_link_idx+1] = global_link_rotations[4*parent_link_idx+1];
+        global_link_rotations[4*child_link_idx+2] = global_link_rotations[4*parent_link_idx+2];
+        global_link_rotations[4*child_link_idx+3] = global_link_rotations[4*parent_link_idx+3];
+      }
+      else // if link has a rotation, only compute that
+      {
+        utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
+                                  &(link_rotations[4*child_link_idx]),
+                                  &(global_link_rotations[4*child_link_idx]));
+      }
+    }
+  }
+}
+
+template<typename T_in, typename T_out>
+void translationRotationToTransform(const T_in* translations, const T_in* rotations, T_out* transforms, const int num_elements)
+{
+  for (int i=0; i<num_elements; i++)
+  {
+    transforms[i*7+0] = T_out(translations[i*3+0]);
+    transforms[i*7+1] = T_out(translations[i*3+1]);
+    transforms[i*7+2] = T_out(translations[i*3+2]);
+    transforms[i*7+3] = T_out(rotations[i*4+0]);
+    transforms[i*7+4] = T_out(rotations[i*4+1]);
+    transforms[i*7+5] = T_out(rotations[i*4+2]);
+    transforms[i*7+6] = T_out(rotations[i*4+3]);
+  }
+}
+
+template<typename T_in, typename T_out>
+void transformToTranslationRotation(const T_in* transforms, T_in* translations, T_out* rotations, const int num_elements)
+{
+  for (int i=0; i<num_elements; i++)
+  {
+    translations[i*3+0] = T_out(transforms[i*7+0]);
+    translations[i*3+1] = T_out(transforms[i*7+1]);
+    translations[i*3+2] = T_out(transforms[i*7+2]);
+    rotations[i*4+0] = T_out(transforms[i*7+3]);
+    rotations[i*4+1] = T_out(transforms[i*7+4]);
+    rotations[i*4+2] = T_out(transforms[i*7+5]);
+    rotations[i*4+3] = T_out(transforms[i*7+6]);
+  }
 }
 
 } // namespace utils

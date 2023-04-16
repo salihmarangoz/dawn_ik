@@ -130,6 +130,16 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          link6:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link7:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           link_base:
             Alpha: 1
             Show Axes: false
@@ -166,7 +176,7 @@ Visualization Manager:
         Goal State Color: 250; 128; 0
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
-        Planning Group: xarm5
+        Planning Group: xarm7
         Query Goal State: true
         Query Start State: false
         Show Workspace: false
@@ -210,6 +220,16 @@ Visualization Manager:
             Show Trail: false
             Value: true
           link5:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link6:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link7:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -407,8 +427,7 @@ Visualization Manager:
       Marker Topic: /salih_marangoz_thesis_node/robot_monitor_visualization
       Name: MarkerArray
       Namespaces:
-        internal_collision: true
-        robot_collision_body: true
+        {}
       Queue Size: 100
       Value: true
     - Attached Body Color: 150; 50; 150
@@ -442,6 +461,16 @@ Visualization Manager:
           Show Trail: false
           Value: true
         link5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link6:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link7:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -535,5 +564,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1536
-  X: 763
-  Y: 86
+  X: -37
+  Y: 71

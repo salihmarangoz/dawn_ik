@@ -150,82 +150,25 @@ RobotMonitor::computeJointLinkState(const sensor_msgs::JointStateConstPtr& msg)
   JointLinkStatePtr state = boost::make_shared<JointLinkState>();
   state->joint_state = *msg; // copy
   state->header = msg->header; // copy
-
   state->header.frame_id = "world"; // TODO
 
   // recompute kinematic chain
+  double variable_positions[robot::num_variables];
+  for (int i=0; i<robot::num_variables; i++)
+  {
+    int joint_idx = robot::variable_idx_to_joint_idx[i];
+    int msg_idx = joint_idx_to_msg_idx[joint_idx];
+    double joint_val = state->joint_state.position[msg_idx];
+    variable_positions[i] = joint_val;
+  }
+  double global_link_translations[3*robot::num_links];
+  double global_link_rotations[4*robot::num_links];
+  utils::computeGlobalLinkTransforms((double*)nullptr, (double*)variable_positions, (double*)global_link_translations, (double*)global_link_rotations);
+
+  // Conversion
   std::vector<double> &global_link_transformations = state->link_state.transformations; // copy reference
   global_link_transformations.resize(robot::num_links*7);
-  for (int i=0; i<robot::num_joints; i++)
-  {
-    int child_link_idx = robot::joint_child_link_idx[i];
-    int parent_link_idx = robot::joint_parent_link_idx[i];
-    int msg_idx = joint_idx_to_msg_idx[i];
-
-    // init
-    if (parent_link_idx == -1)
-    {
-      global_link_transformations[7*child_link_idx+0] = 0.0;
-      global_link_transformations[7*child_link_idx+1] = 0.0;
-      global_link_transformations[7*child_link_idx+2] = 0.0;
-      global_link_transformations[7*child_link_idx+3] = 1.0;
-      global_link_transformations[7*child_link_idx+4] = 0.0;
-      global_link_transformations[7*child_link_idx+5] = 0.0;
-      global_link_transformations[7*child_link_idx+6] = 0.0;
-      continue;
-    }
-
-    // Translation
-    if (robot::link_can_skip_translation[child_link_idx])
-    {
-        global_link_transformations[7*child_link_idx+0] = global_link_transformations[7*parent_link_idx+0];
-        global_link_transformations[7*child_link_idx+1] = global_link_transformations[7*parent_link_idx+1];
-        global_link_transformations[7*child_link_idx+2] = global_link_transformations[7*parent_link_idx+2];
-    }
-    else
-    {
-      utils::computeLinkTranslation(&(global_link_transformations[7*parent_link_idx]), // translation
-                                    &(global_link_transformations[7*parent_link_idx+3]),  // rotation
-                                    &(robot::link_transform_translation_only[child_link_idx][0]), 
-                                    &(global_link_transformations[7*child_link_idx]));
-    }
-
-    if (msg_idx!=-1) // if joint can move
-    { 
-      double joint_val = state->joint_state.position[msg_idx];
-      
-      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then only rotate using the joint position
-      {
-        utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]),
-                                  joint_val, 
-                                  &(global_link_transformations[7*child_link_idx+3]));
-      }
-      else // if link has rotation and joint has rotation, then we need to rotate using both
-      {
-        utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]), 
-                                  &(robot::link_transform_quaternion_only[child_link_idx][0]), 
-                                  joint_val, 
-                                  &(global_link_transformations[7*child_link_idx+3]));
-      }
-    }
-    else // if joint is static
-    {
-      if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
-      {
-        global_link_transformations[7*child_link_idx+3] = global_link_transformations[7*parent_link_idx+3];
-        global_link_transformations[7*child_link_idx+4] = global_link_transformations[7*parent_link_idx+4];
-        global_link_transformations[7*child_link_idx+5] = global_link_transformations[7*parent_link_idx+5];
-        global_link_transformations[7*child_link_idx+6] = global_link_transformations[7*parent_link_idx+6];
-      }
-      else // if link has a rotation, only compute that
-      {
-        utils::computeLinkRotation(&(global_link_transformations[7*parent_link_idx+3]), // global parent rotation
-                                  &(robot::link_transform_quaternion_only[child_link_idx][0]), // local child rotation
-                                  &(global_link_transformations[7*child_link_idx+3]));  // global child rotation
-      }
-
-    }
-  }
+  utils::translationRotationToTransform((double*)global_link_translations, (double*)global_link_rotations, global_link_transformations.data(), robot::num_links);
 
   return state;
 }

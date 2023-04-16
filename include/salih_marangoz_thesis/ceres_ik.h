@@ -118,135 +118,18 @@ struct EndpointGoal {
   {
     T global_link_translations[3*robot::num_links];
     T global_link_rotations[4*robot::num_links];
+    utils::computeGlobalLinkTransforms(target_values, variable_positions, global_link_translations, global_link_rotations);
 
-    // TODO: convert to function
-    T link_translations[3*robot::num_links];
-    T link_rotations[4*robot::num_links];
-    for (int i=0; i<robot::num_links; i++)
-    {
-      link_translations[3*i+0] = T(robot::link_transform_translation_only[i][0]);
-      link_translations[3*i+1] = T(robot::link_transform_translation_only[i][1]);
-      link_translations[3*i+2] = T(robot::link_transform_translation_only[i][2]);
-      link_rotations[4*i+0] = T(robot::link_transform_quaternion_only[i][0]);
-      link_rotations[4*i+1] = T(robot::link_transform_quaternion_only[i][1]);
-      link_rotations[4*i+2] = T(robot::link_transform_quaternion_only[i][2]);
-      link_rotations[4*i+3] = T(robot::link_transform_quaternion_only[i][3]);
-    }
-
-    for (int i=0; i<robot::num_joints; i++)
-    {
-      int child_link_idx = robot::joint_child_link_idx[i];
-      int parent_link_idx = robot::joint_parent_link_idx[i];
-      int target_idx = robot::joint_idx_to_target_idx[i];
-      int variable_idx = robot::joint_idx_to_variable_idx[i];
-
-      // init
-      if (parent_link_idx == -1)
-      {
-        // TODO: convert to function
-        global_link_translations[3*child_link_idx+0] = T(0.0);
-        global_link_translations[3*child_link_idx+1] = T(0.0);
-        global_link_translations[3*child_link_idx+2] = T(0.0);
-        global_link_rotations[4*child_link_idx+0] = T(1.0);
-        global_link_rotations[4*child_link_idx+1] = T(0.0);
-        global_link_rotations[4*child_link_idx+2] = T(0.0);
-        global_link_rotations[4*child_link_idx+3] = T(0.0);
-        continue;
-      }
-
-      // Translation
-      if (robot::link_can_skip_translation[child_link_idx])
-      {
-          // TODO: convert to function
-          global_link_translations[3*child_link_idx+0] = global_link_translations[3*parent_link_idx+0];
-          global_link_translations[3*child_link_idx+1] = global_link_translations[3*parent_link_idx+1];
-          global_link_translations[3*child_link_idx+2] = global_link_translations[3*parent_link_idx+2];
-      }
-      else
-      {
-        utils::computeLinkTranslation(&(global_link_translations[3*parent_link_idx]), 
-                                      &(global_link_rotations[4*parent_link_idx]), 
-                                      &(link_translations[3*child_link_idx]), 
-                                      &(global_link_translations[3*child_link_idx]));
-      }
-
-      if (variable_idx!=-1) // if joint can move
-      { 
-        T joint_val;
-        if (target_idx!=-1)
-        { // this is an optimization target
-          joint_val = target_values[target_idx];
-        }
-        else
-        { // this is a joint value but not an optimization target
-          joint_val = T(variable_positions[variable_idx]);
-        }
-
-        if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then only rotate using the joint position
-        {
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]),
-                                    joint_val, 
-                                    &(global_link_rotations[4*child_link_idx]));
-        }
-        else // if link has rotation and joint has rotation, then we need to rotate using both
-        {
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
-                                    &(link_rotations[4*child_link_idx]), 
-                                    joint_val, 
-                                    &(global_link_rotations[4*child_link_idx]));
-        }
-      }
-      else // if joint is static
-      {
-        if (robot::link_can_skip_rotation[child_link_idx]) // if can skip the rotation then no need to do anything
-        {
-          // TODO: convert to function
-          global_link_rotations[4*child_link_idx+0] = global_link_rotations[4*parent_link_idx+0];
-          global_link_rotations[4*child_link_idx+1] = global_link_rotations[4*parent_link_idx+1];
-          global_link_rotations[4*child_link_idx+2] = global_link_rotations[4*parent_link_idx+2];
-          global_link_rotations[4*child_link_idx+3] = global_link_rotations[4*parent_link_idx+3];
-        }
-        else // if link has a rotation, only compute that
-        {
-          utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
-                                    &(link_rotations[4*child_link_idx]),
-                                    &(global_link_rotations[4*child_link_idx]));
-        }
-
-      }
-    }
-
-    // Simpler, maybe faster?
-    //residuals[0] = global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0];
-    //residuals[1] = global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1];
-    //residuals[2] = global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2];
-
-    // L2 distance to the endpoint. Seems correct
+    // Position cost
     residuals[0] = ceres::hypot(global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0],
                                 global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1],
                                 global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2]);
 
-    // angle diff: BAD
-    //residuals[1] = ceres::acos(global_link_rotations[4*robot::endpoint_link_idx+0]*direction.w()+
-    //                           global_link_rotations[4*robot::endpoint_link_idx+1]*direction.x()+
-    //                           global_link_rotations[4*robot::endpoint_link_idx+2]*direction.y()+
-    //                           global_link_rotations[4*robot::endpoint_link_idx+3]*direction.z());
-
-    // element-wise diff: GOOD
+    // Orientation cost
     residuals[1] = global_link_rotations[4*robot::endpoint_link_idx+0] - direction.w();
     residuals[2] = global_link_rotations[4*robot::endpoint_link_idx+1] - direction.x();
     residuals[3] = global_link_rotations[4*robot::endpoint_link_idx+2] - direction.y();
     residuals[4] = global_link_rotations[4*robot::endpoint_link_idx+3] - direction.z();
-
-    // quaternion product -> 1-w as a cost? WEIRD
-    //T direction_[4];
-    //direction_[0] = T(direction.w());
-    //direction_[1] = T(direction.x());
-    //direction_[2] = T(direction.y());
-    //direction_[3] = T(direction.z());
-    //T result[4];
-    //ceres::QuaternionProduct(direction_, &(global_link_rotations[4*robot::endpoint_link_idx]), result);
-    //residuals[1] = 1.0 - result[0];
 
     return true;
   }
