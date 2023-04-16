@@ -34,6 +34,7 @@ void CeresIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeed
   endpoint.y() =  given_endpoint.position.y;
   endpoint.z() =  given_endpoint.position.z;
   direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
+  endpoint_received = true;
 }
 
 moveit::core::RobotState CeresIK::getCurrentRobotState()
@@ -52,6 +53,15 @@ void CeresIK::loop()
   ros::Rate r(500);
   while (ros::ok())
   {
+    ros::spinOnce();
+    moveit::core::RobotState robot_state = getCurrentRobotState();
+
+    if (!endpoint_received)
+    {
+      r.sleep();
+      continue;
+    }
+
     if (!update(robot_state))
     {
       ROS_ERROR("Can't find a solution!");
@@ -174,7 +184,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   robot::setSolverOptions(options);
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  //std::cout << summary.FullReport() << "\n";
+  std::cout << summary.FullReport() << "\n";
 
   // Update robot state
   for (int i=0; i<robot::num_targets; i++)

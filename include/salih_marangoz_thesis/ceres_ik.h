@@ -43,6 +43,7 @@ public:
   void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
   ros::Subscriber endpoint_sub; 
   Eigen::Vector3d endpoint;
+  bool endpoint_received = false;
   Eigen::Quaterniond direction;
 
   CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
@@ -62,7 +63,7 @@ struct MinimalJointDisplacementGoal {
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
-    for (int i=0; i<robot::num_targets-2; i++) // TODO: skip the last joint. actually this should be modifiable in the robot configuration
+    for (int i=0; i<robot::num_targets; i++) // TODO: skip the last joint. actually this should be modifiable in the robot configuration
     {
       residuals[i] = target_values[i] - init_target_positions[i];
     }
@@ -73,7 +74,7 @@ struct MinimalJointDisplacementGoal {
    // the client code.
    static ceres::CostFunction* Create(const double *init_target_positions)
    { // TODO: robot::num_targets-2 !!!!!!!!!!!!!!
-     return (new ceres::AutoDiffCostFunction<MinimalJointDisplacementGoal, robot::num_targets-2, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<MinimalJointDisplacementGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new MinimalJointDisplacementGoal(init_target_positions)));
    }
    
@@ -91,7 +92,7 @@ struct CenterJointsGoal {
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
-    for (int i=0; i<robot::num_targets-2; i++) // TODO: skip the last joint. actually this should be modifiable in the robot configuration
+    for (int i=0; i<robot::num_targets; i++) // TODO: skip the last joint. actually this should be modifiable in the robot configuration
     {
       residuals[i] = target_values[i] - target_centers[i];
     }
@@ -102,7 +103,7 @@ struct CenterJointsGoal {
    // the client code.
    static ceres::CostFunction* Create(const double* target_centers)
    { // TODO: robot::num_targets-2 !!!!!!!!!!!!!!
-     return (new ceres::AutoDiffCostFunction<CenterJointsGoal, robot::num_targets-2, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<CenterJointsGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new CenterJointsGoal(target_centers)));
    }
    
