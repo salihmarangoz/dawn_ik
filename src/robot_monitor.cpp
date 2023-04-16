@@ -193,53 +193,37 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
     }
   }
 
-  // update internal collision objects
-  // TODO: optimize using these, maybe? robot::object_can_skip_rotation[i]; ;
+  // separate transforms to translations and rotations
+  double global_link_translations[robot::num_links*3];
+  double global_link_rotations[robot::num_links*4];
+  utils::transformToTranslationRotation(state->link_state.transformations.data(), 
+                                        global_link_translations, 
+                                        global_link_rotations, 
+                                        state->link_state.transformations.size()/7);
+
+  // compute global object pose
+  double global_object_translations[robot::num_objects*3];
+  double global_object_rotations[robot::num_objects*4];
+  utils::computeCollisionTransforms((const double*)global_link_translations,
+                                    (const double*)global_link_rotations,
+                                    (const double*)robot::object_transform_translation_only,
+                                    (const double*)robot::object_transform_quaternion_only,
+                                    (const int*)robot::object_can_skip_translation,
+                                    (const int*)robot::object_can_skip_rotation,
+                                    (const int*)robot::object_idx_to_link_idx,
+                                    robot::num_objects,
+                                    (double*)global_object_translations,
+                                    (double*)global_object_rotations);
+
+  // update collision manager
   for (int object_idx=0; object_idx<robot::num_objects; object_idx++)
   {
-    int link_idx = robot::object_idx_to_link_idx[object_idx];
-    bool can_skip_translation = robot::object_can_skip_translation[object_idx];
-    bool can_skip_rotation = robot::object_can_skip_rotation[object_idx];
-    const double* link_translation = &(msg->link_state.transformations[7*link_idx]);
-    const double* link_rotation = &(msg->link_state.transformations[7*link_idx+3]);
-    const double* object_translation = &(robot::object_transform_translation_only[object_idx][0]);
-    const double* object_rotation = &(robot::object_transform_quaternion_only[object_idx][0]);
-
-    double final_object_translation[3];
-    double final_object_rotation[4];
-
-    robot::object_transform_translation_only[object_idx];
-
-    // compute translation
-    if (robot::object_can_skip_translation[object_idx])
-    {
-      final_object_translation[0] = link_translation[0];
-      final_object_translation[1] = link_translation[1];
-      final_object_translation[2] = link_translation[2];
-    }
-    else
-    {
-      utils::computeLinkTranslation(link_translation, link_rotation, object_translation, final_object_translation);
-    }
-
-    // compute rotation
-    if (robot::object_can_skip_rotation[object_idx])
-    {
-      final_object_rotation[0] = link_translation[3];
-      final_object_rotation[1] = link_translation[4];
-      final_object_rotation[2] = link_translation[5];
-      final_object_rotation[3] = link_translation[6];
-    }
-    else
-    {
-      utils::computeLinkRotation(link_rotation, object_rotation, final_object_rotation);
-    }
-
-    int_collision_objects[object_idx]->setTranslation(Vec3f(final_object_translation[0], final_object_translation[1], final_object_translation[2]));
-    int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(final_object_rotation).toRotationMatrix());
+    int_collision_objects[object_idx]->setTranslation(Vec3f(global_object_translations[object_idx*3+0], 
+                                                            global_object_translations[object_idx*3+1], 
+                                                            global_object_translations[object_idx*3+2]));
+    int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(&(global_object_rotations[object_idx*4])).toRotationMatrix());
     int_collision_objects[object_idx]->computeAABB();
   }
-
   if (int_collision_manager.size() <= 0) int_collision_manager.registerObjects(int_collision_objects); // init collision manager if not initialized
   int_collision_manager.update();
 

@@ -134,12 +134,9 @@ inline static void setProblemConstraints(ceres::Problem &problem, double *target
 static inline void setSolverOptions(ceres::Solver::Options &options)
 {
   options.jacobi_scaling = true;
-  options.line_search_direction_type = BFGS;
   options.linear_solver_type = DENSE_QR;
-  options.max_solver_time_in_seconds = 0.01;
   options.minimizer_progress_to_stdout = true;
-  options.minimizer_type = LINE_SEARCH;
-  options.use_approximate_eigenvalue_bfgs_scaling = true;
+  options.minimizer_type = TRUST_REGION;
 }
 
 } // namespace robot

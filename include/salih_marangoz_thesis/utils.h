@@ -108,7 +108,10 @@ void eulerToMatrix(double a, double b, double c, Eigen::Matrix3d& R) {
 //
 // Set target_positions=nullptr to use without autograd
 template<typename JetT, typename ConstT>
-inline void computeGlobalLinkTransforms(const JetT* target_positions, const ConstT* variable_positions, JetT* global_link_translations, JetT* global_link_rotations)
+inline void computeGlobalLinkTransforms(const JetT* target_positions, 
+                                        const ConstT* variable_positions, 
+                                        JetT* global_link_translations, 
+                                        JetT* global_link_rotations)
 {
   // Get link transformations from robot configuration
   JetT link_translations[3*robot::num_links];
@@ -201,6 +204,55 @@ inline void computeGlobalLinkTransforms(const JetT* target_positions, const Cons
                                   &(link_rotations[4*child_link_idx]),
                                   &(global_link_rotations[4*child_link_idx]));
       }
+    }
+  }
+}
+
+// can be used for internal and external collisions
+template<typename JetT, typename ConstT>
+inline void computeCollisionTransforms(const JetT* global_link_translation, 
+                                       const JetT* global_link_rotation, 
+                                       const ConstT* local_object_translation,
+                                       const ConstT* local_object_rotation,
+                                       const int* object_can_skip_translation,
+                                       const int* object_can_skip_rotation,
+                                       const int* object_idx_to_link_idx,
+                                       const int num_objects,
+                                       JetT* global_object_translation,
+                                       JetT* global_object_rotation)
+{
+  for (int object_idx=0; object_idx<num_objects; object_idx++)
+  {
+    int link_idx = object_idx_to_link_idx[object_idx];
+
+    // compute translation
+    if (object_can_skip_translation!= nullptr && object_can_skip_translation[object_idx])
+    {
+      global_object_translation[object_idx*3+0] = global_link_translation[link_idx*3+0];
+      global_object_translation[object_idx*3+1] = global_link_translation[link_idx*3+1];
+      global_object_translation[object_idx*3+2] = global_link_translation[link_idx*3+2];
+    }
+    else
+    {
+      utils::computeLinkTranslation(&(global_link_translation[link_idx*3]), 
+                                    &(global_link_rotation[link_idx*4]), 
+                                    &(local_object_translation[object_idx*3]), 
+                                    &(global_object_translation[object_idx*3]));
+    }
+
+    // compute rotation
+    if (object_can_skip_rotation != nullptr && object_can_skip_rotation[object_idx])
+    {
+      global_object_rotation[object_idx*4+0] = global_link_rotation[link_idx*4+0];
+      global_object_rotation[object_idx*4+1] = global_link_rotation[link_idx*4+1];
+      global_object_rotation[object_idx*4+2] = global_link_rotation[link_idx*4+2];
+      global_object_rotation[object_idx*4+3] = global_link_rotation[link_idx*4+3];
+    }
+    else
+    {
+      utils::computeLinkRotation(&(global_link_rotation[link_idx*4]), 
+                                 &(local_object_rotation[object_idx*4]), 
+                                 &(global_object_rotation[object_idx*4]));
     }
   }
 }

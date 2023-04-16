@@ -44,15 +44,15 @@ problem_constraints:
 # see: http://ceres-solver.org/nnls_solving.html#solver-options
 # also available values: DBL_MIN, DBL_MAX
 solver_options:
-  minimizer_type: LINE_SEARCH
-  #minimizer_type: TRUST_REGION # LINE_SEARCH methods don't support bounds
+  #minimizer_type: LINE_SEARCH
+  minimizer_type: TRUST_REGION # LINE_SEARCH methods don't support bounds
   linear_solver_type: DENSE_QR
   jacobi_scaling: true
   minimizer_progress_to_stdout: true
-  line_search_direction_type: BFGS
+  #line_search_direction_type: BFGS
   #use_inner_iterations: true # COORDINATE_DESCENT
-  use_approximate_eigenvalue_bfgs_scaling: true
-  max_solver_time_in_seconds: 0.01
+  #use_approximate_eigenvalue_bfgs_scaling: true
+  #max_solver_time_in_seconds: 0.01
   #eta: DBL_MIN
   #function_tolerance: DBL_MIN
   #gradient_tolerance: DBL_MIN

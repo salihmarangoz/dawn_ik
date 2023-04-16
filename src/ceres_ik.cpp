@@ -50,7 +50,7 @@ void CeresIK::loop()
 {
   moveit::core::RobotState robot_state = getCurrentRobotState();
 
-  ros::Rate r(500);
+  ros::Rate r(20);
   while (ros::ok())
   {
     ros::spinOnce();
@@ -150,12 +150,14 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
 */
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
-  ceres::SoftLOneLoss *center_joints_loss = new ceres::SoftLOneLoss(0.005); // goal weight
+  ceres::SoftLOneLoss *center_joints_loss = new ceres::SoftLOneLoss(0.01); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
+/*
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.005); // goal weight
+  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.1); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
+*/
 
   // Target min/max constraints
   for (int i=0; i<robot::num_targets; i++)
@@ -172,8 +174,8 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     double max_val = const_target_positions[i] + 0.1;
     if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];
     if (robot::joint_max_position[joint_i] < max_val) max_val = robot::joint_max_position[joint_i];
-    //problem.SetParameterLowerBound(target_positions, i, min_val); 
-    //problem.SetParameterUpperBound(target_positions, i, max_val); 
+    problem.SetParameterLowerBound(target_positions, i, min_val); 
+    problem.SetParameterUpperBound(target_positions, i, max_val); 
 
     // STANDARD WAY OF SETTING JOINT LIMITS
     //problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
@@ -186,6 +188,11 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
 
+  if (!summary.IsSolutionUsable())
+  {
+    return false;
+  }
+
   // Update robot state
   for (int i=0; i<robot::num_targets; i++)
   {
@@ -197,7 +204,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   }
   current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
 
-  return summary.IsSolutionUsable();
+  return true;
 }
 
 
