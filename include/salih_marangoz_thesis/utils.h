@@ -9,7 +9,7 @@
 #include <ceres/rotation.h>
 
 // VISUALIZATION UTILS
-#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h> // TODO: this shouldn't be used here
+#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <moveit/robot_state/robot_state.h>
