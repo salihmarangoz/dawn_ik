@@ -102,7 +102,17 @@ struct EndpointGoal {
 
 
 struct CollisionAvoidanceGoal {
-  CollisionAvoidanceGoal(const double* variable_positions) : variable_positions(variable_positions) {}
+  CollisionAvoidanceGoal(const double* variable_positions, 
+                         const int* int_collision_pair_a, 
+                         const int* int_collision_pair_b, 
+                         const int num_int_pairs, 
+                         const std::vector<CollisionObject*>& int_collision_objects)
+  :  variable_positions(variable_positions),
+     int_collision_pair_a(int_collision_pair_a),
+     int_collision_pair_b(int_collision_pair_b),
+     num_int_pairs(num_int_pairs),
+     int_collision_objects(int_collision_objects)
+  {}
 
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
@@ -142,26 +152,53 @@ struct CollisionAvoidanceGoal {
                                       (T*)global_object_translations,
                                       (T*)global_object_rotations);
 
-    // Compute collision pairs
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    // TODO: supports only spheres!!!
+    for (int i=0; i<num_int_pairs; i++)
+    {
+      int object_idx_a = int_collision_pair_a[i];
+      int object_idx_b = int_collision_pair_b[i];
+      int link_idx_a = robot::object_idx_to_link_idx[object_idx_a];
+      int link_idx_b = robot::object_idx_to_link_idx[object_idx_b];
+      const CollisionObject* object_a = int_collision_objects[object_idx_a];
+      const CollisionObject* object_b = int_collision_objects[object_idx_b];
+      const Sphere& shape_a = static_cast<const Sphere&>(*(object_a->collisionGeometry()));
+      const Sphere& shape_b = static_cast<const Sphere&>(*(object_b->collisionGeometry()));
+      const T* pos_a = &(global_object_translations[object_idx_a*3]);
+      const T* pos_b = &(global_object_translations[object_idx_b*3]);
+
+      // TODO: write a function for this!
+      // TODO: maybe use not inflated objects? inflated ones only for the broadphase collision detection.
+      const T distance = utils::distSphere2Sphere(pos_a, 
+                                                  shape_a.radius-robot::inflation, 
+                                                  pos_b, 
+                                                  shape_b.radius-robot::inflation);
+      residuals[i] = 0.001 / distance;
+    }
 
     return true; // TODO: maybe return false if there is a collision?
   }
 
   
   // Factory to hide the construction of the CostFunction object from the client code.
-  static ceres::CostFunction* Create(const int num_pairs, const double* variable_positions)
+  static ceres::CostFunction* Create(const double* variable_positions, 
+                                     const int* int_collision_pair_a, 
+                                     const int* int_collision_pair_b, 
+                                     const int num_int_pairs,
+                                     const std::vector<CollisionObject*>& int_collision_objects)
   {
+    // TODO: which one to select?
     //return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+    //            new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), ceres::TAKE_OWNERSHIP, num_int_pairs));
     return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                new CollisionAvoidanceGoal(variable_positions), num_pairs));
-    // THANK GOD CERES AutoDiffCostFunction SUPPORTS DYNAMIC NUMBER OF RESIDUALS!!!
+                new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), num_int_pairs));
+
   }
 
   const double* variable_positions;
+  const int* int_collision_pair_a;
+  const int* int_collision_pair_b;
+  int num_int_pairs;
+  const std::vector<CollisionObject*>& int_collision_objects;
 };
 
 

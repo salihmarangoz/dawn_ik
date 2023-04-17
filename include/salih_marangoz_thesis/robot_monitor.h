@@ -50,6 +50,8 @@ class RobotMonitor
 public:
   RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   ~RobotMonitor();
+  const JointLinkCollisionStateConstPtr getState();
+  const std::vector<CollisionObject*> getInternalObjects(){ return int_collision_objects; }
 
 private:
   void jointStateCallback(const sensor_msgs::JointStateConstPtr& msg);

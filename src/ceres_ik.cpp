@@ -138,17 +138,23 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   // int current_joint_idx = robot::endpoint_joint_idx;
   // .....
 
+  JointLinkCollisionStateConstPtr state = robot_monitor->getState();
+  const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
 
   ceres::Problem problem;
 
   ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, variable_positions);
   ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
-/*
-  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions);
+
+  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions,
+                                                                                 state->collision_state.int_pair_a.data(),
+                                                                                 state->collision_state.int_pair_b.data(),
+                                                                                 state->collision_state.int_pair_a.size(),
+                                                                                 int_objects);
   //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
-*/
+
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
   ceres::SoftLOneLoss *center_joints_loss = new ceres::SoftLOneLoss(0.01); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);

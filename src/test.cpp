@@ -1,4 +1,5 @@
 
+/*
 #include <Eigen/Geometry>
 #include <hpp/fcl/collision.h>
 #include <hpp/fcl/narrowphase/narrowphase.h>
@@ -153,7 +154,7 @@ int main()
   }
 
 }
-
+*/
 
 
 
@@ -252,3 +253,55 @@ int main()
 
 //   return 0;
 // }
+
+
+#include <ceres/ceres.h>
+
+// Define the cost functor
+struct MyCostFunctor {
+  template<typename T>
+  bool operator()(const T* const* params, T* residuals) const {
+    // Extract the parameters
+    const T* x = params[0];
+    const T* y = params[1];
+
+    // Compute residuals using x and y
+    residuals[0] = T(10.0) - *x;
+    residuals[1] = *y - T(20.0);
+    return true;
+  }
+};
+
+int main() {
+  // Initialize the problem
+  ceres::Problem problem;
+
+  // Add parameters to the problem
+  double x = 0.0; // initial value for x
+  double y = 0.0; // initial value for y
+  problem.AddParameterBlock(&x, 1); // x has 1 component
+  problem.AddParameterBlock(&y, 1); // y has 1 component
+
+  // Add the cost functor to the problem
+  ceres::DynamicAutoDiffCostFunction<MyCostFunctor>* cost_function =
+    new ceres::DynamicAutoDiffCostFunction<MyCostFunctor>(new MyCostFunctor);
+  cost_function->AddParameterBlock(1); // x has 1 parameter
+  cost_function->AddParameterBlock(1); // y has 1 parameter
+  cost_function->SetNumResiduals(2); // 2 residuals
+  problem.AddResidualBlock(cost_function, nullptr, &x, &y);
+
+  // Configure solver options
+  ceres::Solver::Options options;
+  options.linear_solver_type = ceres::LinearSolverType::DENSE_QR;
+  options.minimizer_progress_to_stdout = true;
+
+  // Solve the problem
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+
+  // Print optimization results
+  std::cout << summary.FullReport() << std::endl;
+  std::cout << "Optimized parameters: x = " << x << ", y = " << y << std::endl;
+
+  return 0;
+}

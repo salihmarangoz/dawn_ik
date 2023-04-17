@@ -27,14 +27,6 @@ bool CollisionCallBackCollect::exist(const CollisionPair& pair) const {
 
 ////////////////////////////////////////////////////////////////////
 
-// const JointLinkStateConstPtr
-// RobotMonitor::getJointLinkState()
-// {
-//   async_mtx_.lock();
-//   JointLinkStatePtr tmp = async_state_;
-//   async_mtx_.unlock();
-//   return tmp;
-// }
 
 RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh)
 {
@@ -51,6 +43,15 @@ RobotMonitor::~RobotMonitor()
   delete link_state_thread;
   collision_state_thread->join();
   delete collision_state_thread;
+}
+
+const JointLinkCollisionStateConstPtr
+RobotMonitor::getState()
+{
+  last_joint_link_collision_state_mtx.lock();
+  JointLinkCollisionStateConstPtr tmp = last_joint_link_collision_state_msg;
+  last_joint_link_collision_state_mtx.unlock();
+  return tmp;
 }
 
 void
@@ -229,7 +230,7 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
 
   // TODO: handle external objects
 
-  // TODO: find self collision pairs
+  // find self collision pairs
   CollisionCallBackCollect self_collision_callback;
   int_collision_manager.collide(&self_collision_callback);
   state->collision_state.int_pair_a.reserve(self_collision_callback.numCollisionPairs()); // uses more memory, but faster
