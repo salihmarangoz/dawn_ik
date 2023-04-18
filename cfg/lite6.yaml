@@ -134,14 +134,67 @@ proximity:
     # LITE6 COLLISION MODEL WITH SPHERES
     - link: "link_base"
       shape: "Sphere(0.1)"
-      translation: [0.0, 0.0, 0.075]
+      translation: [0.0, 0.0, 0.04]
 
     - link: "link1"
-      shape: "Sphere(0.06)"
+      shape: "Sphere(0.05)"
       translation: [0.0, 0.0, 0.0]
     - link: "link1"
-      shape: "Sphere(0.06)"
+      shape: "Sphere(0.05)"
       translation: [0.0, 0.0, -0.075]
+
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.00, 0.0, 0.05]
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.00, 0.0, 0.1]
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.065, 0.0, 0.1]
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.13, 0.0, 0.1]
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.195, 0.0, 0.1]
+    - link: "link2"
+      shape: "Sphere(0.05)"
+      translation: [0.195, 0.0, 0.05]
+
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.045, 0.0, 0.0]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.09, 0.0, 0.0]
+
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.16]
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.1]
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.05, -0.1]
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.05, -0.05]
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.05, 0.0]
+
+    - link: "link5"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
+
+    - link: "link6"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
 
 #########################################################
 ### Extra ###############################################
