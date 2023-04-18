@@ -131,7 +131,7 @@ proximity:
   loss: "TrivialLoss()"
   inflation: 0.05
   objects:
-    # XARM5 COLLISION MODEL WITH SPHERES
+    # XARM6 COLLISION MODEL WITH SPHERES
     - link: "link_base"
       shape: "Sphere(0.1)"
       translation: [0.0, 0.0, 0.075]
@@ -171,23 +171,24 @@ proximity:
     - link: "link3"
       shape: "Sphere(0.05)"
       translation: [0.075, 0.15, 0.0]
-    - link: "link3"
-      shape: "Sphere(0.05)"
-      translation: [0.075, 0.225, 0.0]
-    - link: "link3"
-      shape: "Sphere(0.05)"
-      translation: [0.075, 0.275, -0.05]
-    - link: "link3"
-      shape: "Sphere(0.05)"
-      translation: [0.075, 0.345, -0.05]
 
     - link: "link4"
       shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.025]
+      translation: [0.0, 0.05, 0.0]
     - link: "link4"
       shape: "Sphere(0.05)"
-      translation: [0.075, 0.0, 0.0]
+      translation: [0.0, 0.05, -0.075]
     - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.15]
+
+    - link: "link5"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.025]
+    - link: "link5"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.0, 0.0]
+    - link: "link5"
       shape: "Sphere(0.05)"
       translation: [0.075, 0.075, 0.0]
 

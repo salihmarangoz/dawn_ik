@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="salih_marangoz_thesis_node" pkg="salih_marangoz_thesis" type="ceres_ik_node" output="screen">
+    <remap from="joint/command" to="/xarm/xarm6_traj_controller/command"/>
+    <remap from="joint/state" to="/xarm/xarm6_traj_controller/state"/>
+  </node>
+
+</launch>
