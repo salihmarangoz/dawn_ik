@@ -52,11 +52,11 @@ solver_options:
   #line_search_direction_type: BFGS
   #use_inner_iterations: true # COORDINATE_DESCENT
   #use_approximate_eigenvalue_bfgs_scaling: true
-  #max_solver_time_in_seconds: 0.01
-  #eta: DBL_MIN
-  #function_tolerance: DBL_MIN
-  #gradient_tolerance: DBL_MIN
-  #parameter_tolerance: DBL_MIN
+  max_solver_time_in_seconds: 0.01
+  eta: DBL_MIN
+  function_tolerance: DBL_MIN
+  gradient_tolerance: DBL_MIN
+  parameter_tolerance: DBL_MIN
 
 #########################################################
 ### Objective: Look at Goal #############################
@@ -129,33 +129,67 @@ minimal_displacement:
 proximity:
   weight: 1.0 # set zero to disable the objective
   loss: "TrivialLoss()"
-  inflation: 0.075
+  inflation: 0.05
   objects:
+# XARM5 COLLISION MODEL WITH SPHERES
     - link: "link_base"
-      shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.05]
-    - link: "link_base"
-      shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.15]
-    - link: "link_base"
-      shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.25]
+      shape: "Sphere(0.1)"
+      translation: [0.0, 0.0, 0.075]
+
+    - link: "link1"
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, 0.0]
+    - link: "link1"
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, -0.075]
 
     - link: "link2"
-      shape: "Sphere(0.05)"
-      translation: [0.0, -0.1, 0.08]
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, 0.075]
     - link: "link2"
+      shape: "Sphere(0.06)"
+      translation: [0.0, -0.1, 0.075]
+    - link: "link2"
+      shape: "Sphere(0.06)"
+      translation: [0.0, -0.1, 0.0]
+    - link: "link2"
+      shape: "Sphere(0.06)"
+      translation: [0.0, -0.2, 0.0]
+    - link: "link2"
+      shape: "Sphere(0.07)"
+      translation: [0.0265, -0.275, 0.0]
+
+    - link: "link3"
       shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.08]
+      translation: [0.0, 0.0, 0.075]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.075, 0.075]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.075, 0.0]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.15, 0.0]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.225, 0.0]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.275, -0.05]
+    - link: "link3"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.345, -0.05]
 
-    - link: "link5"
-      shape: "Sphere(0.04)"
-      translation: [0.0, 0.05, 0.0]
-    - link: "link5"
-      shape: "Sphere(0.04)"
-      translation: [0.0, 0.04, -0.08]
-
-
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.025]
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.0, 0.0]
+    - link: "link4"
+      shape: "Sphere(0.05)"
+      translation: [0.075, 0.075, 0.0]
 
 #########################################################
 ### Extra ###############################################
