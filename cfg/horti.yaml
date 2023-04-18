@@ -131,27 +131,72 @@ proximity:
   loss: "TrivialLoss()"
   inflation: 0.075
   objects:
+    # LITE6 COLLISION MODEL WITH SPHERES
     - link: "head_link_base"
-      shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.00]
+      shape: "Sphere(0.1)"
+      translation: [0.0, 0.0, 0.04]
+
     - link: "head_link1"
-      shape: "Sphere(0.04)"
-      translation: [0.00, 0.0, 0.00]
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
+    - link: "head_link1"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.075]
+
     - link: "head_link2"
-      shape: "Sphere(0.04)"
-      translation: [0.00, 0.0, 0.00]
+      shape: "Sphere(0.05)"
+      translation: [0.00, 0.0, 0.05]
+    - link: "head_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.00, 0.0, 0.1]
+    - link: "head_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.065, 0.0, 0.1]
+    - link: "head_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.13, 0.0, 0.1]
+    - link: "head_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.195, 0.0, 0.1]
+    - link: "head_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.195, 0.0, 0.05]
+
     - link: "head_link3"
-      shape: "Sphere(0.04)"
-      translation: [0.00, 0.0, 0.00]
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
+    - link: "head_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.045, 0.0, 0.0]
+    - link: "head_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.09, 0.0, 0.0]
+
     - link: "head_link4"
-      shape: "Sphere(0.04)"
-      translation: [0.00, 0.0, 0.00]
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.16]
+    - link: "head_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.1]
+    - link: "head_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.05, -0.1]
+    - link: "head_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.05, -0.05]
+    - link: "head_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.05, 0.0]
+
     - link: "head_link5"
-      shape: "Sphere(0.04)"
-      translation: [0.00, 0.0, 0.00]
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
+
     - link: "head_link6"
-      shape: "Sphere(0.04)"
-      translation: [0.00, 0.0, 0.00]
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, 0.0]
+
+
 
 #########################################
       
