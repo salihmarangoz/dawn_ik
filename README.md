@@ -25,6 +25,7 @@ Note: To increase joint states update frequency of xarm7, add `<param name="rate
 **TODO:** fork xarm_ros repository and apply related modifications.
 
 ```bash
+$ roslaunch salih_marangoz_thesis lite6_sim.launch
 $ roslaunch salih_marangoz_thesis xarm5_sim.launch
 $ roslaunch salih_marangoz_thesis xarm6_sim.launch
 $ roslaunch salih_marangoz_thesis xarm7_sim.launch
@@ -42,6 +43,7 @@ Make sure the robot description is loaded. (if the simulation is running then it
 
 ```bash
 # select one!
+$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=lite6
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm5
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm6
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm7
@@ -52,6 +54,7 @@ $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=horti
 
 ```bash
 # select one!
+$ roslaunch salih_marangoz_thesis lite6_solver.launch
 $ roslaunch salih_marangoz_thesis xarm5_solver.launch
 $ roslaunch salih_marangoz_thesis xarm6_solver.launch
 $ roslaunch salih_marangoz_thesis xarm7_solver.launch

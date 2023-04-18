@@ -1,0 +1,151 @@
+
+# Objective functions (and weights) see: http://ceres-solver.org/nnls_modeling.html#instances
+# Available: TrivialLoss(), HuberLoss(delta), SoftLOneLoss(delta), CauchyLoss(delta)
+
+# NOTE:
+# Current YAML parser can't parse inline arrays like [1,2,3]. I have added an exception for handling just for numeric arrays (for translation, rotation, etc.).
+
+#########################################################
+### Common Parameters ###################################
+#########################################################
+
+#DONE
+# Starting from this endpoint to the root, all joints will be the optimization parameter
+endpoint_link: "link_eef"
+
+world_frame: "world"
+
+#DONE
+# Excludes joints from optimization and control 
+exclude_joints:
+
+#########################################################
+### Problem Constaints ##################################
+#########################################################
+#NOT-DONE!!!
+# Must be disabled if not supported by the minimizer type
+problem_constraints:
+  # Available values
+  # "disabled"
+  # "minmax" : Applies minimum/maximum position values as constraints
+  # "posdiff" : Applies custom minimum/maximum position values as constraints.
+  joint_limiting_method: "minmax"
+  posdiff_default: 0.2
+  posdiff_override:
+    - joint: "joint2"
+      neg_diff: -0.3
+      pos_diff: 0.3
+
+
+#########################################################
+### Solver Parameters ###################################
+#########################################################
+#DONE
+# see: http://ceres-solver.org/nnls_solving.html#solver-options
+# also available values: DBL_MIN, DBL_MAX
+solver_options:
+  #minimizer_type: LINE_SEARCH
+  minimizer_type: TRUST_REGION # LINE_SEARCH methods don't support bounds
+  linear_solver_type: DENSE_QR
+  jacobi_scaling: true
+  minimizer_progress_to_stdout: true
+  #line_search_direction_type: BFGS
+  #use_inner_iterations: true # COORDINATE_DESCENT
+  #use_approximate_eigenvalue_bfgs_scaling: true
+  max_solver_time_in_seconds: 0.01
+  eta: DBL_MIN
+  function_tolerance: DBL_MIN
+  gradient_tolerance: DBL_MIN
+  parameter_tolerance: DBL_MIN
+
+#########################################################
+### Objective: Look at Goal #############################
+#########################################################
+look_at_goal:
+  weight: 1.0 # set zero to disable the objective
+  loss: "TrivialLoss()"
+  orientation_weight: 2.0
+  distance_weight: 0.1
+  distance_to_target: 1.0
+
+
+#########################################################
+### Objective: Avoid Joint Limits #######################
+#########################################################
+avoid_joint_limits:
+  weight: 1.0 # set zero to disable the objective
+  loss: "TrivialLoss()"
+  override: # weight 1.0 by default.
+    - joint: "joint1"
+      weight: 0.5
+    - joint: "joint2"
+      weight: 0.5
+
+
+#########################################################
+### Objective: Preferred Joint Positions ################
+#########################################################
+preferred_joint_positions:
+  weight: 1.0 # set zero to disable the objective
+  loss: "TrivialLoss()"
+  override: # position (limit_min+limit_max)/2 by default. weight (optional) 1.0 by default.
+    - joint: "joint1"
+      position: 0.1
+      weight: 0.2
+    - joint: "joint2"
+      position: -0.2
+      weight: 0.5
+
+#########################################################
+### Objective: Minimal Displacement #####################
+#########################################################
+minimal_displacement:
+  weight: 1.0 # set zero to disable the objective
+  loss: "TrivialLoss()"
+  override: # Higher values cause less movement. weight 1.0 by default.
+    - joint: "joint1"
+      weight: 0.5
+    - joint: "joint2"
+      weight: 0.2
+
+
+#########################################################
+### Objective: Proximity ################################
+#########################################################
+# Available shapes:
+# Box(x,y,z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Box.html
+# Sphere(radius): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Sphere.html
+# Capsule(radius_, length_z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Capsule.html
+# Cylinder(radius, length_z): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Cylinder.html
+# Plane(a,b,c,d): https://gepettoweb.laas.fr/hpp/hpp-fcl/doxygen-html/classhpp_1_1fcl_1_1Plane.html
+# Cone is not supported. Because the misplacement caused by inflation is not implemented in this project.
+
+# Object parameters:
+# - link: Link name as a string. Mandatory.
+# - shape: Shape from available shapes with its parameter. Mandatory.
+# - translation: local translation w.r.t. the link origin in XYZ format. Optional. Assumes (0,0,0) if not given.
+# - rotation: local rotation w.r.t. the link origin in RPY format. Optional. Assumes (0,0,0) if not given.
+
+proximity:
+  weight: 1.0 # set zero to disable the objective
+  loss: "TrivialLoss()"
+  inflation: 0.05
+  objects:
+    # LITE6 COLLISION MODEL WITH SPHERES
+    - link: "link_base"
+      shape: "Sphere(0.1)"
+      translation: [0.0, 0.0, 0.075]
+
+    - link: "link1"
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, 0.0]
+    - link: "link1"
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, -0.075]
+
+#########################################################
+### Extra ###############################################
+#########################################################
+#DONE
+extra:
+  horti_acm_tricks: false # hardcoded acm modification trick for horti robot. TODO: this should be automated
