@@ -130,6 +130,16 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          link6:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link7:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           link_base:
             Alpha: 1
             Show Axes: false
@@ -166,7 +176,7 @@ Visualization Manager:
         Goal State Color: 250; 128; 0
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
-        Planning Group: xarm5
+        Planning Group: xarm7
         Query Goal State: true
         Query Start State: false
         Show Workspace: false
@@ -210,6 +220,16 @@ Visualization Manager:
             Show Trail: false
             Value: true
           link5:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link6:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link7:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -407,8 +427,7 @@ Visualization Manager:
       Marker Topic: /salih_marangoz_thesis_node/robot_monitor_visualization
       Name: MarkerArray
       Namespaces:
-        internal_collision: true
-        robot_collision_body: true
+        {}
       Queue Size: 100
       Value: true
     - Attached Body Color: 150; 50; 150
@@ -465,17 +484,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.05528261139988899
-        Y: -0.01774762198328972
-        Z: 0.2996383309364319
+        X: 0.030442798510193825
+        Y: -0.11784957349300385
+        Z: 0.22245347499847412
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2702030837535858
+      Pitch: 0.3752029836177826
       Target Frame: <Fixed Frame>
-      Yaw: 1.4454237222671509
+      Yaw: 0.4754246473312378
     Saved: ~
 Window Geometry:
   Displays:

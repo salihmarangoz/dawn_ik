@@ -187,10 +187,10 @@ struct CollisionAvoidanceGoal {
                                      const std::vector<CollisionObject*>& int_collision_objects)
   {
     // TODO: which one to select?
-    //return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-    //            new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), ceres::TAKE_OWNERSHIP, num_int_pairs));
-    return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), num_int_pairs));
+    return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), ceres::TAKE_OWNERSHIP, num_int_pairs));
+    //return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+    //            new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), num_int_pairs));
 
   }
 

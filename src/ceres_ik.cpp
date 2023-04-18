@@ -73,7 +73,7 @@ void CeresIK::loop()
     auto controller_state = joint_controller->getState();
     if (controller_state!=nullptr)
     {
-      joint_controller->setJointPositions(robot_state.getVariablePositions());
+      //joint_controller->setJointPositions(robot_state.getVariablePositions());
     }
 
     visual_tools->publishRobotState(robot_state);
@@ -123,7 +123,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   {
     const int joint_i = robot::target_idx_to_joint_idx[i];
     const int variable_i = robot::joint_idx_to_variable_idx[joint_i];
-    const_target_positions[i] = variable_positions[i];
+    const_target_positions[i] = variable_positions[variable_i];
   }
 
   // Generate target centers. Assuming that center=(max+min)/2
@@ -147,6 +147,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
 
+
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions,
                                                                                  state->collision_state.int_pair_a.data(),
                                                                                  state->collision_state.int_pair_b.data(),
@@ -155,15 +156,16 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
 
+
   ceres::CostFunction* center_joints_goal = CenterJointsGoal::Create(target_centers);
   ceres::SoftLOneLoss *center_joints_loss = new ceres::SoftLOneLoss(0.01); // goal weight
   problem.AddResidualBlock(center_joints_goal, center_joints_loss, target_positions);
 
-/*
-  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.1); // goal weight
-  problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
-*/
+
+  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
+  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.1); // goal weight
+  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
+
 
   // Target min/max constraints
   for (int i=0; i<robot::num_targets; i++)
@@ -207,8 +209,17 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
     variable_positions[variable_idx] = target_positions[i];
 
     // int state_idx = current_state.getVariablePosition(robot::joint_names[joint_idx]) !!!!!!!!!!!
+    printf("%f ", target_positions[i]);
   }
+  printf("\n");
   current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
+
+  // TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+  auto controller_state = joint_controller->getState();
+  if (controller_state!=nullptr)
+  {
+    joint_controller->setJointPositions(target_positions);
+  }
 
   return true;
 }
