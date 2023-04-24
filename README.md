@@ -8,16 +8,22 @@
 
 [![](https://img.youtube.com/vi/HZM6uRaNSIk/0.jpg)](https://www.youtube.com/watch?v=HZM6uRaNSIk)
 
-## Installation
+## Dependencies
 
 ```bash
 # Install Ceres Solver 2.x.x
 # http://ceres-solver.org/installation.html
 
+# Horti
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
+
 # xArm
 $ git clone clone git@github.com:salihmarangoz/xarm_ros.git
 $ cd xarm_ros
 $ git submodule update --init --remote
+
+# Others
+$ rosdep install --from-paths src --ignore-src -r
 ```
 
 ## Running
