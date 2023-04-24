@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Status1
         - /MotionPlanning1
-        - /MotionPlanning1/Scene Robot1
+        - /MotionPlanning1/Scene Robot1/Links1
         - /MotionPlanning1/Planning Request1
         - /Raw DepthCloud1/Auto Size1
         - /MarkerArray1
@@ -130,6 +130,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          link6:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           link_base:
             Alpha: 1
             Show Axes: false
@@ -166,7 +171,7 @@ Visualization Manager:
         Goal State Color: 250; 128; 0
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
-        Planning Group: xarm5
+        Planning Group: lite6
         Query Goal State: true
         Query Start State: false
         Show Workspace: false
@@ -210,6 +215,11 @@ Visualization Manager:
             Show Trail: false
             Value: true
           link5:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          link6:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -407,7 +417,8 @@ Visualization Manager:
       Marker Topic: /salih_marangoz_thesis_node/robot_monitor_visualization
       Name: MarkerArray
       Namespaces:
-        {}
+        internal_collision: true
+        robot_collision_body: true
       Queue Size: 100
       Value: true
     - Attached Body Color: 150; 50; 150
@@ -456,7 +467,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.1931474208831787
+      Distance: 1.2728127241134644
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -464,17 +475,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.16687756776809692
-        Y: -0.13210755586624146
-        Z: 0.26268720626831055
+        X: 0.09265326708555222
+        Y: -0.004772488493472338
+        Z: 0.26187583804130554
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3002035319805145
+      Pitch: 0.23979784548282623
       Target Frame: <Fixed Frame>
-      Yaw: 1.91158926486969
+      Yaw: 0.06851810216903687
     Saved: ~
 Window Geometry:
   Displays:

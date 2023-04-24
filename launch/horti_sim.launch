@@ -1,0 +1,24 @@
+<launch>
+
+  <!-- specify the planning pipeline -->
+  <arg name="pipeline" default="ompl" />
+
+  <!-- Gazebo specific options -->
+  <arg name="gazebo_gui" default="true"/>
+  <arg name="paused" default="false"/>
+
+  <!-- launch the gazebo simulator and spawn the robot -->
+  <include file="$(find horti_moveit_config)/launch/gazebo.launch" >
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="gui" value="$(arg gazebo_gui)"/>
+  </include>
+
+  <include file="$(find horti_moveit_config)/launch/demo.launch" pass_all_args="true">
+    <!-- robot description is loaded by gazebo.launch, to enable Gazebo features -->
+    <arg name="load_robot_description" value="false" />
+    <arg name="moveit_controller_manager" value="ros_control" />
+  </include>
+
+  <node name="gazebo_killer_node" pkg="salih_marangoz_thesis" type="gazebo_killer_node.py"/>
+
+</launch>

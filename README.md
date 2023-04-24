@@ -4,37 +4,33 @@
 
 ### [===> My Notes](thesis/MY_NOTES.md)
 
+## Latest Dev Preview
 
+[![](https://img.youtube.com/vi/HZM6uRaNSIk/0.jpg)](https://www.youtube.com/watch?v=HZM6uRaNSIk)
 
 ## Installation
 
-- http://ceres-solver.org/installation.html (2.1.0)
+```bash
+# Install Ceres Solver 2.x.x
+# http://ceres-solver.org/installation.html
 
-- https://github.com/xArm-Developer/xarm_ros (master) (commit: c10d5e59dd50109d15e8fbd3da0bae6aeacbb855)
+# xArm
+$ git clone clone git@github.com:salihmarangoz/xarm_ros.git
+$ cd xarm_ros
+$ git submodule update --init --remote
+```
 
 ## Running
 
 ### Simulation
 
-Select one!
-
-#### 1. xArm
-
-Note: To increase joint states update frequency of xarm7, add `<param name="rate" value="200" />` to the `joint_state_publisher` node in file`xarm_ros/xarm7_moveit_config/launch/moveit_rviz_common.launch`.
-
-**TODO:** fork xarm_ros repository and apply related modifications.
-
 ```bash
+# select one!
 $ roslaunch salih_marangoz_thesis lite6_sim.launch
 $ roslaunch salih_marangoz_thesis xarm5_sim.launch
 $ roslaunch salih_marangoz_thesis xarm6_sim.launch
 $ roslaunch salih_marangoz_thesis xarm7_sim.launch
-```
-
-#### 2. Horti
-
-```bash
-$ roslaunch horti_moveit_config demo_gazebo.launch # TODO: modify the launch file
+$ roslaunch salih_marangoz_thesis horti_sim.launch
 ```
 
 ### Code Generation
@@ -48,6 +44,8 @@ $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm5
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm6
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm7
 $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=horti
+
+# Re-compile the project after this step. 
 ```
 
 ### Solver/Controller
