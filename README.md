@@ -10,9 +10,13 @@
 
 ## Dependencies
 
+- todo: remove bio_ik
+
 ```bash
-# Install Ceres Solver 2.x.x
-# http://ceres-solver.org/installation.html
+$ cd catkin_ws/src
+
+# This package
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git
 
 # Horti
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
@@ -23,7 +27,22 @@ $ cd xarm_ros
 $ git submodule update --init --remote
 
 # Others
+$ cd catkin_ws
 $ rosdep install --from-paths src --ignore-src -r
+
+# Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
+$ cd $HOME
+$ git git@github.com:salihmarangoz/ceres-solver.git
+$ sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev libeigen3-dev libsuitesparse-dev
+$ cd ceres-solver
+$ mkdir ceres-bin
+$ cmake ../ceres-solver
+$ make -j4
+$ sudo make install
+
+# Extra stuff
+$ sudo apt install python3-yaml python-is-python3
+$ pip install pyyaml
 ```
 
 ## Running
