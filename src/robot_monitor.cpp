@@ -187,7 +187,7 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
   // init int_collision_objects if not initialized
   if (int_collision_objects.size() <= 0)
   {
-    int_collision_objects = robot::getRobotCollisionObjects();
+    int_collision_objects = robot::getRobotCollisionObjects(robot::default_inflation);
     for (int i=0; i<int_collision_objects.size(); i++)
     {
       int_collision_objects[i]->setUserData((void*)i);
@@ -279,9 +279,9 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
       marker.ns = std::string("robot_collision_body");
       marker.id = id_counter++;
       marker.type = visualization_msgs::Marker::SPHERE;
-      marker.scale.x = (shape.radius - robot::inflation)*2;
-      marker.scale.y = (shape.radius - robot::inflation)*2;
-      marker.scale.z = (shape.radius - robot::inflation)*2;
+      marker.scale.x = (shape.radius - robot::default_inflation)*2;
+      marker.scale.y = (shape.radius - robot::default_inflation)*2;
+      marker.scale.z = (shape.radius - robot::default_inflation)*2;
       marker.pose.position.x = curr_translation.x();
       marker.pose.position.y = curr_translation.y();
       marker.pose.position.z = curr_translation.z();

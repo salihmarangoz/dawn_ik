@@ -227,9 +227,9 @@ struct CollisionAvoidanceGoal {
       // TODO: write a function for this!
       // TODO: maybe use not inflated objects? inflated ones only for the broadphase collision detection.
       const T distance = utils::distSphere2Sphere(pos_a, 
-                                                  shape_a.radius-robot::inflation, 
+                                                  shape_a.radius-robot::default_inflation, 
                                                   pos_b, 
-                                                  shape_b.radius-robot::inflation);
+                                                  shape_b.radius-robot::default_inflation);
       residuals[i] = 0.001 / (distance);
       
       if (distance < 0) return false; // TODO: maybe return false if there is a collision?

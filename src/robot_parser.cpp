@@ -487,6 +487,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "template<typename T>\n"
                 "CollisionObject* inflatedCollisionObject(const T &shape, double inflation)\n"
                 "{\n"
+                "  if (inflation <= 0) return new CollisionObject(std::make_shared<T>(shape));\n"
                 "  return new CollisionObject(std::make_shared<T>(shape.inflated(inflation).first));\n"
                 "}\n" << std::endl;
 
@@ -558,8 +559,8 @@ std::string RobotParser::generateCodeForParsedRobot()
 
   // Collision objects function
   out_stream << "// Collision Objects Function" << std::endl;
-  out_stream << "const double inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
-  out_stream << "static inline std::vector<CollisionObject*> getRobotCollisionObjects()" << std::endl;
+  out_stream << "const double default_inflation = " << cfg["proximity"]["inflation"].As<double>() << ";" << std::endl;
+  out_stream << "static inline std::vector<CollisionObject*> getRobotCollisionObjects(double inflation = 0.0)" << std::endl;
   out_stream << "{" << std::endl;
   out_stream << "  std::vector<CollisionObject*> objects;" << std::endl;
   out_stream << std::endl;

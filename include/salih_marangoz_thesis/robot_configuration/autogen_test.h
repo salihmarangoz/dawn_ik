@@ -24,6 +24,7 @@ namespace robot
 template<typename T>
 CollisionObject* inflatedCollisionObject(const T &shape, double inflation)
 {
+  if (inflation <= 0) return new CollisionObject(std::make_shared<T>(shape));
   return new CollisionObject(std::make_shared<T>(shape.inflated(inflation).first));
 }
 
@@ -139,8 +140,8 @@ const int object_can_skip_translation[19] = {0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1
 const int object_can_skip_rotation[19] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; // bool
 
 // Collision Objects Function
-const double inflation = 0.05;
-static inline std::vector<CollisionObject*> getRobotCollisionObjects()
+const double default_inflation = 0.05;
+static inline std::vector<CollisionObject*> getRobotCollisionObjects(double inflation = 0.0)
 {
   std::vector<CollisionObject*> objects;
 
