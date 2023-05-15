@@ -84,6 +84,13 @@ public:
   std::vector<int> object_can_skip_translation;
   std::vector<int> object_can_skip_rotation;
 
+  // Goal info
+  bool enabled_preferred_joint_position_goal; // TODO
+  std::vector<float> weight_preferred_joint_position_goal;
+  //std::vector<float> goal_weight_joint_minimal_velocity; // TODO
+  //std::vector<float> goal_weight_joint_minimal_acceleration; // TODO
+  //std::vector<float> goal_weight_joint_minimal_jerk; // TODO
+
 
   /////////////////////////////////////////////////////////////////////
 

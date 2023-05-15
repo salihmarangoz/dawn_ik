@@ -106,6 +106,40 @@ struct EndpointGoal {
     residuals[2] = global_link_rotations[4*robot::endpoint_link_idx+1] - direction.x();
     residuals[3] = global_link_rotations[4*robot::endpoint_link_idx+2] - direction.y();
     residuals[4] = global_link_rotations[4*robot::endpoint_link_idx+3] - direction.z();
+    
+    // TEST: SLOW!
+    /*
+    Eigen::Quaterniond endpoint_dir;
+    endpoint_dir.w() = global_link_rotations[4*robot::endpoint_link_idx+0];
+    endpoint_dir.x() = global_link_rotations[4*robot::endpoint_link_idx+1];
+    endpoint_dir.y() = global_link_rotations[4*robot::endpoint_link_idx+2];
+    endpoint_dir.z() = global_link_rotations[4*robot::endpoint_link_idx+3];
+    residuals[1] = endpoint_dir.angularDistance(direction);
+    */
+
+    // TEST: SLOW!
+    /*
+    residuals[1] = 1.0-global_link_rotations[4*robot::endpoint_link_idx+0]*direction.w() -
+                   global_link_rotations[4*robot::endpoint_link_idx+1]*direction.x() -
+                   global_link_rotations[4*robot::endpoint_link_idx+2]*direction.y() -
+                   global_link_rotations[4*robot::endpoint_link_idx+3]*direction.z();
+    */
+
+    // couldn't implement this method
+    /*
+    T inverse_quad[4];
+    inverse_quad[0] = global_link_rotations[4*robot::endpoint_link_idx+0];
+    inverse_quad[1] = -global_link_rotations[4*robot::endpoint_link_idx+1];
+    inverse_quad[2] = -global_link_rotations[4*robot::endpoint_link_idx+2];
+    inverse_quad[3] = -global_link_rotations[4*robot::endpoint_link_idx+3];
+    T endpoint[4];
+    endpoint[0] = direction.w();
+    endpoint[1] = direction.x();
+    endpoint[2] = direction.y();
+    endpoint[3] = direction.z();
+    T tmp[4];
+    ceres::QuaternionProduct(endpoint, inverse_quad, tmp);
+    */
 
     return true;
   }
@@ -113,6 +147,8 @@ struct EndpointGoal {
    // Factory to hide the construction of the CostFunction object from the client code.
    static ceres::CostFunction* Create(const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction, const double* variable_positions)
    {
+     //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new EndpointGoal(endpoint, direction, variable_positions)));
      return (new ceres::AutoDiffCostFunction<EndpointGoal, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new EndpointGoal(endpoint, direction, variable_positions)));
    }
