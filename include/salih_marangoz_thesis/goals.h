@@ -9,6 +9,28 @@
 namespace salih_marangoz_thesis
 {
 
+struct PreferredJointPositionGoal {
+  PreferredJointPositionGoal(){}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+    {
+      int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+      residuals[target_idx] = robot::weight_preferred_joint_position_goal[joint_idx] * (target_values[target_idx] - robot::joint_preferred_position[joint_idx]);
+    }
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create()
+   {
+     return (new ceres::AutoDiffCostFunction<PreferredJointPositionGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new PreferredJointPositionGoal()));
+   }
+};
+
 /**
  * MinimalJointDisplacementGoal
 */
@@ -189,7 +211,7 @@ struct CollisionAvoidanceGoal {
                                      const std::vector<CollisionObject*>& int_collision_objects)
   {
     // TODO: which one to select?
-    return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::CENTRAL, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+    return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::FORWARD, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                 new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), ceres::TAKE_OWNERSHIP, num_int_pairs));
     //return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
     //            new CollisionAvoidanceGoal(variable_positions, int_collision_pair_a, int_collision_pair_b, num_int_pairs, int_collision_objects), num_int_pairs));

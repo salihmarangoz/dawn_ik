@@ -239,6 +239,7 @@ bool RobotParser::parse()
   joint_child_link_idx.resize(num_joints);
   joint_parent_link_idx.resize(num_joints);
   joint_is_position_bounded.resize(num_joints);
+  joint_preferred_position.resize(num_joints);
   joint_max_position.resize(num_joints);
   joint_min_position.resize(num_joints);
   joint_is_velocity_bounded.resize(num_joints);
@@ -247,6 +248,7 @@ bool RobotParser::parse()
   joint_is_acceleration_bounded.resize(num_joints);
   joint_max_acceleration.resize(num_joints);
   joint_min_acceleration.resize(num_joints);
+  weight_preferred_joint_position_goal.resize(num_joints, 1.0);
   for (auto j: joint_models)
   {
     ROS_INFO("------------------------------------------------------");
@@ -304,6 +306,7 @@ bool RobotParser::parse()
     // Get variable limits
     moveit::core::JointModel::Bounds variable_bounds = j->getVariableBounds();
     joint_is_position_bounded[joint_idx] = variable_bounds[0].position_bounded_;
+    joint_preferred_position[joint_idx] = (variable_bounds[0].max_position_ + variable_bounds[0].min_position_) / 2.0; // will be overriden later
     joint_min_position[joint_idx] = variable_bounds[0].min_position_;
     joint_max_position[joint_idx] = variable_bounds[0].max_position_;
     joint_is_velocity_bounded[joint_idx] = variable_bounds[0].velocity_bounded_;
@@ -513,6 +516,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << prefix << primitiveVector2Str("int joint_child_link_idx", joint_child_link_idx) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_parent_link_idx", joint_parent_link_idx) << " // -1 if no link available" << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_is_position_bounded", joint_is_position_bounded) << " // bool" << std::endl;
+  out_stream << prefix << primitiveVector2Str("double joint_preferred_position", joint_preferred_position) << std::endl;
   out_stream << prefix << primitiveVector2Str("double joint_max_position", joint_max_position) << std::endl;
   out_stream << prefix << primitiveVector2Str("double joint_min_position", joint_min_position) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_is_velocity_bounded", joint_is_velocity_bounded) << " // bool" << std::endl;
@@ -537,6 +541,11 @@ std::string RobotParser::generateCodeForParsedRobot()
   out_stream << "// ACM" << std::endl;
   out_stream << prefix << eigenArrayXXi2Str("int acm", processed_acm, prefix.size());
   out_stream << std::endl;
+  out_stream << std::endl;
+
+  // Objective weights
+  out_stream << "// Objective weights" << std::endl;
+  out_stream << prefix << primitiveVector2Str("double weight_preferred_joint_position_goal", weight_preferred_joint_position_goal) << std::endl;
   out_stream << std::endl;
 
   // Collision objects

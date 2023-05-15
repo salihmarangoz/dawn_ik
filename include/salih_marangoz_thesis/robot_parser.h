@@ -59,6 +59,7 @@ public:
   std::vector<int> joint_child_link_idx;
   std::vector<int> joint_parent_link_idx; // -1 if no link available
   std::vector<int> joint_is_position_bounded; // bool
+  std::vector<float> joint_preferred_position;
   std::vector<float> joint_max_position;
   std::vector<float> joint_min_position;
   std::vector<int> joint_is_velocity_bounded; // bool
