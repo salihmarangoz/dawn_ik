@@ -18,9 +18,9 @@ void RelaxedIKLoss::Evaluate(double s, double* rho) const {
     const double c4 = c2*c2;
     const double g = std::exp( -s2/(2*c2) );
 
-    rho[0] = a_*( -g + r*s2 + 1 );
-    rho[1] = a_*( (s*g) / c2 + 2*r*s );
-    rho[2] = a_*( g/c2 - (s2*g)/c4 + 2*r );
+    rho[0] = a_*( -g + r*s2 + 1 ); // r*s
+    rho[1] = a_*( (s*g) / c2 + 2*r*s ); // r
+    rho[2] = a_*( g/c2 - (s2*g)/c4 + 2*r ); // 0
 }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
