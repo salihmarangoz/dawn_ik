@@ -32,11 +32,12 @@ $ rosdep install --from-paths src --ignore-src -r
 
 # Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
 $ cd $HOME
-$ git git@github.com:salihmarangoz/ceres-solver.git
+$ git clone git@github.com:salihmarangoz/ceres-solver.git
 $ sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev libeigen3-dev libsuitesparse-dev
 $ cd ceres-solver
-$ mkdir ceres-bin
-$ cmake ../ceres-solver
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make -j4
 $ sudo make install
 
