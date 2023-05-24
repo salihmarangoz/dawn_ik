@@ -16,6 +16,19 @@
 #include <salih_marangoz_thesis/robot_monitor.h>
 #include <salih_marangoz_thesis/goals.h>
 
+/////////////////////////////////////// EXPERIMENTAL /////////////////////////////////////////////////////////////
+namespace ceres {
+class RelaxedIKLoss final : public LossFunction {
+ public:
+  explicit RelaxedIKLoss(double a);
+  void Evaluate(double, double*) const override;
+
+ private:
+  const double a_;
+};
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace salih_marangoz_thesis
 {
 
