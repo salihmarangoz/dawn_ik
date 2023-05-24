@@ -147,7 +147,7 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
 
   // ========== Preferred Joint Position Goal ==========
   ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create();
-  ceres::SoftLOneLoss *preferred_joint_position_loss = new ceres::SoftLOneLoss(0.01); // goal weight
+  ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.1); // goal weight
   problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, target_positions);
   //problem.AddResidualBlock(preferred_joint_position_goal, robot::createPreferredJointPositionLoss(), target_positions); // TODO
 
