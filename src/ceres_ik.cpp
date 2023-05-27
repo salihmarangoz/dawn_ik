@@ -10,6 +10,7 @@ RelaxedIKLoss::RelaxedIKLoss(double a) : a_(a) {
 // desmos: https://www.desmos.com/calculator/9epwyzkkk7
 // based on "RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion" by Daniel Rakita, et. al.
 // note: relaxed ^4 to ^2 for the outlier part of the loss. ^4 is crazy...
+// more note: relaxed ^2 to l1 for the outlier part. this may be used for something else...
 void RelaxedIKLoss::Evaluate(double s, double* rho) const {
     const double c = 0.1; // TODO
     const double r = 0.01; // TODO
@@ -18,9 +19,15 @@ void RelaxedIKLoss::Evaluate(double s, double* rho) const {
     const double c4 = c2*c2;
     const double g = std::exp( -s2/(2*c2) );
 
-    rho[0] = a_*( -g + r*s2 + 1 ); // r*s
-    rho[1] = a_*( (s*g) / c2 + 2*r*s ); // r
-    rho[2] = a_*( g/c2 - (s2*g)/c4 + 2*r ); // 0
+    // L2 loss for outliers
+    //rho[0] = a_*( -g + r*s2 + 1 );
+    //rho[1] = a_*( (s*g) / c2 + 2*r*s );
+    //rho[2] = a_*( g/c2 - (s2*g)/c4 + 2*r );
+
+    // L1 loss for outliers
+    rho[0] = a_*( -g + r*s + 1 );
+    rho[1] = a_*( (s*g) / c2 + r );
+    rho[2] = a_*( g/c2 - (s2*g)/c4 );
 }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +191,8 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
   // ================== Endpoint Goal ==================
   ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, variable_positions);
   //ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
-  problem.AddResidualBlock(endpoint_goal, nullptr, target_positions);
+  ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
+  problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
   //problem.AddResidualBlock(endpoint_goal, robot::createEndpointLoss(), target_positions);
 
   // ============= Collision Avoidance Goal ============
