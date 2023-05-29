@@ -287,6 +287,25 @@ void transformToTranslationRotation(const T_in* transforms, T_in* translations, 
   }
 }
 
+
+//=======================================================================================================================
+
+static inline 
+double computeSquaredDistancePointToLineSegment(double p_[3], double a_[3], double b_[3])
+{
+  Eigen::Vector3d p(p_);
+  Eigen::Vector3d a(a_);
+  Eigen::Vector3d b(b_);
+  auto ba = b - a;
+  auto ap = a - p;
+  auto c = ba.dot(ap);
+  if (c>0) return ap.dot(ap);
+  auto pb = p - b;
+  if (ba.dot(pb)>0) return pb.dot(pb);
+  auto e = ap - ba * (c / ba.dot(ba));
+  return e.dot(e);
+}
+
 } // namespace utils
 
 #endif // __SALIH_MARANGOZ_UTILS_H__
