@@ -54,13 +54,13 @@ Constraint m1_distance # euclidean distance tolerance
 ###################################################################################################
 
 # Constraints define:
-# - line;    with p1 and p2 unbounded
-# - ray;     with one bounded and one unbounded
-# - segment; with p1 and p2 bounded
+# - line;         with p1 and p2 unbounded
+# - ray;          with one bounded and one unbounded
+# - line segment; with p1 and p2 bounded
 
 # The parameter "m2_distance" adds extra distance tolerance to the defined shape. For example;
 # Constraints define:
-# - infinite height capsule;                 with p1 and p2 unbounded + m2_distance>0
+# - infinite height capsule/cylinder;        with p1 and p2 unbounded + m2_distance>0
 # - infinite height capsule with a start;    with one bounded and one unbounded + m2_distance>0
 # - capsule;                                 with p1 and p2 bounded + m2_distance>0
 
@@ -78,8 +78,8 @@ float64    m2_p2y
 float64    m2_p2z
 bool       m2_p2_bounded
 
-# Distance tolerance to the defined shape
-Constraint m2_distance
+# Distance tolerance to the defined shape. Valid values are m2_distance>=0
+Constraint m2_distance # Recommended to always set m2_distance.lower_tolerance = 0
 
 ###################################################################################################
 # MODE_3: ENDPOINT ORIENTATION CONTROL IN WORLD FRAME
@@ -98,21 +98,33 @@ Constraint m3_yaw
 ###################################################################################################
 
 # Constraints define:
-# - keep distance to the target;        with soft or hard bounded m4_target_distance
-# - look at target;                     with hard-bounded m4_target_offset_roll, m4_target_offset_pitch, m4_target_offset_yaw
-# - keep target in view;                with soft-bounded m4_target_offset_roll, m4_target_offset_pitch, m4_target_offset_yaw
-# - look at target and keep distance;   with soft-bounded m4_target_distance + soft-bounded m4_target_offset_roll, m4_target_offset_pitch, m4_target_offset_yaw
+# - keep distance to the target;        with soft or hard bounded m4_distance
+# - look at target;                     with hard-bounded m4_offset_roll, m4_offset_pitch, m4_offset_yaw
+# - keep target in view;                with soft-bounded m4_offset_roll, m4_offset_pitch, m4_offset_yaw
+# - look at target and keep distance;   with soft-bounded m4_distance + soft-bounded m4_offset_roll, m4_offset_pitch, m4_offset_yaw
 
 # Always set the target position!
-float64    m4_target_point_x
-float64    m4_target_point_y
-float64    m4_target_point_z
+float64    m4_point_x
+float64    m4_point_y
+float64    m4_point_z
 
-Constraint m4_target_distance # This is the only parameter affecting final position heavily in this mode.
+Constraint m4_distance # This is the only parameter affecting final position heavily in this mode.
 
 # Angle offset to the target in the endpoint frame. To keep the target in camera image, appropriate values may be needed to set w.r.t. camera parameters
 # Set values to 0 to keep the image on center and soft-bound to minimize energy use while tracking a moving target.
 # Always set boundaries otherwise, 
-Constraint m4_target_offset_roll
-Constraint m4_target_offset_pitch
-Constraint m4_target_offset_yaw
+Constraint m4_offset_roll
+Constraint m4_offset_pitch
+Constraint m4_offset_yaw
+
+###################################################################################################
+# MODE_5: ENDPOINT POSITION CONSTRAINING WITH CONVEX HULL
+###################################################################################################
+
+# Constraints define:
+# - convex hull working environment;   with m5_convex_hull and optionally adding more tolerance with m5_distance
+
+# NOTE: To restrict whole robot body, use external collisions input of the controller
+
+sensor_msgs/PointCloud m5_convex_hull
+float64 m5_distance # valid values are; m5_distance>=0
