@@ -1,5 +1,5 @@
-#ifndef __SALIH_MARANGOZ_UTILS_H__
-#define __SALIH_MARANGOZ_UTILS_H__
+#ifndef DAWN_IK_UTILS_H
+#define DAWN_IK_UTILS_H
 
 // COMPILE TIME COMPUTATIONS AND CONSTEXPR UTILS
 #include <stddef.h> // ptrdiff_t
@@ -9,7 +9,7 @@
 #include <ceres/rotation.h>
 
 // VISUALIZATION UTILS
-#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
+#include <dawn_ik/robot_configuration/robot_configuration.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <moveit/robot_state/robot_state.h>
@@ -308,4 +308,4 @@ double computeSquaredDistancePointToLineSegment(double p_[3], double a_[3], doub
 
 } // namespace utils
 
-#endif // __SALIH_MARANGOZ_UTILS_H__
+#endif // DAWN_IK_UTILS_H

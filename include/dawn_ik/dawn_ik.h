@@ -1,5 +1,5 @@
-#ifndef __CERES_IK_H__
-#define __CERES_IK_H__
+#ifndef DAWN_IK_H
+#define DAWN_IK_H
 
 #include <ros/ros.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -10,11 +10,11 @@
 #include <ceres/rotation.h>
 #include <visualization_msgs/InteractiveMarkerFeedback.h> // TODO
 
-#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
-#include <salih_marangoz_thesis/joint_trajectory_control_interface.h>
-#include <salih_marangoz_thesis/utils.h>
-#include <salih_marangoz_thesis/robot_monitor.h>
-#include <salih_marangoz_thesis/goals.h>
+#include <dawn_ik/robot_configuration/robot_configuration.h>
+#include <dawn_ik/joint_trajectory_control_interface.h>
+#include <dawn_ik/utils.h>
+#include <dawn_ik/robot_monitor.h>
+#include <dawn_ik/goals.h>
 
 /////////////////////////////////////// EXPERIMENTAL /////////////////////////////////////////////////////////////
 namespace ceres {
@@ -29,7 +29,7 @@ class RelaxedIKLoss final : public LossFunction {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 using ceres::AutoDiffCostFunction;
@@ -38,7 +38,7 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
-class CeresIK
+class DawnIK
 {
 // my classes
 public:
@@ -60,7 +60,7 @@ public:
   bool endpoint_received = false;
   Eigen::Quaterniond direction;
 
-  CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
+  DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   moveit::core::RobotState getCurrentRobotState();
   void loop();
   bool update(moveit::core::RobotState &current_state);
@@ -68,7 +68,7 @@ public:
 };
 
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik
 
 
-#endif // __CERES_IK_H__
+#endif // DAWN_IK_H

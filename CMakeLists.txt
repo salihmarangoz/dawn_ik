@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(salih_marangoz_thesis)
+project(dawn_ik)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++17)
 
 ## Further optimizations
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wno-int-to-pointer-cast")
 
 ## Disable assertions for more performance (maybe a little)
 #set(EIGEN_NO_DEBUG "1")
@@ -22,7 +22,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   roscpp
   rospy
-  bio_ik
   moveit_core
   moveit_msgs
   moveit_ros_planning
@@ -37,9 +36,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-
 find_package(Ceres REQUIRED COMPONENTS EigenSparse SparseLinearAlgebraLibrary LAPACK SuiteSparse SchurSpecializations)
-
 find_package(hpp-fcl REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -80,6 +77,8 @@ add_message_files(
   JointLinkState.msg
   JointLinkCollisionState.msg
   SolverSummary.msg
+  IKGoal.msg
+  Constraint.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -147,24 +146,24 @@ include_directories(
   ${hpp-fcl_INCLUDE_DIRS}
 )
 
-## ceres_ik_node executable
-add_executable(ceres_ik_node 
-  src/ceres_ik_node.cpp
-  src/ceres_ik.cpp
+############# solver_node executable ###########
+add_executable(solver_node
+  src/nodes/solver_node.cpp
+  src/dawn_ik.cpp
   src/joint_trajectory_control_interface.cpp
   src/robot_monitor.cpp
 )
-add_dependencies(ceres_ik_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ceres_ik_node
+add_dependencies(solver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(solver_node
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   Ceres::ceres
   ${hpp-fcl_LIBRARIES}
 )
 
-## robot_parser_node executable
+############# robot_parser_node executable ###########
 add_executable(robot_parser_node 
-  src/robot_parser_node.cpp
+  src/nodes/robot_parser_node.cpp
   src/robot_parser.cpp
   src/yaml.cpp
 )
@@ -231,7 +230,7 @@ target_link_libraries(test_node
 )
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_salih_marangoz_thesis.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_dawn_ik.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

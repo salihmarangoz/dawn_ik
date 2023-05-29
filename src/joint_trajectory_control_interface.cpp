@@ -1,6 +1,6 @@
-#include <salih_marangoz_thesis/joint_trajectory_control_interface.h>
+#include <dawn_ik/joint_trajectory_control_interface.h>
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 JointTrajectoryControlInterface::JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic) : nh_(nh), state_(nullptr), speed_scale_(0.5), is_started_(false)
@@ -127,4 +127,4 @@ JointTrajectoryControlInterface::stateCallback_(const control_msgs::JointTraject
   state_ = msg;
 }
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik

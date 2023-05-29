@@ -1,6 +1,6 @@
-#include <salih_marangoz_thesis/robot_monitor.h>
+#include <dawn_ik/robot_monitor.h>
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 CollisionCallBackCollect::CollisionCallBackCollect(){}
@@ -363,4 +363,4 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
 
 
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik

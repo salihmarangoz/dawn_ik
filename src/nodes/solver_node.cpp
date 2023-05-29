@@ -1,13 +1,13 @@
-#include <salih_marangoz_thesis/ceres_ik.h>
+#include <dawn_ik/dawn_ik.h>
 #include <ros/ros.h>
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "salih_marangoz_thesis_ceres_ik");
+  ros::init(argc, argv, "solver_node");
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh("~");
   ros::AsyncSpinner spinner(0);
-  salih_marangoz_thesis::CeresIK ik(nh, priv_nh);
+  dawn_ik::DawnIK ik(nh, priv_nh);
   ros::waitForShutdown();
   return 0;
 }

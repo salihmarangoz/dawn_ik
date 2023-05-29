@@ -50,8 +50,8 @@
 
   <include file="$(find xarm_gazebo)/launch/xarm6_beside_table.launch"/>
 
-  <node name="gazebo_killer_node" pkg="salih_marangoz_thesis" type="gazebo_killer_node.py"/>
+  <node name="gazebo_killer_node" pkg="dawn_ik" type="gazebo_killer_node.py"/>
   
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find salih_marangoz_thesis)/rviz/ceres_ik.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find dawn_ik)/dawn_ik.rviz"/>
 
 </launch>

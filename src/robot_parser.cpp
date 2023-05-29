@@ -1,4 +1,4 @@
-#include <salih_marangoz_thesis/robot_parser.h>
+#include <dawn_ik/robot_parser.h>
 
 // EXAMPLE YAML USAGE:
 // Yaml::Node& joint_position_limits_override = cfg["joint_position_limits_override"];
@@ -13,7 +13,7 @@
 //     ROS_WARN("no_limit %d", (*it).second["no_limit"].As<bool>() );
 // }
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 RobotParser::RobotParser(ros::NodeHandle &nh, ros::NodeHandle &priv_nh) : nh(nh), priv_nh(priv_nh)
@@ -57,7 +57,7 @@ RobotParser::readCfg()
     ROS_FATAL("Configuration file not found!");
     return false;
   }
-  std::string cfg_filepath = ros::package::getPath("salih_marangoz_thesis") + "/cfg/" + cfg_filename + ".yaml";
+  std::string cfg_filepath = ros::package::getPath("dawn_ik") + "/cfg/" + cfg_filename + ".yaml";
   ROS_WARN("Loading cfg: %s", cfg_filepath.c_str());
   try
   {
@@ -74,7 +74,7 @@ RobotParser::readCfg()
 bool
 RobotParser::saveCode(const std::string& code)
 {
-  std::string robot_configuration_folder = ros::package::getPath("salih_marangoz_thesis") + "/include/salih_marangoz_thesis/robot_configuration"; // TODO: hardcoded
+  std::string robot_configuration_folder = ros::package::getPath("dawn_ik") + "/include/dawn_ik/robot_configuration"; // TODO: hardcoded
   std::string generated_code_destination = robot_configuration_folder + "/autogen_test.h"; // TODO: hardcoded
 
   ROS_INFO("Generated code will be saved to: %s", generated_code_destination.c_str());
@@ -863,4 +863,4 @@ std::vector<int> RobotParser::findPartialChain(const int endpoint_link)
 }
 
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik

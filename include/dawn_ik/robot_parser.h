@@ -1,5 +1,5 @@
-#ifndef __ROBOT_PARSER_H__
-#define __ROBOT_PARSER_H__
+#ifndef DAWN_IK_ROBOT_PARSER_H
+#define DAWN_IK_ROBOT_PARSER_H
 
 #include <ros/ros.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -12,11 +12,11 @@
 #include <sstream>
 #include <cctype> // std::isdigit()
 
-#include <salih_marangoz_thesis/utils.h>
-#include <salih_marangoz_thesis/yaml.h>
+#include <dawn_ik/utils.h>
+#include <dawn_ik/yaml.h>
 
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 // NOTE:
@@ -162,7 +162,7 @@ public:
 
 };
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik
 
 
-#endif // __ROBOT_PARSER_H__
+#endif // DAWN_IK_ROBOT_PARSER_H

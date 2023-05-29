@@ -1,4 +1,4 @@
-#include <salih_marangoz_thesis/ceres_ik.h>
+#include <dawn_ik/dawn_ik.h>
 
 /////////////////////////////////////// EXPERIMENTAL /////////////////////////////////////////////////////////////
 namespace ceres
@@ -32,10 +32,10 @@ void RelaxedIKLoss::Evaluate(double s, double* rho) const {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
-CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
+DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
   // init robot monitor
   robot_monitor = std::make_shared<RobotMonitor>(nh, priv_nh);
@@ -50,7 +50,7 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
   visual_tools.reset(new moveit_visual_tools::MoveItVisualTools(planning_scene_monitor->getRobotModel()->getModelFrame(), "/ceres_ik_visual_markers"));
 
   // TODO
-  endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &CeresIK::subscriberCallback, this);
+  endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
 
   joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh);
   joint_controller->start("");
@@ -58,7 +58,7 @@ CeresIK::CeresIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh
   loop(); // TODO
 }
 
-void CeresIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg)
+void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg)
 {
   auto given_endpoint = msg->pose;
   ROS_WARN_THROTTLE(1.0, "Endpoint received. x: %lf, y: %lf, z: %lf", given_endpoint.position.x, given_endpoint.position.y, given_endpoint.position.z);
@@ -69,7 +69,7 @@ void CeresIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeed
   endpoint_received = true;
 }
 
-moveit::core::RobotState CeresIK::getCurrentRobotState()
+moveit::core::RobotState DawnIK::getCurrentRobotState()
 {
   // TODO: this method is slow... 
   planning_scene_monitor->waitForCurrentRobotState(ros::Time(0));
@@ -78,7 +78,7 @@ moveit::core::RobotState CeresIK::getCurrentRobotState()
 }
 
 // TODO: this is just a dummy loop function. this will run on a separate thread!
-void CeresIK::loop()
+void DawnIK::loop()
 {
   moveit::core::RobotState robot_state = getCurrentRobotState();
 
@@ -117,7 +117,7 @@ void CeresIK::loop()
   }
 }
 
-bool CeresIK::update(moveit::core::RobotState &current_state)
+bool DawnIK::update(moveit::core::RobotState &current_state)
 {
   ROS_INFO_ONCE("Number of variables in the robot state: %d", (int)(current_state.getVariableCount()) );
   if (robot::num_variables != current_state.getVariableCount())
@@ -267,4 +267,4 @@ bool CeresIK::update(moveit::core::RobotState &current_state)
 }
 
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik

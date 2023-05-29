@@ -1,5 +1,5 @@
-#ifndef __SALIH_MARANGOZ_JOINT_TRAJECTORY_CONTROL_INTERFACE_H__
-#define __SALIH_MARANGOZ_JOINT_TRAJECTORY_CONTROL_INTERFACE_H__
+#ifndef DAWN_IK_JOINT_TRAJECTORY_CONTROL_INTERFACE
+#define DAWN_IK_JOINT_TRAJECTORY_CONTROL_INTERFACE
 
 #include <ros/ros.h>
 #include <control_msgs/JointTrajectoryControllerState.h>
@@ -9,7 +9,7 @@
 // http://wiki.ros.org/joint_trajectory_controller
 // http://wiki.ros.org/joint_trajectory_controller/UnderstandingTrajectoryReplacement
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 class JointTrajectoryControlInterface
@@ -39,6 +39,6 @@ private:
 
 
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik
 
-#endif // __SALIH_MARANGOZ_JOINT_TRAJECTORY_CONTROL_INTERFACE_H__
+#endif // DAWN_IK_JOINT_TRAJECTORY_CONTROL_INTERFACE

@@ -1,10 +1,10 @@
-#ifndef __ROBOT_MONITOR_H__
-#define __ROBOT_MONITOR_H__
+#ifndef DAWN_IK_ROBOT_MONITOR_H
+#define DAWN_IK_ROBOT_MONITOR_H
 
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-#include <salih_marangoz_thesis/JointLinkState.h>
-#include <salih_marangoz_thesis/JointLinkCollisionState.h>
+#include <dawn_ik/JointLinkState.h>
+#include <dawn_ik/JointLinkCollisionState.h>
 
 #include <hpp/fcl/collision.h>
 #include <hpp/fcl/broadphase/broadphase.h>
@@ -23,11 +23,11 @@ using hpp::fcl::Matrix3f;
 #include <chrono>
 using namespace std::chrono;
 
-#include <salih_marangoz_thesis/utils.h> // computeLinkTranslation, computeLinkRotation
-#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
+#include <dawn_ik/utils.h> // computeLinkTranslation, computeLinkRotation
+#include <dawn_ik/robot_configuration/robot_configuration.h>
 
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 struct CollisionCallBackCollect : hpp::fcl::CollisionCallBackBase {
@@ -94,7 +94,7 @@ private:
 
 };
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik
 
 
-#endif // __ROBOT_MONITOR_H__
+#endif // DAWN_IK_ROBOT_MONITOR_H

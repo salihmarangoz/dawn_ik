@@ -1,12 +1,12 @@
-#ifndef __SALIH_MARANGOZ_THESIS_GOALS__
-#define __SALIH_MARANGOZ_THESIS_GOALS__
+#ifndef DAWN_IK_GOALS_H
+#define DAWN_IK_GOALS_H
 
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
-#include <salih_marangoz_thesis/robot_configuration/robot_configuration.h>
-#include <salih_marangoz_thesis/utils.h>
+#include <dawn_ik/robot_configuration/robot_configuration.h>
+#include <dawn_ik/utils.h>
 
-namespace salih_marangoz_thesis
+namespace dawn_ik
 {
 
 struct PreferredJointPositionGoal {
@@ -267,6 +267,6 @@ struct CollisionAvoidanceGoal {
 
 
 
-} // namespace salih_marangoz_thesis
+} // namespace dawn_ik
 
-#endif // __SALIH_MARANGOZ_THESIS_GOALS__
+#endif // DAWN_IK_GOALS_H

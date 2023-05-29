@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <launch>
 
   <!-- specify the planning pipeline -->
@@ -19,6 +21,6 @@
     <arg name="moveit_controller_manager" value="ros_control" />
   </include>
 
-  <node name="gazebo_killer_node" pkg="salih_marangoz_thesis" type="gazebo_killer_node.py"/>
+  <node name="gazebo_killer_node" pkg="dawn_ik" type="gazebo_killer_node.py"/>
 
 </launch>

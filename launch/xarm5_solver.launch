@@ -2,7 +2,7 @@
 
 <launch>
 
-  <node name="salih_marangoz_thesis_node" pkg="salih_marangoz_thesis" type="ceres_ik_node" output="screen">
+  <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen">
     <remap from="joint/command" to="/xarm/xarm5_traj_controller/command"/>
     <remap from="joint/state" to="/xarm/xarm5_traj_controller/state"/>
   </node>

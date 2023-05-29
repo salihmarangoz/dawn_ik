@@ -1,4 +1,6 @@
-# Salih Marangoz Thesis
+# DawnIK Solver (Salih Marangoz Thesis)
+
+DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms focusing on observation capabilities with collision avoidance and multiple objectives.
 
 ### [===> Thesis Notes](thesis/THESIS_NOTES.md) (meetings, etc.)
 
@@ -9,8 +11,6 @@
 [![](https://img.youtube.com/vi/HZM6uRaNSIk/0.jpg)](https://www.youtube.com/watch?v=HZM6uRaNSIk)
 
 ## Dependencies
-
-- todo: remove bio_ik
 
 ```bash
 $ cd catkin_ws/src
@@ -52,11 +52,11 @@ $ pip install pyyaml
 
 ```bash
 # select one!
-$ roslaunch salih_marangoz_thesis lite6_sim.launch
-$ roslaunch salih_marangoz_thesis xarm5_sim.launch
-$ roslaunch salih_marangoz_thesis xarm6_sim.launch
-$ roslaunch salih_marangoz_thesis xarm7_sim.launch
-$ roslaunch salih_marangoz_thesis horti_sim.launch
+$ roslaunch dawn_ik lite6_sim.launch
+$ roslaunch dawn_ik xarm5_sim.launch
+$ roslaunch dawn_ik xarm6_sim.launch
+$ roslaunch dawn_ik xarm7_sim.launch
+$ roslaunch dawn_ik horti_sim.launch
 ```
 
 ### Code Generation
@@ -65,11 +65,11 @@ Make sure the robot description is loaded. (if the simulation is running then it
 
 ```bash
 # select one!
-$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=lite6
-$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm5
-$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm6
-$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=xarm7
-$ rosrun salih_marangoz_thesis robot_parser_node _cfg:=horti
+$ rosrun dawn_ik robot_parser_node _cfg:=lite6
+$ rosrun dawn_ik robot_parser_node _cfg:=xarm5
+$ rosrun dawn_ik robot_parser_node _cfg:=xarm6
+$ rosrun dawn_ik robot_parser_node _cfg:=xarm7
+$ rosrun dawn_ik robot_parser_node _cfg:=horti
 
 # Re-compile the project after this step. 
 ```
@@ -78,9 +78,14 @@ $ rosrun salih_marangoz_thesis robot_parser_node _cfg:=horti
 
 ```bash
 # select one!
-$ roslaunch salih_marangoz_thesis lite6_solver.launch
-$ roslaunch salih_marangoz_thesis xarm5_solver.launch
-$ roslaunch salih_marangoz_thesis xarm6_solver.launch
-$ roslaunch salih_marangoz_thesis xarm7_solver.launch
-$ roslaunch salih_marangoz_thesis horti_solver.launch
+$ roslaunch dawn_ik lite6_solver.launch
+$ roslaunch dawn_ik xarm5_solver.launch
+$ roslaunch dawn_ik xarm6_solver.launch
+$ roslaunch dawn_ik xarm7_solver.launch
+$ roslaunch dawn_ik horti_solver.launch
 ```
+
+### Footnotes
+
+- [1] [Ceres Solver](http://ceres-solver.org/) is heavily used in this project so we named this project similar to [how Ceres Solver is named](http://ceres-solver.org/#f1). [Dawn](https://solarsystem.nasa.gov/missions/dawn/overview/) is the spacecraft launched in 2007 by NASA, reached to Ceres in 2015 and acquired the dwarf planet's information of global shape, mean density, surface morphology, mineralogy, etc. by the middle of 2016. 
+
