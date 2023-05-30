@@ -52,24 +52,13 @@ void DawnIK::loopThread()
   ros::Rate r(20); // TODO: param
   while (ros::ok())
   {
-    std::scoped_lock(ik_goal_mutex);
+    ik_goal_mutex.lock();
+    dawn_ik::IKGoalPtr ik_goal_msg_copy = ik_goal_msg;
+    ik_goal_mutex.unlock();
 
-    if (ik_goal_msg->mode == IKGoal::MODE_0)
+    if (ik_goal_msg_copy->mode != IKGoal::MODE_0)
     {
-      joint_controller->stop();
-    }
-    else
-    {
-      joint_controller->start();
-
-      if (update())
-      {
-        ROS_INFO("Found a solution!");
-      }
-      else
-      {
-        ROS_ERROR("Can't find a solution!");
-      }
+      update(ik_goal_msg_copy);
     }
 
     r.sleep();
@@ -77,7 +66,7 @@ void DawnIK::loopThread()
 }
 
 
-bool DawnIK::update()
+bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
 {
   JointLinkCollisionStateConstPtr state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
@@ -187,7 +176,7 @@ bool DawnIK::update()
   }
 
   if (!summary.IsSolutionUsable()) return false;
-  joint_controller->setJointPositions(target_positions);
+  joint_controller->setJointPositions(target_positions); // automatically starts if not started
   return true;
 }
 

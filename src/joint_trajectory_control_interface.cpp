@@ -51,11 +51,7 @@ JointTrajectoryControlInterface::getJointNames()
 void 
 JointTrajectoryControlInterface::setJointPositions(const double *positions)
 {
-  if (!is_started_)
-  {
-    ROS_ERROR("JointTrajectoryControlInterface: not started yet!");
-    return;
-  }
+  start(); // automatically start if not started!
 
   if (state_ == nullptr)
   {

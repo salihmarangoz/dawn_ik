@@ -38,7 +38,7 @@ public:
   DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   ~DawnIK();
   void loopThread();
-  bool update();
+  bool update(const dawn_ik::IKGoalPtr &ik_goal);
   
 
 private:
