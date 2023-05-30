@@ -13,19 +13,10 @@
 #include <dawn_ik/utils.h>
 #include <dawn_ik/robot_monitor.h>
 #include <dawn_ik/goals.h>
+#include <dawn_ik/Constraint.h>
+#include <dawn_ik/IKGoal.h>
 
-/////////////////////////////////////// EXPERIMENTAL /////////////////////////////////////////////////////////////
-namespace ceres {
-class RelaxedIKLoss final : public LossFunction {
- public:
-  explicit RelaxedIKLoss(double a);
-  void Evaluate(double, double*) const override;
-
- private:
-  const double a_;
-};
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <dawn_ik/experimental.h> // TODO: EXPERIMENTAL STUFF!
 
 namespace dawn_ik
 {
@@ -38,15 +29,22 @@ using ceres::Solve;
 
 class DawnIK
 {
-// my classes
+
 public:
-  std::shared_ptr<RobotMonitor> robot_monitor;
-public:
+  DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
+  void loop();
+  bool update();
+
+private:
   std::random_device rand_dev;
   std::mt19937 rand_gen;
+
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
-  std::shared_ptr<JointTrajectoryControlInterface> joint_controller;
+
+  std::shared_ptr<RobotMonitor> robot_monitor;                        // solver environment input
+  ros::Subscriber ik_goal_sub;                                        // solver command input
+  std::shared_ptr<JointTrajectoryControlInterface> joint_controller;  // solver control output
 
   // TODO
   void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
@@ -54,10 +52,6 @@ public:
   Eigen::Vector3d endpoint;
   bool endpoint_received = false;
   Eigen::Quaterniond direction;
-
-  DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
-  void loop();
-  bool update();
 
 };
 

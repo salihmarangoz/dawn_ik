@@ -152,6 +152,7 @@ add_executable(solver_node
   src/dawn_ik.cpp
   src/joint_trajectory_control_interface.cpp
   src/robot_monitor.cpp
+  src/experimental.cpp
 )
 add_dependencies(solver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(solver_node

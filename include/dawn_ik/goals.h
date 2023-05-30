@@ -230,7 +230,13 @@ struct CollisionAvoidanceGoal {
                                                   shape_a.radius-robot::default_inflation, 
                                                   pos_b, 
                                                   shape_b.radius-robot::default_inflation);
-      residuals[i] = 0.001 / (distance);
+
+      // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      if (distance < 0.05)
+        residuals[i] = 0.001 / (distance);
+      else
+        residuals[i] = 0.0;
+
       
       if (distance < 0) return false; // TODO: maybe return false if there is a collision?
     }
