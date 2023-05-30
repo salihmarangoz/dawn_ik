@@ -2,5 +2,7 @@
 # see: http://ceres-solver.org/nnls_solving.html#solver-summary
 
 Header header
-string BriefReport
-string FullReport
+bool is_solution_usable
+float64 total_time_in_seconds
+string brief_report
+string full_report

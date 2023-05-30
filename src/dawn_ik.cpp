@@ -12,6 +12,8 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
 
   joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh);
 
+  solver_summary_pub = priv_nh.advertise<dawn_ik::SolverSummary>("solver_summary", 2);
+
   loop_thread = new boost::thread(boost::bind(&DawnIK::loopThread, this)); // consumer
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
 
@@ -172,20 +174,20 @@ bool DawnIK::update()
   robot::setSolverOptions(options);
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  std::cout << summary.FullReport() << "\n";
 
-  if (!summary.IsSolutionUsable())
+  if (solver_summary_pub.getNumSubscribers() > 0)
   {
-    return false;
+    dawn_ik::SolverSummary summary_msg;
+    summary_msg.is_solution_usable = summary.IsSolutionUsable();
+    summary_msg.total_time_in_seconds = summary.total_time_in_seconds;
+    summary_msg.brief_report = summary.BriefReport();
+    summary_msg.full_report = summary.FullReport();
+    summary_msg.header = state->header;
+    solver_summary_pub.publish(summary_msg);
   }
 
-  // TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-  auto controller_state = joint_controller->getState();
-  if (controller_state!=nullptr)
-  {
-    joint_controller->setJointPositions(target_positions);
-  }
-
+  if (!summary.IsSolutionUsable()) return false;
+  joint_controller->setJointPositions(target_positions);
   return true;
 }
 

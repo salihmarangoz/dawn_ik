@@ -15,8 +15,10 @@
 #include <dawn_ik/utils.h>
 #include <dawn_ik/robot_monitor.h>
 #include <dawn_ik/goals.h>
+
 #include <dawn_ik/Constraint.h>
 #include <dawn_ik/IKGoal.h>
+#include <dawn_ik/SolverSummary.h>
 
 #include <dawn_ik/experimental.h> // TODO: EXPERIMENTAL STUFF!
 
@@ -50,6 +52,8 @@ private:
   std::shared_ptr<RobotMonitor> robot_monitor;                        // solver environment input
   ros::Subscriber ik_goal_sub;                                        // solver command input
   std::shared_ptr<JointTrajectoryControlInterface> joint_controller;  // solver control output
+  ros::Publisher solver_summary_pub;                                  // solver log
+
 
   void goalCallback(const dawn_ik::IKGoalPtr &msg);
   std::mutex ik_goal_mutex;
