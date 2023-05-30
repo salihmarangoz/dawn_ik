@@ -12,20 +12,9 @@ JointTrajectoryControlInterface::JointTrajectoryControlInterface(ros::NodeHandle
 }
 
 bool
-JointTrajectoryControlInterface::start(const std::string& controller)
+JointTrajectoryControlInterface::start()
 {
-  if (is_started_)
-  {
-    ROS_ERROR("JointTrajectoryControlInterface: already started!");
-    return is_started_;
-  }
-
-  if (controller.size() <= 0)
-  {
-    // TODO: automatically find a suitable controller
-  }
-  // TODO: switch the controller
-  ROS_WARN("TODO: switch the controller");
+  if (is_started_) return is_started_;
 
   command_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>(command_topic_, 2);
   is_started_ = true;
@@ -35,7 +24,7 @@ JointTrajectoryControlInterface::start(const std::string& controller)
 bool
 JointTrajectoryControlInterface::stop()
 {
-  if (!is_started_) return false;
+  if (!is_started_) return !is_started_;
 
   // TODO: switch the controller?
   ROS_WARN("TODO: switch the controller");

@@ -16,7 +16,7 @@ class JointTrajectoryControlInterface
 {
 public:
   JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic = "joint"); // TODO: mimic rqt_joint_trajectory_controller ? 
-  bool start(const std::string& controller);
+  bool start();
   bool stop();
   void setSpeedScaling(double scale); // scale: [0.0-1.0]
   const std::vector<std::string> getJointNames();

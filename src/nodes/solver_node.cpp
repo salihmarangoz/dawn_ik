@@ -7,6 +7,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh("~");
   ros::AsyncSpinner spinner(0);
+  spinner.start();
   dawn_ik::DawnIK ik(nh, priv_nh);
   ros::waitForShutdown();
   return 0;

@@ -5,18 +5,34 @@ namespace dawn_ik
 
 DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
-  // init robot monitor
+  ik_goal_msg = boost::make_shared<dawn_ik::IKGoal>();
+  ik_goal_msg->mode = IKGoal::MODE_0; // idle
+
   robot_monitor = std::make_shared<RobotMonitor>(nh, priv_nh);
+
+  joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh);
+
+  loop_thread = new boost::thread(boost::bind(&DawnIK::loopThread, this)); // consumer
+  ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
 
   // TODO
   endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
-
-  joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh);
-  joint_controller->start(""); // TODO
-
-  loop(); // TODO
 }
 
+DawnIK::~DawnIK()
+{
+  loop_thread->join();
+  delete loop_thread;
+}
+
+void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
+{
+  std::scoped_lock(ik_goal_mutex);
+  ik_goal_msg = msg;
+  ROS_INFO_ONCE("First IK Goal Message Received!");
+}
+
+// TODO: remove this function
 void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg)
 {
   auto given_endpoint = msg->pose;
@@ -25,44 +41,45 @@ void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedb
   endpoint.y() =  given_endpoint.position.y;
   endpoint.z() =  given_endpoint.position.z;
   direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
-  endpoint_received = true;
+  ik_goal_msg->mode = IKGoal::MODE_1;
 }
 
-// TODO: this is just a dummy loop function. this should run on a separate thread!!!!!!!!!!!
-void DawnIK::loop()
+
+void DawnIK::loopThread()
 {
-  ros::Rate r(20);
+  ros::Rate r(20); // TODO: param
   while (ros::ok())
   {
-    if (!endpoint_received)
+    std::scoped_lock(ik_goal_mutex);
+
+    if (ik_goal_msg->mode == IKGoal::MODE_0)
     {
-      r.sleep(); ros::spinOnce();
-      continue;
+      joint_controller->stop();
+    }
+    else
+    {
+      joint_controller->start();
+
+      if (update())
+      {
+        ROS_INFO("Found a solution!");
+      }
+      else
+      {
+        ROS_ERROR("Can't find a solution!");
+      }
     }
 
-    if (!update())
-    {
-      ROS_ERROR("Can't find a solution!");
-      r.sleep(); ros::spinOnce();
-      continue;
-    }
-
-    // TODO: control robot
-    auto controller_state = joint_controller->getState();
-    if (controller_state!=nullptr)
-    {
-      //joint_controller->setJointPositions(robot_state.getVariablePositions());
-    }
-
-    r.sleep(); ros::spinOnce();
+    r.sleep();
   }
 }
+
 
 bool DawnIK::update()
 {
   JointLinkCollisionStateConstPtr state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
-  const double* variable_positions = state->joint_state.position.data(); // TODO: DONT FORGET TO FIX THIS MESS!!!!!!
+  const double* variable_positions = state->joint_state.position.data(); // TODO: DONT FORGET TO FIX THIS MESS. ORDER IS NOT GUARANTEED !!!!!!
 
   // Generate target_positions (this is the init state and this will be optimized)
   double target_positions[robot::num_targets];
@@ -138,7 +155,7 @@ bool DawnIK::update()
       continue;
     }
 
-    // TODO: ALTERNATIVE WAY?
+    // TODO: ALTERNATIVE WAY? IK GOAL JOINT SPEED MULTIPLIER? ZERO TO FIX THE JOINT?
     double min_val = const_target_positions[i] - 0.1;
     double max_val = const_target_positions[i] + 0.1;
     if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];

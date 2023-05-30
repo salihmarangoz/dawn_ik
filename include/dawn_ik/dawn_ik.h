@@ -2,6 +2,8 @@
 #define DAWN_IK_H
 
 #include <random>
+#include <mutex>
+#include <boost/thread.hpp>
 
 #include <ros/ros.h>
 #include <ceres/ceres.h>
@@ -32,12 +34,15 @@ class DawnIK
 
 public:
   DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
-  void loop();
+  ~DawnIK();
+  void loopThread();
   bool update();
+  
 
 private:
   std::random_device rand_dev;
   std::mt19937 rand_gen;
+  boost::thread *loop_thread;
 
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
@@ -46,11 +51,14 @@ private:
   ros::Subscriber ik_goal_sub;                                        // solver command input
   std::shared_ptr<JointTrajectoryControlInterface> joint_controller;  // solver control output
 
+  void goalCallback(const dawn_ik::IKGoalPtr &msg);
+  std::mutex ik_goal_mutex;
+  dawn_ik::IKGoalPtr ik_goal_msg;
+
   // TODO
   void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
   ros::Subscriber endpoint_sub; 
   Eigen::Vector3d endpoint;
-  bool endpoint_received = false;
   Eigen::Quaterniond direction;
 
 };
