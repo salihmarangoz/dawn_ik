@@ -40,15 +40,6 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   // init robot monitor
   robot_monitor = std::make_shared<RobotMonitor>(nh, priv_nh);
 
-  // init planning_scene_monitor
-  planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
-  planning_scene_monitor->setStateUpdateFrequency(100);
-  //planning_scene_monitor->startSceneMonitor();
-  planning_scene_monitor->startStateMonitor();
-
-  // init visual_tools
-  visual_tools.reset(new moveit_visual_tools::MoveItVisualTools(planning_scene_monitor->getRobotModel()->getModelFrame(), "/ceres_ik_visual_markers"));
-
   // TODO
   endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
 
@@ -69,35 +60,22 @@ void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedb
   endpoint_received = true;
 }
 
-moveit::core::RobotState DawnIK::getCurrentRobotState()
-{
-  // TODO: this method is slow... 
-  planning_scene_monitor->waitForCurrentRobotState(ros::Time(0));
-  planning_scene_monitor::LockedPlanningSceneRO lps(planning_scene_monitor);
-  return lps->getCurrentState(); // copy the current state
-}
-
-// TODO: this is just a dummy loop function. this will run on a separate thread!
+// TODO: this is just a dummy loop function. this should run on a separate thread!!!!!!!!!!!
 void DawnIK::loop()
 {
-  moveit::core::RobotState robot_state = getCurrentRobotState();
-
   ros::Rate r(20);
   while (ros::ok())
   {
-    ros::spinOnce();
-    moveit::core::RobotState robot_state = getCurrentRobotState();
-
     if (!endpoint_received)
     {
-      r.sleep();
+      r.sleep(); ros::spinOnce();
       continue;
     }
 
-    if (!update(robot_state))
+    if (!update())
     {
       ROS_ERROR("Can't find a solution!");
-      r.sleep();
+      r.sleep(); ros::spinOnce();
       continue;
     }
 
@@ -108,25 +86,15 @@ void DawnIK::loop()
       //joint_controller->setJointPositions(robot_state.getVariablePositions());
     }
 
-    visual_tools->publishRobotState(robot_state);
-    r.sleep();
-
-    // TODO: control robot
-    //if (controller_state!=nullptr)
-    //  robot_state.setVariablePositions(controller_state->actual.positions.data());
+    r.sleep(); ros::spinOnce();
   }
 }
 
-bool DawnIK::update(moveit::core::RobotState &current_state)
+bool DawnIK::update()
 {
-  ROS_INFO_ONCE("Number of variables in the robot state: %d", (int)(current_state.getVariableCount()) );
-  if (robot::num_variables != current_state.getVariableCount())
-  {
-    ROS_FATAL_ONCE("Number of variables does not match!");
-    exit(-1);
-  }
-
-  double* variable_positions = current_state.getVariablePositions();
+  JointLinkCollisionStateConstPtr state = robot_monitor->getState();
+  const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
+  const double* variable_positions = state->joint_state.position.data(); // TODO: DONT FORGET TO FIX THIS MESS!!!!!!
 
   // Generate target_positions (this is the init state and this will be optimized)
   double target_positions[robot::num_targets];
@@ -158,22 +126,7 @@ bool DawnIK::update(moveit::core::RobotState &current_state)
     const_target_positions[i] = variable_positions[variable_i];
   }
 
-  // Generate target centers. Assuming that center=(max+min)/2
-  /*
-  double target_centers[robot::num_targets];
-  for (int i=0; i<robot::num_targets; i++)
-  {
-    const int joint_i = robot::target_idx_to_joint_idx[i];
-    target_centers[i] = 0.5 * (robot::joint_max_position[joint_i] + robot::joint_min_position[joint_i]);
-  }
-  */
-
-  // TODO: Find the partial kinematic tree for the endpoint goal
-  // int current_joint_idx = robot::endpoint_joint_idx;
-  // .....
-
-  JointLinkCollisionStateConstPtr state = robot_monitor->getState();
-  const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
+  // TODO: Find the partial kinematic tree for the endpoint goal. Move this to the robot parser!!!!!!!!!!!!!!!!!
 
   ceres::Problem problem;
 
@@ -204,8 +157,6 @@ bool DawnIK::update(moveit::core::RobotState &current_state)
   //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
   //problem.AddResidualBlock(collision_avoidance_goal, robot::createCollisionAvoidanceLoss(), target_positions);
-
-
 
 
 
@@ -242,19 +193,6 @@ bool DawnIK::update(moveit::core::RobotState &current_state)
   {
     return false;
   }
-
-  // Update robot state
-  for (int i=0; i<robot::num_targets; i++)
-  {
-    const int joint_idx = robot::target_idx_to_joint_idx[i];
-    const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
-    variable_positions[variable_idx] = target_positions[i];
-
-    // int state_idx = current_state.getVariablePosition(robot::joint_names[joint_idx]) !!!!!!!!!!!
-    printf("%f ", target_positions[i]);
-  }
-  printf("\n");
-  current_state.update(true); // TODO: can be faster with: updateLinkTransforms()
 
   // TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
   auto controller_state = joint_controller->getState();

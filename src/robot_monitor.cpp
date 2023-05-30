@@ -103,7 +103,7 @@ RobotMonitor::updateLinkThread()
 void
 RobotMonitor::updateCollisionThread()
 {
-  ros::Rate r(100.0); // TODO
+  ros::Rate r(30.0); // TODO
   while (ros::ok())
   {
     if (last_joint_link_state_msg == nullptr){r.sleep(); continue;}

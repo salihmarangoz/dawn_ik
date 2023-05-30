@@ -1,11 +1,9 @@
 #ifndef DAWN_IK_H
 #define DAWN_IK_H
 
+#include <random>
+
 #include <ros/ros.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit_visual_tools/moveit_visual_tools.h>
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 #include <visualization_msgs/InteractiveMarkerFeedback.h> // TODO
@@ -48,9 +46,6 @@ public:
   std::mt19937 rand_gen;
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
-  robot_model_loader::RobotModelLoaderPtr robot_model_loader;
-  moveit_visual_tools::MoveItVisualToolsPtr visual_tools;
   std::shared_ptr<JointTrajectoryControlInterface> joint_controller;
 
   // TODO
@@ -61,9 +56,8 @@ public:
   Eigen::Quaterniond direction;
 
   DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
-  moveit::core::RobotState getCurrentRobotState();
   void loop();
-  bool update(moveit::core::RobotState &current_state);
+  bool update();
 
 };
 
