@@ -13,15 +13,17 @@ DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms foc
 ## Dependencies
 
 ```bash
+################# ROS DEPENDENCIES ##################################
+
 $ cd catkin_ws/src
 
 # This package
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git
 
-# Horti
+# Horti Robot
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
 
-# xArm
+# xArm ROS
 $ git clone clone git@github.com:salihmarangoz/xarm_ros.git
 $ cd xarm_ros
 $ git submodule update --init --remote
@@ -30,6 +32,8 @@ $ git submodule update --init --remote
 $ cd catkin_ws
 $ rosdep install --from-paths src --ignore-src -r
 
+################## EXTERNAL DEPENDENCIES ############################
+
 # Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
 $ cd $HOME
 $ git clone git@github.com:salihmarangoz/ceres-solver.git
@@ -37,13 +41,25 @@ $ sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev 
 $ cd ceres-solver
 $ mkdir build
 $ cd build
-$ cmake ..
-$ make -j4
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make -j8
+$ sudo make install
+
+# Ruckig
+$ cd $HOME
+$ git clone git@github.com:salihmarangoz/ruckig.git
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make -j8
 $ sudo make install
 
 # Extra stuff
 $ sudo apt install python3-yaml python-is-python3
 $ pip install pyyaml
+
+# Update dynamic linker run-time bindings
+sudo ldconfig
 ```
 
 ## Running
