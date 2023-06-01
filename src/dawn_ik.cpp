@@ -13,7 +13,7 @@ namespace dawn_ik
 DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
   readParameters();
-  
+
   for (int i=0; i<robot::num_joints; i++) joint_name_to_joint_idx[robot::joint_names[i]] = i;
 
   ik_goal_msg = boost::make_shared<dawn_ik::IKGoal>();
@@ -154,32 +154,24 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   ceres::Problem problem;
 
   // ========== Preferred Joint Position Goal ==========
-  ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create();
+  ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create(shared_block);
   ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.1); // goal weight
   problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
-  //problem.AddResidualBlock(preferred_joint_position_goal, robot::createPreferredJointPositionLoss(), target_positions); // TODO
 
   // ========== Minimal Joint Displacement Goal ==========
-  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(const_target_positions);
-  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.1); // goal weight
-  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
+  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
+  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.01); // goal weight
+  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
 
   // ================== Endpoint Goal ==================
-  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, variable_positions.data());
+  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block, endpoint, direction);
   //ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
   problem.AddResidualBlock(endpoint_goal, endpoint_loss, optm_target_positions);
-  //problem.AddResidualBlock(endpoint_goal, robot::createEndpointLoss(), target_positions);
 
   // ============= Collision Avoidance Goal ============
-  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions.data(),
-                                                                                 monitor_state->collision_state.int_pair_a.data(),
-                                                                                 monitor_state->collision_state.int_pair_b.data(),
-                                                                                 monitor_state->collision_state.int_pair_a.size(),
-                                                                                 int_objects);
-  //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
+  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
-  //problem.AddResidualBlock(collision_avoidance_goal, robot::createCollisionAvoidanceLoss(), target_positions);
 
 
   //=================================================================================================
