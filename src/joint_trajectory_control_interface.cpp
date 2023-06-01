@@ -3,113 +3,83 @@
 namespace dawn_ik
 {
 
-JointTrajectoryControlInterface::JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic) : nh_(nh), state_(nullptr), speed_scale_(0.5), is_started_(false)
+JointTrajectoryControlInterface::JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& command_topic) : nh_(nh), ruckig_(0.01)
 {
-  command_topic_ = controller_topic + "/command";
-  state_topic_ = controller_topic + "/state";
-
-  state_sub_ = nh_.subscribe(state_topic_, 2, &JointTrajectoryControlInterface::stateCallback_, this);
+  command_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>(command_topic, 2);
 }
 
-bool
-JointTrajectoryControlInterface::start()
-{
-  if (is_started_) return is_started_;
-
-  command_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>(command_topic_, 2);
-  is_started_ = true;
-  return true;
-}
-
-bool
-JointTrajectoryControlInterface::stop()
-{
-  if (!is_started_) return !is_started_;
-
-  // TODO: switch the controller?
-  ROS_WARN("TODO: switch the controller");
-
-  command_pub_.shutdown();
-  is_started_ = false;
-  return true;
-}
 
 void 
-JointTrajectoryControlInterface::setSpeedScaling(double scale)
+JointTrajectoryControlInterface::setJointPositions(const std::vector<std::string> joint_names, const double *target_positions, const double *current_positions, const double* current_velocities, const double *current_accelerations)
 {
-  speed_scale_ = scale;
-}
-
-const std::vector<std::string> 
-JointTrajectoryControlInterface::getJointNames()
-{
-  if (state_ == nullptr) return std::vector<std::string>();
-  std::vector<std::string> copy_arr = state_->joint_names;
-  return copy_arr;
-}
-
-void 
-JointTrajectoryControlInterface::setJointPositions(const double *positions)
-{
-  start(); // automatically start if not started!
-
-  if (state_ == nullptr)
-  {
-    ROS_WARN_THROTTLE(1.0, "JointTrajectoryControlInterface: not initialized yet!");
-    return;
-  }
-
   if (command_pub_.getNumSubscribers() <= 0)
   {
-    ROS_ERROR("JointTrajectoryControlInterface: no subscribers on the command topic. something is wrong.");
-    return;
+    ROS_ERROR_THROTTLE(1.0, "Joint targets are published but there are no subscribers!");
   }
 
-  for (int i=0; i<command_.points[0].positions.size(); i++)
-    command_.points[0].positions[i] = positions[i];
-
-  // TODO: use scaling_
-  ROS_WARN_ONCE("TODO: use scaling_");
-  command_.points[0].time_from_start = ros::Duration(0.1);
-
-  command_pub_.publish(command_);
-}
-
-control_msgs::JointTrajectoryControllerStateConstPtr 
-JointTrajectoryControlInterface::getState()
-{
-  return state_;
-}
-
-void 
-JointTrajectoryControlInterface::stateCallback_(const control_msgs::JointTrajectoryControllerStateConstPtr& msg)
-{
-  ROS_INFO_ONCE("JointTrajectoryControlInterface: initialized!");
-
-  // TODO: initialize everytime joint positions needs to be send? caching should be optional
-
-  // init command_ (... mostly)
-  if (state_ == nullptr)
+  trajectory_msgs::JointTrajectory command;
+  trajectory_msgs::JointTrajectoryPoint point;
+  for (int i=0; i<joint_names.size(); i++)
   {
-    //command_.header.frame_id = msg->header.frame_id; // not used
-    command_.joint_names = msg->joint_names;
-    trajectory_msgs::JointTrajectoryPoint p;
-    if (msg->desired.positions.size() == msg->joint_names.size())
-    {
-      for (int i=0; i<msg->joint_names.size(); i++) p.positions.push_back(msg->desired.positions[i]);
-    }
-    else if (msg->actual.positions.size() == msg->joint_names.size())
-    {
-      for (int i=0; i<msg->joint_names.size(); i++) p.positions.push_back(msg->actual.positions[i]);
-    }
-    else
-    {
-      for (int i=0; i<msg->joint_names.size(); i++) p.positions.push_back(0.0);
-    }
-    command_.points.push_back(p);
+    command.joint_names.push_back(joint_names[i]);
+    point.positions.push_back(target_positions[i]);
+  }
+  point.time_from_start = ros::Duration(0.1);
+  command.points.push_back(point);
+  command.header.stamp = ros::Time::now();
+  command_pub_.publish(command);
+
+  /*
+  ruckig::InputParameter<robot::num_targets> input;
+  for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+  {
+    int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+
+    // Current
+    input.current_position[target_idx] = current_positions[target_idx];
+    //if (current_velocities != nullptr)
+    //  input.current_velocity[target_idx] = current_velocities[target_idx];
+    //if (current_accelerations != nullptr)
+    //  input.current_acceleration[target_idx] = current_accelerations[target_idx];
+
+    // Target
+    input.target_position[target_idx] = target_positions[target_idx];
+    //input.target_velocity = {-0.1, ...};
+    //input.target_acceleration = {0.2, ...};
+
+    // Limits
+    //if (robot::joint_is_velocity_bounded[joint_idx])
+    //  input.max_velocity[target_idx] = robot::joint_max_velocity[joint_idx];
+    //else
+    //  input.max_velocity[target_idx] = 1.0; // safe option?
+
+    //if (robot::joint_is_acceleration_bounded[joint_idx])
+    //  input.max_acceleration[target_idx] = robot::joint_max_acceleration[joint_idx];
+    //else
+    //  input.max_acceleration[target_idx] = 1.0; // safe option?
+
+    //input.max_jerk[target_idx] = 0.1;
   }
 
-  state_ = msg;
+  command_.points.clear();
+  ruckig::OutputParameter<robot::num_targets> output;
+  ruckig::Result update_result = ruckig_.update(input, output);
+  while (update_result == ruckig::Result::Working)
+  {
+    ROS_WARN("working!!!");
+    trajectory_msgs::JointTrajectoryPoint point;
+    for (int i=0; i<robot::num_targets; i++)
+    {
+      ROS_INFO("%f", output.new_position[i]);
+      point.positions.push_back( output.new_position[i] );
+      point.velocities.push_back( output.new_velocity[i] );
+      //point.accelerations.push_back( output.new_acceleration[i] );
+      point.time_from_start = ros::Duration(output.time);
+    }
+    command_.points.push_back(point);
+  }
+  ROS_WARN("aaaaaaaaaaaa %d", update_result);
+  */
 }
 
 } // namespace dawn_ik

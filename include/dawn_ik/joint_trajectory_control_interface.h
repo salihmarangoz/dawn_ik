@@ -5,6 +5,10 @@
 #include <control_msgs/JointTrajectoryControllerState.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <dawn_ik/robot_configuration/robot_configuration.h>
+#include <ruckig/ruckig.hpp>
+#include <sensor_msgs/JointState.h>
+#include <map>
 
 // http://wiki.ros.org/joint_trajectory_controller
 // http://wiki.ros.org/joint_trajectory_controller/UnderstandingTrajectoryReplacement
@@ -15,29 +19,14 @@ namespace dawn_ik
 class JointTrajectoryControlInterface
 {
 public:
-  JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic = "joint"); // TODO: mimic rqt_joint_trajectory_controller ? 
-  bool start();
-  bool stop();
-  void setSpeedScaling(double scale); // scale: [0.0-1.0]
-  const std::vector<std::string> getJointNames();
-  void setJointPositions(const double *positions);
-  control_msgs::JointTrajectoryControllerStateConstPtr getState();
+  JointTrajectoryControlInterface(ros::NodeHandle &nh, const std::string& controller_topic = "joint_trajectory_command");
+  void setJointPositions(const std::vector<std::string> joint_names, const double *target_positions, const double *current_positions=nullptr, const double* current_velocities=nullptr, const double *current_accelerations=nullptr);
 
 private:
-  control_msgs::JointTrajectoryControllerStateConstPtr state_;
-  trajectory_msgs::JointTrajectory command_;
-  ros::Subscriber state_sub_;
-  ros::Publisher  command_pub_;
   ros::NodeHandle nh_;
-  double speed_scale_;
-  bool is_started_;
-  std::string command_topic_;
-  std::string state_topic_;
-  void stateCallback_(const control_msgs::JointTrajectoryControllerStateConstPtr& msg);
+  ros::Publisher command_pub_;
+  ruckig::Ruckig<robot::num_targets> ruckig_;
 };
-
-
-
 
 } // namespace dawn_ik
 

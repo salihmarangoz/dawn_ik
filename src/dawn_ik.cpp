@@ -70,26 +70,32 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
 {
   JointLinkCollisionStateConstPtr state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
-  const double* variable_positions = state->joint_state.position.data(); // TODO: DONT FORGET TO FIX THIS MESS. ORDER IS NOT GUARANTEED !!!!!!
+
+   // TODO: DONT FORGET TO FIX THIS MESS. ORDER IS NOT GUARANTEED !!!!!!
+  const double* variable_positions = state->joint_state.position.data();
+  const double* variable_velocities = state->joint_state.velocity.data();
 
   // Generate target_positions (this is the init state and this will be optimized)
   double target_positions[robot::num_targets];
-  for (int i=0; i<robot::num_targets; i++)
+  double target_velocities[robot::num_targets];
+  for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
-    const int joint_i = robot::target_idx_to_joint_idx[i];
-    const int variable_i = robot::joint_idx_to_variable_idx[joint_i];
-    target_positions[i] = variable_positions[variable_i];
+    const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+    const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
+    
+    target_positions[target_idx] = variable_positions[variable_idx];
+    target_velocities[target_idx] = variable_velocities[variable_idx];
 
     // Add noise to the init state to avoid gimball lock, etc.
     double noise = 0.0; // TODO: 0.1
     if (noise>0)
     {
-      double sampling_min = target_positions[i]-noise;
-      if (sampling_min<robot::joint_min_position[joint_i]) sampling_min=robot::joint_min_position[joint_i];
-      double sampling_max = target_positions[i]+noise;
-      if (sampling_max>robot::joint_max_position[joint_i]) sampling_max=robot::joint_max_position[joint_i];
+      double sampling_min = target_positions[target_idx]-noise;
+      if (sampling_min<robot::joint_min_position[joint_idx]) sampling_min=robot::joint_min_position[joint_idx];
+      double sampling_max = target_positions[target_idx]+noise;
+      if (sampling_max>robot::joint_max_position[joint_idx]) sampling_max=robot::joint_max_position[joint_idx];
       std::uniform_real_distribution<> dis(sampling_min, sampling_max);
-      target_positions[i] = dis(rand_gen);
+      target_positions[target_idx] = dis(rand_gen);
     }
   }
 
@@ -176,7 +182,16 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   }
 
   if (!summary.IsSolutionUsable()) return false;
-  joint_controller->setJointPositions(target_positions); // automatically starts if not started
+
+  // Publish output
+  std::vector<std::string> target_names;
+  for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+  {
+    int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+    target_names.push_back(robot::joint_names[joint_idx]);
+  }
+  joint_controller->setJointPositions(target_names, target_positions);
+
   return true;
 }
 
