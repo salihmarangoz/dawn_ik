@@ -3,6 +3,7 @@
 
 #include <random>
 #include <mutex>
+#include <queue>
 #include <boost/thread.hpp>
 
 #include <ros/ros.h>
@@ -39,7 +40,12 @@ public:
   ~DawnIK();
   void loopThread();
   bool update(const dawn_ik::IKGoalPtr &ik_goal);
-  
+
+private: // Parameters
+  void readParameters();
+  double p_update_rate;
+  double p_init_noise;
+  double p_max_step_size;
 
 private:
   std::random_device rand_dev;
@@ -49,11 +55,13 @@ private:
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
 
+  std::map<std::string, int> joint_name_to_joint_idx;
+
   std::shared_ptr<RobotMonitor> robot_monitor;                        // solver environment input
   ros::Subscriber ik_goal_sub;                                        // solver command input
   std::shared_ptr<JointTrajectoryControlInterface> joint_controller;  // solver control output
   ros::Publisher solver_summary_pub;                                  // solver log
-
+  std::queue< std::vector<double> > solver_history;                   // solver history
 
   void goalCallback(const dawn_ik::IKGoalPtr &msg);
   std::mutex ik_goal_mutex;

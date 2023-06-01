@@ -5,9 +5,49 @@
 #include <ceres/rotation.h>
 #include <dawn_ik/robot_configuration/robot_configuration.h>
 #include <dawn_ik/utils.h>
+#include <dawn_ik/IKGoal.h>
+#include <dawn_ik/JointLinkCollisionState.h>
+#include <map>
+#include <queue>
+#include <vector>
 
 namespace dawn_ik
 {
+
+//=================================================================================================
+struct SharedBlock
+{
+  SharedBlock(const dawn_ik::IKGoalPtr &ik_goal,
+              std::queue< std::vector<double> > solver_history,
+              std::map<std::string, int> &joint_name_to_joint_idx,
+              std::vector<double> &variable_positions,
+              std::vector<double> &variable_velocities,
+              double (&curr_target_positions)[robot::num_targets],
+              double (&curr_target_velocities)[robot::num_targets],
+              JointLinkCollisionStateConstPtr &monitor_state,
+              const std::vector<CollisionObject*> &int_objects
+  ):
+  ik_goal(ik_goal),
+  solver_history(solver_history),
+  joint_name_to_joint_idx(joint_name_to_joint_idx),
+  variable_positions(variable_positions),
+  variable_velocities(variable_velocities),
+  curr_target_positions(curr_target_positions),
+  curr_target_velocities(curr_target_velocities),
+  monitor_state(monitor_state),
+  int_objects(int_objects)
+  {};
+  const dawn_ik::IKGoalPtr &ik_goal;
+  std::queue< std::vector<double> > &solver_history;
+  std::map<std::string, int> &joint_name_to_joint_idx;
+  std::vector<double> &variable_positions;
+  std::vector<double> &variable_velocities;
+  double (&curr_target_positions)[robot::num_targets];
+  double (&curr_target_velocities)[robot::num_targets];
+  JointLinkCollisionStateConstPtr &monitor_state;
+  const std::vector<CollisionObject*> &int_objects;
+};
+//=================================================================================================
 
 struct PreferredJointPositionGoal {
   PreferredJointPositionGoal(){}

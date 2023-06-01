@@ -1,10 +1,21 @@
 #include <dawn_ik/dawn_ik.h>
 
+// TODO LIST
+// - remove interactive marker feedback stuff
+// - goals should be able to handle non-bounded positions
+// - get loss functions from the parser. Ex: problem.AddResidualBlock(preferred_joint_position_goal, robot::createPreferredJointPositionLoss(), target_positions);
+// - discarded unusable solution case. What to do in that case?
+//     if (!summary.IsSolutionUsable()) return false;
+
 namespace dawn_ik
 {
 
 DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
+  readParameters();
+  
+  for (int i=0; i<robot::num_joints; i++) joint_name_to_joint_idx[robot::joint_names[i]] = i;
+
   ik_goal_msg = boost::make_shared<dawn_ik::IKGoal>();
   ik_goal_msg->mode = IKGoal::MODE_0; // idle
 
@@ -17,7 +28,6 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   loop_thread = new boost::thread(boost::bind(&DawnIK::loopThread, this)); // consumer
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
 
-  // TODO
   endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
 }
 
@@ -27,6 +37,19 @@ DawnIK::~DawnIK()
   delete loop_thread;
 }
 
+void
+DawnIK::readParameters()
+{
+  priv_nh.param("update_rate", p_update_rate, 20.0);
+  if (p_update_rate <= 0.0){ROS_ERROR("Invalid update_rate!"); p_update_rate = 20.0;}
+
+  priv_nh.param("init_noise", p_init_noise, 0.01);
+  if (p_init_noise < 0.0){ROS_ERROR("Invalid init_noise!"); p_init_noise = 0.0;} // disable on error
+
+  priv_nh.param("max_step_size", p_max_step_size, 0.1);
+  if (p_max_step_size < 0.0){ROS_ERROR("Invalid max_step_size!"); p_max_step_size = 0.0;} // disable on error
+}
+
 void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
 {
   std::scoped_lock(ik_goal_mutex);
@@ -34,7 +57,6 @@ void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
   ROS_INFO_ONCE("First IK Goal Message Received!");
 }
 
-// TODO: remove this function
 void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg)
 {
   auto given_endpoint = msg->pose;
@@ -46,10 +68,9 @@ void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedb
   ik_goal_msg->mode = IKGoal::MODE_1;
 }
 
-
 void DawnIK::loopThread()
 {
-  ros::Rate r(20); // TODO: param
+  ros::Rate r(p_update_rate);
   while (ros::ok())
   {
     ik_goal_mutex.lock();
@@ -65,57 +86,77 @@ void DawnIK::loopThread()
   }
 }
 
-
 bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
 {
-  JointLinkCollisionStateConstPtr state = robot_monitor->getState();
+  //=================================================================================================
+  // Get current state
+  //=================================================================================================
+  JointLinkCollisionStateConstPtr monitor_state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
 
-   // TODO: DONT FORGET TO FIX THIS MESS. ORDER IS NOT GUARANTEED !!!!!!
-  const double* variable_positions = state->joint_state.position.data();
-  const double* variable_velocities = state->joint_state.velocity.data();
+  std::vector<double> variable_positions;
+  variable_positions.resize(robot::num_variables);
+  std::vector<double> variable_velocities;
+  variable_velocities.resize(robot::num_variables);
+  for (int i=0; i< monitor_state->joint_state.name.size(); i++)
+  {
+    if(joint_name_to_joint_idx.find(monitor_state->joint_state.name[i]) == joint_name_to_joint_idx.end()) continue;
+    int joint_idx = joint_name_to_joint_idx[monitor_state->joint_state.name[i]];
+    int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
 
-  // Generate target_positions (this is the init state and this will be optimized)
-  double target_positions[robot::num_targets];
-  double target_velocities[robot::num_targets];
+    variable_positions[variable_idx] = monitor_state->joint_state.position[i];
+    variable_velocities[variable_idx] = monitor_state->joint_state.velocity[i];
+  }
+
+  //=================================================================================================
+  // Set up the problem inputs
+  //=================================================================================================
+  double optm_target_positions[robot::num_targets];  // -----> this will be the output. random noise can be added before the optimization.
+  double curr_target_positions[robot::num_targets];  // -----> this is the original input. do not modify.
+  double curr_target_velocities[robot::num_targets]; // -----> this is the original input. do not modify.
   for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
     const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
     const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
-    
-    target_positions[target_idx] = variable_positions[variable_idx];
-    target_velocities[target_idx] = variable_velocities[variable_idx];
 
-    // Add noise to the init state to avoid gimball lock, etc.
-    double noise = 0.0; // TODO: 0.1
-    if (noise>0)
+    optm_target_positions[target_idx]  = variable_positions[variable_idx];
+    curr_target_positions[target_idx]  = variable_positions[variable_idx];
+    curr_target_velocities[target_idx] = variable_velocities[variable_idx];
+
+    // Add noise to the init state to quickly escape form gimball locks, etc.
+    if (p_init_noise > 0)
     {
-      double sampling_min = target_positions[target_idx]-noise;
+      double sampling_min = curr_target_positions[target_idx]-p_init_noise;
       if (sampling_min<robot::joint_min_position[joint_idx]) sampling_min=robot::joint_min_position[joint_idx];
-      double sampling_max = target_positions[target_idx]+noise;
+      double sampling_max = curr_target_positions[target_idx]+p_init_noise;
       if (sampling_max>robot::joint_max_position[joint_idx]) sampling_max=robot::joint_max_position[joint_idx];
       std::uniform_real_distribution<> dis(sampling_min, sampling_max);
-      target_positions[target_idx] = dis(rand_gen);
+      optm_target_positions[target_idx] = dis(rand_gen);
     }
   }
 
-  // Generate const_target_positions (this a noise-free copy of target_positions and should not be modified!)
-  double const_target_positions[robot::num_targets];
-  for (int i=0; i<robot::num_targets; i++)
-  {
-    const int joint_i = robot::target_idx_to_joint_idx[i];
-    const int variable_i = robot::joint_idx_to_variable_idx[joint_i];
-    const_target_positions[i] = variable_positions[variable_i];
-  }
+  //=================================================================================================
+  // Create the shared block (for read-only information sharing to the objectives)
+  //=================================================================================================
+  dawn_ik::SharedBlock shared_block(ik_goal,
+                                    solver_history,
+                                    joint_name_to_joint_idx,
+                                    variable_positions,
+                                    variable_velocities,
+                                    curr_target_positions,
+                                    curr_target_velocities,
+                                    monitor_state,
+                                    int_objects);
 
-  // TODO: Find the partial kinematic tree for the endpoint goal. Move this to the robot parser!!!!!!!!!!!!!!!!!
-
+  //=================================================================================================
+  // Set up the optimization problem
+  //=================================================================================================
   ceres::Problem problem;
 
   // ========== Preferred Joint Position Goal ==========
   ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create();
   ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.1); // goal weight
-  problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, target_positions);
+  problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
   //problem.AddResidualBlock(preferred_joint_position_goal, robot::createPreferredJointPositionLoss(), target_positions); // TODO
 
   // ========== Minimal Joint Displacement Goal ==========
@@ -124,47 +165,50 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, target_positions);
 
   // ================== Endpoint Goal ==================
-  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, variable_positions);
+  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(endpoint, direction, variable_positions.data());
   //ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
   ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
-  problem.AddResidualBlock(endpoint_goal, endpoint_loss, target_positions);
+  problem.AddResidualBlock(endpoint_goal, endpoint_loss, optm_target_positions);
   //problem.AddResidualBlock(endpoint_goal, robot::createEndpointLoss(), target_positions);
 
   // ============= Collision Avoidance Goal ============
-  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions,
-                                                                                 state->collision_state.int_pair_a.data(),
-                                                                                 state->collision_state.int_pair_b.data(),
-                                                                                 state->collision_state.int_pair_a.size(),
+  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(variable_positions.data(),
+                                                                                 monitor_state->collision_state.int_pair_a.data(),
+                                                                                 monitor_state->collision_state.int_pair_b.data(),
+                                                                                 monitor_state->collision_state.int_pair_a.size(),
                                                                                  int_objects);
   //ceres::HuberLoss *collision_avoidance_loss = new ceres::HuberLoss(1.0); // goal weight
-  problem.AddResidualBlock(collision_avoidance_goal, nullptr, target_positions);
+  problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
   //problem.AddResidualBlock(collision_avoidance_goal, robot::createCollisionAvoidanceLoss(), target_positions);
 
 
-
-  // Target min/max constraints
-  for (int i=0; i<robot::num_targets; i++)
+  //=================================================================================================
+  // Set parameter constraints
+  //=================================================================================================
+  for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
-    const int joint_i = robot::target_idx_to_joint_idx[i];
-    if (!robot::joint_is_position_bounded[joint_i])
-    {
-      ROS_WARN("Target is not bounded. This can cause bad solutions!");
-      continue;
-    }
+    const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+    if (!robot::joint_is_position_bounded[joint_idx]) continue;
 
-    // TODO: ALTERNATIVE WAY? IK GOAL JOINT SPEED MULTIPLIER? ZERO TO FIX THE JOINT?
-    double min_val = const_target_positions[i] - 0.1;
-    double max_val = const_target_positions[i] + 0.1;
-    if (robot::joint_min_position[joint_i] > min_val) min_val = robot::joint_min_position[joint_i];
-    if (robot::joint_max_position[joint_i] < max_val) max_val = robot::joint_max_position[joint_i];
-    problem.SetParameterLowerBound(target_positions, i, min_val); 
-    problem.SetParameterUpperBound(target_positions, i, max_val); 
+    // TODO: EXPERIMENTAL PROBLEM BOUNDARIES
+    if (p_max_step_size > 0.0)
+    {
+      double min_val = curr_target_positions[target_idx] - p_max_step_size;
+      double max_val = curr_target_positions[target_idx] + p_max_step_size;
+      if (robot::joint_min_position[joint_idx] > min_val) min_val = robot::joint_min_position[joint_idx];
+      if (robot::joint_max_position[joint_idx] < max_val) max_val = robot::joint_max_position[joint_idx];
+      problem.SetParameterLowerBound(optm_target_positions, target_idx, min_val); 
+      problem.SetParameterUpperBound(optm_target_positions, target_idx, max_val); 
+    }
 
     // STANDARD WAY OF SETTING JOINT LIMITS
     //problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
     //problem.SetParameterUpperBound(target_positions, i, robot::joint_max_position[joint_i]); 
   }
 
+  //=================================================================================================
+  // Solve!!!
+  //=================================================================================================
   ceres::Solver::Options options;
   robot::setSolverOptions(options);
   ceres::Solver::Summary summary;
@@ -177,11 +221,13 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
     summary_msg.total_time_in_seconds = summary.total_time_in_seconds;
     summary_msg.brief_report = summary.BriefReport();
     summary_msg.full_report = summary.FullReport();
-    summary_msg.header = state->header;
+    summary_msg.header = monitor_state->header;
     solver_summary_pub.publish(summary_msg);
   }
 
-  if (!summary.IsSolutionUsable()) return false;
+  //=================================================================================================
+  // Process the output
+  //=================================================================================================
 
   // Publish output
   std::vector<std::string> target_names;
@@ -190,7 +236,13 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
     int joint_idx = robot::target_idx_to_joint_idx[target_idx];
     target_names.push_back(robot::joint_names[joint_idx]);
   }
-  joint_controller->setJointPositions(target_names, target_positions);
+  joint_controller->setJointPositions(target_names, optm_target_positions);
+
+  // Keep history
+  std::vector<double> optm_target_positions_v;
+  for (int i=0; i<robot::num_targets; i++) optm_target_positions_v.push_back(optm_target_positions[i]);
+  solver_history.push(optm_target_positions_v);
+  if (solver_history.size() > 4) solver_history.pop();
 
   return true;
 }
