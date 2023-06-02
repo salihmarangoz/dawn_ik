@@ -13,17 +13,23 @@ from geometry_msgs.msg import Point
 
 
 class RvizController:
+
   def __init__(self):
     self.server = InteractiveMarkerServer("dawn_ik_rviz_controls")
     self.goal_pub = rospy.Publisher("/dawn_ik_solver/ik_goal", IKGoal, queue_size=1)
     self.goal = IKGoal()
 
     self.menu_handler = MenuHandler()
-    self.menu_handler.insert( "IDLE", callback=self.handle_idle )
-    self.menu_handler.insert( "END-POINT-ORIENTATION", callback=self.handle_end_point_orientation )
-    self.menu_handler.insert( "END-POINT + TARGET-POINT", callback=self.handle_end_point_and_target_point )
-    self.menu_handler.insert( "KEEP-DISTANCE + TARGET-POINT", callback=self.handle_keep_distance_and_target_point )
-    self.menu_handler.insert( "Save current distance to the target", callback=self.handle_save_current_distance )
+    self.menu_handler.insert( "IDLE", callback=self.processFeedback )
+    self.menu_handler.insert( "ENDPOINT_POSE", callback=self.processFeedback )
+    self.menu_handler.insert( "ENDPOINT_POSE_ORIENTATION", callback=self.processFeedback )
+    self.menu_handler.insert( "ENDPOINT_POSE_LOOK_AT_GOAL", callback=self.processFeedback )
+    self.menu_handler.insert( "KEEP_DISTANCE_LOOK_AT_GOAL", callback=self.processFeedback )
+
+    self.header = None
+    self.endpoint_pose = None
+    self.target_pose = None
+    self.menu_entry_id = 1
 
     position = Point( 0.5, 0, 0)
     self.make6DofMarker("endpoint", InteractiveMarkerControl.MOVE_ROTATE_3D, position, True )
@@ -32,41 +38,53 @@ class RvizController:
 
     self.server.applyChanges()
 
-  def handle_idle(self, feedback):
-    print("handle_idle")
-    self.goal.mode = 0
+  def updateGoal(self):
+    IDLE                        = 1
+    ENDPOINT_POSE               = 2
+    ENDPOINT_POSE_ORIENTATION   = 3
+    ENDPOINT_POSE_LOOK_AT_GOAL  = 4
+    KEEP_DISTANCE_LOOK_AT_GOAL  = 5
 
-  def handle_end_point_orientation(self, feedback):
-    print("handle_end_point_orientation")
-    self.goal.mode = 1
+    #############################################################################
+    if self.menu_entry_id == IDLE:
+      self.goal.mode = 0
+    #############################################################################
+    elif self.menu_entry_id == ENDPOINT_POSE:
+      self.goal.mode = 1
+      self.goal.m1_x.value = self.endpoint_pose.position.x
+      self.goal.m1_x.weight = 1.0
+      self.goal.m1_y.value = self.endpoint_pose.position.y
+      self.goal.m1_y.weight = 1.0
+      self.goal.m1_z.value = self.endpoint_pose.position.z
+      self.goal.m1_z.weight = 1.0
+      self.goal.m1_distance.value = 0.0
+      self.goal.m1_distance.weight = 1.0
+    #############################################################################
+    elif self.menu_entry_id == ENDPOINT_POSE_ORIENTATION:
+      pass
+    #############################################################################
+    elif self.menu_entry_id == ENDPOINT_POSE_LOOK_AT_GOAL:
+      pass
+    #############################################################################
+    elif self.menu_entry_id == KEEP_DISTANCE_LOOK_AT_GOAL:
+      pass
+    #############################################################################
 
-  def handle_end_point_and_target_point(self, feedback):
-    print("handle_end_point_and_target_point")
-    pass
 
-  def handle_keep_distance_and_target_point(self, feedback):
-    print("handle_keep_distance_and_target_point")
-    pass
-
-  def handle_save_current_distance(self, feedback):
-    print("handle_save_current_distance")
-    pass
 
   def processFeedback(self, feedback):
-    #print(feedback)
-    
-    self.goal.m1_x.value = feedback.pose.position.x
-    self.goal.m1_x.weight = 1.0
+    if feedback.marker_name == "endpoint":
+      self.header = feedback.header
+      self.endpoint_pose = feedback.pose
+    elif feedback.marker_name == "target":
+      self.header = feedback.header
+      self.target_pose = feedback.pose
 
-    self.goal.m1_y.value = feedback.pose.position.y
-    self.goal.m1_y.weight = 1.0
+    if feedback.menu_entry_id != 0:
+      self.header = feedback.header
+      self.menu_entry_id = feedback.menu_entry_id
 
-    self.goal.m1_z.value = feedback.pose.position.z
-    self.goal.m1_z.weight = 1.0
-
-    self.goal.m1_distance.value = 0.0
-    self.goal.m1_distance.weight = 1.0
-
+    self.updateGoal()
     self.goal_pub.publish(self.goal)
     self.server.applyChanges()
 
@@ -79,23 +97,21 @@ class RvizController:
 
   def makeMarker(self, msg):
     marker = Marker()
-
     marker.type = Marker.SPHERE
     marker.scale.x = msg.scale * 0.45
     marker.scale.y = msg.scale * 0.45
     marker.scale.z = msg.scale * 0.45
-    marker.color.r = 0.5
+    marker.color.r = 0.1
     marker.color.g = 0.5
-    marker.color.b = 0.5
-    marker.color.a = 1.0
-
+    marker.color.b = 1.0
+    marker.color.a = 0.85
     return marker
 
   def make6DofMarker(self, name, interaction_mode, position, show_6dof = False):
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = "world"
     int_marker.pose.position = position
-    int_marker.scale = 0.2
+    int_marker.scale = 0.3
     int_marker.name = name
 
     # insert a box

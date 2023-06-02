@@ -11,7 +11,7 @@ uint32 MODE_7=64
 uint32 MODE_8=128
 uint32 MODE_9=256
 
-int64 mode # Set Endpoint Control Mode
+int64 mode
 
 ###################################################################################################
 # MODE_(?): CONVERGE TO PRIOR

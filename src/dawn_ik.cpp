@@ -28,7 +28,7 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   loop_thread = new boost::thread(boost::bind(&DawnIK::loopThread, this)); // consumer
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
 
-  endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
+  //endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
 }
 
 DawnIK::~DawnIK()
@@ -93,6 +93,11 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //=================================================================================================
   JointLinkCollisionStateConstPtr monitor_state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
+
+  endpoint.x() =  ik_goal->m1_x.value;
+  endpoint.y() =  ik_goal->m1_y.value;
+  endpoint.z() =  ik_goal->m1_z.value;
+  //direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
 
   std::vector<double> variable_positions;
   variable_positions.resize(robot::num_variables);
