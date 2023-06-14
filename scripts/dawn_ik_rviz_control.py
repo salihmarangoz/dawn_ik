@@ -92,11 +92,11 @@ class RvizController:
       self.goal.m1_x = self.endpoint_pose.position.x
       self.goal.m1_y = self.endpoint_pose.position.y
       self.goal.m1_z = self.endpoint_pose.position.z
-      self.goal.m1_weight = 0.5
+      self.goal.m1_weight = 1.0
       self.goal.m3_x = self.target_pose.position.x
       self.goal.m3_y = self.target_pose.position.y
       self.goal.m3_z = self.target_pose.position.z
-      self.goal.m3_weight = 5.0
+      self.goal.m3_weight = 1.0
 
 
   def processFeedback(self, feedback):

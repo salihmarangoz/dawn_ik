@@ -46,7 +46,7 @@ DawnIK::readParameters()
   priv_nh.param("init_noise", p_init_noise, 0.01);
   if (p_init_noise < 0.0){ROS_ERROR("Invalid init_noise!"); p_init_noise = 0.0;} // disable on error
 
-  priv_nh.param("max_step_size", p_max_step_size, 0.1);
+  priv_nh.param("max_step_size", p_max_step_size, 0.2);
   if (p_max_step_size < 0.0){ROS_ERROR("Invalid max_step_size!"); p_max_step_size = 0.0;} // disable on error
 }
 

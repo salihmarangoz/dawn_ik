@@ -154,28 +154,27 @@ struct EndpointGoal {
 
 
     // Look at goal cost
-    T endpoint_euler[3];
-    T rotation_matrix[9];
-    ceres::QuaternionToRotation(&(global_link_rotations[4*robot::endpoint_link_idx]), rotation_matrix);
-    ceres::RotationMatrixToEulerAngles<ceres::ExtrinsicYZY>(rotation_matrix, endpoint_euler);
-
     T x = shared_block.ik_goal->m3_x - global_link_translations[3*robot::endpoint_link_idx+0];
     T y = shared_block.ik_goal->m3_y - global_link_translations[3*robot::endpoint_link_idx+1];
     T z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
-    T len = ceres::sqrt(x*x + y*y + z*z);
+    T target_pitch = ceres::atan2(x, z);
+    T target_yaw = ceres::atan2(y, x);
 
-    residuals[7] = (endpoint_euler[1] - ceres::atan2(x, z)) * shared_block.ik_goal->m3_weight; // OK
-    //residuals[7] = (endpoint_euler[1] - M_PI_2) * shared_block.ik_goal->m3_weight; // OK
+    T& qw = global_link_rotations[4*robot::endpoint_link_idx+0];
+    T& qx = global_link_rotations[4*robot::endpoint_link_idx+1];
+    T& qy = global_link_rotations[4*robot::endpoint_link_idx+2];
+    T& qz = global_link_rotations[4*robot::endpoint_link_idx+3];
+    T roll = ceres::atan2(2.0*(qw*qx+qy*qz), 1.0-2.0*(qx*qx+qy*qy));
+    T pitch = ceres::asin(2.0*(qw*qy-qx*qz));
+    T yaw = ceres::atan2(2.0*(qw*qz+qx*qy), 1.0-2.0*(qy*qy+qz*qz));
 
-    //residuals[8] = (endpoint_euler[0] - ceres::asin(-y/len)) * shared_block.ik_goal->m3_weight;
-    //residuals[8] = (endpoint_euler[0] - M_PI_4) * shared_block.ik_goal->m3_weight;
-    residuals[8] = (endpoint_euler[0]) * shared_block.ik_goal->m3_weight;
+    residuals[7] = (yaw-target_yaw) * shared_block.ik_goal->m3_weight;
+    residuals[8] = (pitch-target_pitch) * shared_block.ik_goal->m3_weight;
+    residuals[9] = (roll-M_PI) * shared_block.ik_goal->m3_weight;
 
-    //alt = toDegrees(atan2(y, sqrt(x*x + z*z)))
-    //az = toDegrees(atan2(-x, -z))
 
-    residuals[9] = (endpoint_euler[2]) * shared_block.ik_goal->m3_weight;
-
+    //residuals[8] = (endpoint_euler[1]) * shared_block.ik_goal->m3_weight;
+    //residuals[9] = (endpoint_euler[2]) * shared_block.ik_goal->m3_weight;
 
     return true;
   }

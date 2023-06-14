@@ -41,7 +41,7 @@ $ sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev 
 $ cd ceres-solver
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ cmake -DCMAKE_BUILD_TYPE=Release -DUSE_CUDA=OFF ..
 $ make -j8
 $ sudo make install
 
