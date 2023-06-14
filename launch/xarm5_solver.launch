@@ -6,4 +6,7 @@
     <remap from="joint_trajectory_command" to="/xarm/xarm5_traj_controller/command"/>
   </node>
 
+  <node name="dawn_ik_rviz_control" pkg="dawn_ik" type="dawn_ik_rviz_control.py" output="screen">
+  </node>
+
 </launch>

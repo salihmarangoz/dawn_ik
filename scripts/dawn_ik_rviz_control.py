@@ -23,13 +23,14 @@ class RvizController:
     self.menu_handler.insert( "IDLE", callback=self.processFeedback )
     self.menu_handler.insert( "ENDPOINT_POSE", callback=self.processFeedback )
     self.menu_handler.insert( "ENDPOINT_POSE_ORIENTATION", callback=self.processFeedback )
-    self.menu_handler.insert( "ENDPOINT_POSE_LOOK_AT_GOAL", callback=self.processFeedback )
-    self.menu_handler.insert( "KEEP_DISTANCE_LOOK_AT_GOAL", callback=self.processFeedback )
+    self.menu_handler.insert( "ENDPOINT_POSE_ORIENTATION (Adaptive)", callback=self.processFeedback )
+    self.menu_handler.insert( "ENDPOINT_POSE + LOOK-AT-GOAL", callback=self.processFeedback )
 
     self.header = None
     self.endpoint_pose = None
     self.target_pose = None
     self.menu_entry_id = 1
+    self.feedback = None
 
     position = Point( 0.5, 0, 0)
     self.make6DofMarker("endpoint", InteractiveMarkerControl.MOVE_ROTATE_3D, position, True )
@@ -39,40 +40,67 @@ class RvizController:
     self.server.applyChanges()
 
   def updateGoal(self):
+    self.goal = IKGoal()
+
     IDLE                        = 1
     ENDPOINT_POSE               = 2
     ENDPOINT_POSE_ORIENTATION   = 3
-    ENDPOINT_POSE_LOOK_AT_GOAL  = 4
-    KEEP_DISTANCE_LOOK_AT_GOAL  = 5
+    ENDPOINT_POSE_ORIENTATION_A = 4
+    ENDPOINT_POSE_LOOKATGOAL    = 5
 
     #############################################################################
     if self.menu_entry_id == IDLE:
-      self.goal.mode = 0
+      self.goal.mode = IKGoal.MODE_0
     #############################################################################
     elif self.menu_entry_id == ENDPOINT_POSE:
-      self.goal.mode = 1
-      self.goal.m1_x.value = self.endpoint_pose.position.x
-      self.goal.m1_x.weight = 1.0
-      self.goal.m1_y.value = self.endpoint_pose.position.y
-      self.goal.m1_y.weight = 1.0
-      self.goal.m1_z.value = self.endpoint_pose.position.z
-      self.goal.m1_z.weight = 1.0
-      self.goal.m1_distance.value = 0.0
-      self.goal.m1_distance.weight = 1.0
+      self.goal.mode = IKGoal.MODE_1
+      self.goal.m1_x = self.endpoint_pose.position.x
+      self.goal.m1_y = self.endpoint_pose.position.y
+      self.goal.m1_z = self.endpoint_pose.position.z
+      self.goal.m1_weight = 1.0
     #############################################################################
     elif self.menu_entry_id == ENDPOINT_POSE_ORIENTATION:
-      pass
+      self.goal.mode = IKGoal.MODE_1 + IKGoal.MODE_2
+      self.goal.m1_x = self.endpoint_pose.position.x
+      self.goal.m1_y = self.endpoint_pose.position.y
+      self.goal.m1_z = self.endpoint_pose.position.z
+      self.goal.m1_weight = 1.0
+      self.goal.m2_w = self.endpoint_pose.orientation.w
+      self.goal.m2_x = self.endpoint_pose.orientation.x
+      self.goal.m2_y = self.endpoint_pose.orientation.y
+      self.goal.m2_z = self.endpoint_pose.orientation.z
+      self.goal.m2_weight = 1.0
     #############################################################################
-    elif self.menu_entry_id == ENDPOINT_POSE_LOOK_AT_GOAL:
-      pass
+    elif self.menu_entry_id == ENDPOINT_POSE_ORIENTATION_A:
+      self.goal.mode = IKGoal.MODE_1 + IKGoal.MODE_2
+      self.goal.m1_x = self.endpoint_pose.position.x
+      self.goal.m1_y = self.endpoint_pose.position.y
+      self.goal.m1_z = self.endpoint_pose.position.z
+      self.goal.m1_weight = 1.0
+      self.goal.m2_w = self.endpoint_pose.orientation.w
+      self.goal.m2_x = self.endpoint_pose.orientation.x
+      self.goal.m2_y = self.endpoint_pose.orientation.y
+      self.goal.m2_z = self.endpoint_pose.orientation.z
+      self.goal.m2_weight = 1.0
+      if "move" in self.feedback.control_name:
+        self.goal.m2_weight = 5.0
+      if "rotate" in self.feedback.control_name:
+        self.goal.m1_weight = 5.0
     #############################################################################
-    elif self.menu_entry_id == KEEP_DISTANCE_LOOK_AT_GOAL:
-      pass
-    #############################################################################
-
+    elif self.menu_entry_id == ENDPOINT_POSE_LOOKATGOAL:
+      self.goal.mode = IKGoal.MODE_1 + IKGoal.MODE_3
+      self.goal.m1_x = self.endpoint_pose.position.x
+      self.goal.m1_y = self.endpoint_pose.position.y
+      self.goal.m1_z = self.endpoint_pose.position.z
+      self.goal.m1_weight = 0.5
+      self.goal.m3_x = self.target_pose.position.x
+      self.goal.m3_y = self.target_pose.position.y
+      self.goal.m3_z = self.target_pose.position.z
+      self.goal.m3_weight = 5.0
 
 
   def processFeedback(self, feedback):
+    self.feedback = feedback
     if feedback.marker_name == "endpoint":
       self.header = feedback.header
       self.endpoint_pose = feedback.pose
@@ -116,6 +144,7 @@ class RvizController:
 
     # insert a box
     control =  InteractiveMarkerControl()
+    control.name = "move_3d"
     control.always_visible = True
     control.markers.append( self.makeMarker(int_marker) )
     control.interaction_mode = interaction_mode

@@ -94,9 +94,9 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   JointLinkCollisionStateConstPtr monitor_state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
 
-  endpoint.x() =  ik_goal->m1_x.value;
-  endpoint.y() =  ik_goal->m1_y.value;
-  endpoint.z() =  ik_goal->m1_z.value;
+  //endpoint.x() =  ik_goal->m1_x.value;
+  //endpoint.y() =  ik_goal->m1_y.value;
+  //endpoint.z() =  ik_goal->m1_z.value;
   //direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
 
   std::vector<double> variable_positions;
@@ -157,11 +157,14 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   // Set up the optimization problem
   //=================================================================================================
   ceres::Problem problem;
+  ceres::Solver::Options options;
+  robot::setSolverOptions(options);
+  ceres::Solver::Summary summary;
 
   // ========== Preferred Joint Position Goal ==========
   ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create(shared_block);
   ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.1); // goal weight
-  problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
+  //problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
 
   // ========== Minimal Joint Displacement Goal ==========
   //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
@@ -169,10 +172,10 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
 
   // ================== Endpoint Goal ==================
-  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block, endpoint, direction);
+  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block);
   //ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
-  ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
-  problem.AddResidualBlock(endpoint_goal, endpoint_loss, optm_target_positions);
+  //ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
+  problem.AddResidualBlock(endpoint_goal, nullptr, optm_target_positions);
 
   // ============= Collision Avoidance Goal ============
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
@@ -188,7 +191,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
     if (!robot::joint_is_position_bounded[joint_idx]) continue;
 
     // TODO: EXPERIMENTAL PROBLEM BOUNDARIES
-    if (p_max_step_size > 0.0)
+    if (p_max_step_size > 0.0 && options.minimizer_type == TRUST_REGION)
     {
       double min_val = curr_target_positions[target_idx] - p_max_step_size;
       double max_val = curr_target_positions[target_idx] + p_max_step_size;
@@ -206,9 +209,6 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //=================================================================================================
   // Solve!!!
   //=================================================================================================
-  ceres::Solver::Options options;
-  robot::setSolverOptions(options);
-  ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
   if (solver_summary_pub.getNumSubscribers() > 0)

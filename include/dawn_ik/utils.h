@@ -20,14 +20,12 @@ namespace utils
 // TODO: Eigen::Map<const Eigen::Matrix<T, 4, 1> > point(input_point);
 // https://groups.google.com/g/ceres-solver/c/7ZH21XX6HWU/m/kX-2n4vbAwAJ
 
-// desmos: https://www.desmos.com/calculator/mlpskpxmuj
+// desmos: https://www.desmos.com/calculator/kutmzfuw6a
 // do not use this function if min_value >= max_value
 template <typename T>
-inline T computeToleranceCost(const T value, double min_value, double max_value)
+inline T computeToleranceCost(const T x, double tolerance=0.1, double squared_weight=0.001)
 {
-  double center_value = (min_value+max_value)/2.0;
-  double diff = max_value - min_value;
-  return ceres::tanh(ceres::pow((value-center_value)/diff, 2));
+  return ceres::pow(ceres::tanh(x/tolerance), 2) + squared_weight*ceres::pow(x/tolerance, 2);
 }
 
 // Computes translation of the link

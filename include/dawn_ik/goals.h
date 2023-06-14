@@ -113,7 +113,7 @@ struct MinimalJointDisplacementGoal {
  * EndpointGoal
 */
 struct EndpointGoal {
-  EndpointGoal(SharedBlock &shared_block, const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction) : shared_block(shared_block), endpoint(endpoint), direction(direction) {}
+  EndpointGoal(SharedBlock &shared_block) : shared_block(shared_block) {}
 
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
@@ -122,66 +122,74 @@ struct EndpointGoal {
     T global_link_rotations[4*robot::num_links];
     utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
 
-    // Position cost
-    residuals[0] = ceres::hypot(global_link_translations[3*robot::endpoint_link_idx+0] - endpoint[0],
-                                global_link_translations[3*robot::endpoint_link_idx+1] - endpoint[1],
-                                global_link_translations[3*robot::endpoint_link_idx+2] - endpoint[2]);
+    // Position cost (FAST)
+    // residuals[4] = ceres::hypot(global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x,
+    //                             global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y,
+    //                             global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
 
-    // Orientation cost
-    residuals[1] = global_link_rotations[4*robot::endpoint_link_idx+0] - direction.w();
-    residuals[2] = global_link_rotations[4*robot::endpoint_link_idx+1] - direction.x();
-    residuals[3] = global_link_rotations[4*robot::endpoint_link_idx+2] - direction.y();
-    residuals[4] = global_link_rotations[4*robot::endpoint_link_idx+3] - direction.z();
-    
-    // TEST: SLOW!
-    /*
-    Eigen::Quaterniond endpoint_dir;
-    endpoint_dir.w() = global_link_rotations[4*robot::endpoint_link_idx+0];
-    endpoint_dir.x() = global_link_rotations[4*robot::endpoint_link_idx+1];
-    endpoint_dir.y() = global_link_rotations[4*robot::endpoint_link_idx+2];
-    endpoint_dir.z() = global_link_rotations[4*robot::endpoint_link_idx+3];
-    residuals[1] = endpoint_dir.angularDistance(direction);
-    */
+    // Position cost (SHOULD BE SAME AS ABOVE)
+    residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x) * shared_block.ik_goal->m1_weight;
+    residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y) * shared_block.ik_goal->m1_weight;
+    residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
 
-    // TEST: SLOW!
-    /*
-    residuals[1] = 1.0-global_link_rotations[4*robot::endpoint_link_idx+0]*direction.w() -
-                   global_link_rotations[4*robot::endpoint_link_idx+1]*direction.x() -
-                   global_link_rotations[4*robot::endpoint_link_idx+2]*direction.y() -
-                   global_link_rotations[4*robot::endpoint_link_idx+3]*direction.z();
-    */
+    // Orientation cost (FAST)
+    residuals[0] = (global_link_rotations[4*robot::endpoint_link_idx+0] - shared_block.ik_goal->m2_w) * shared_block.ik_goal->m2_weight;
+    residuals[1] = (global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x) * shared_block.ik_goal->m2_weight;
+    residuals[2] = (global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y) * shared_block.ik_goal->m2_weight;
+    residuals[3] = (global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z) * shared_block.ik_goal->m2_weight;
 
-    // couldn't implement this method
-    /*
-    T inverse_quad[4];
-    inverse_quad[0] = global_link_rotations[4*robot::endpoint_link_idx+0];
-    inverse_quad[1] = -global_link_rotations[4*robot::endpoint_link_idx+1];
-    inverse_quad[2] = -global_link_rotations[4*robot::endpoint_link_idx+2];
-    inverse_quad[3] = -global_link_rotations[4*robot::endpoint_link_idx+3];
-    T endpoint[4];
-    endpoint[0] = direction.w();
-    endpoint[1] = direction.x();
-    endpoint[2] = direction.y();
-    endpoint[3] = direction.z();
-    T tmp[4];
-    ceres::QuaternionProduct(endpoint, inverse_quad, tmp);
-    */
+    // Orientation cost (SLOW)
+    // const T tmp =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
+    //                (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
+    //                (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
+    //                (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
+    // residuals[1] = ceres::acos(2.0*tmp*tmp-1.0) * shared_block.ik_goal->m2_weight;
+
+    // Orientation cost (SUPER SLOW)
+    // const T tmp =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
+    //                (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
+    //                (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
+    //                (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
+    // residuals[1] = 1.0 - tmp*tmp;
+
+
+    // Look at goal cost
+    T endpoint_euler[3];
+    T rotation_matrix[9];
+    ceres::QuaternionToRotation(&(global_link_rotations[4*robot::endpoint_link_idx]), rotation_matrix);
+    ceres::RotationMatrixToEulerAngles<ceres::ExtrinsicYZY>(rotation_matrix, endpoint_euler);
+
+    T x = shared_block.ik_goal->m3_x - global_link_translations[3*robot::endpoint_link_idx+0];
+    T y = shared_block.ik_goal->m3_y - global_link_translations[3*robot::endpoint_link_idx+1];
+    T z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
+    T len = ceres::sqrt(x*x + y*y + z*z);
+
+    residuals[7] = (endpoint_euler[1] - ceres::atan2(x, z)) * shared_block.ik_goal->m3_weight; // OK
+    //residuals[7] = (endpoint_euler[1] - M_PI_2) * shared_block.ik_goal->m3_weight; // OK
+
+    //residuals[8] = (endpoint_euler[0] - ceres::asin(-y/len)) * shared_block.ik_goal->m3_weight;
+    //residuals[8] = (endpoint_euler[0] - M_PI_4) * shared_block.ik_goal->m3_weight;
+    residuals[8] = (endpoint_euler[0]) * shared_block.ik_goal->m3_weight;
+
+    //alt = toDegrees(atan2(y, sqrt(x*x + z*z)))
+    //az = toDegrees(atan2(-x, -z))
+
+    residuals[9] = (endpoint_euler[2]) * shared_block.ik_goal->m3_weight;
+
 
     return true;
   }
 
    // Factory to hide the construction of the CostFunction object from the client code.
-   static ceres::CostFunction* Create(SharedBlock &shared_block, const Eigen::Vector3d &endpoint, const Eigen::Quaterniond &direction)
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
    {
      //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-     //            new EndpointGoal(shared_block, endpoint, direction)));
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new EndpointGoal(shared_block, endpoint, direction)));
+     //            new EndpointGoal(shared_block)));
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 10, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new EndpointGoal(shared_block)));
    }
 
   SharedBlock &shared_block;
-  const Eigen::Vector3d endpoint;       // TODO
-  const Eigen::Quaterniond direction;   // TODO
 };
 
 /**
