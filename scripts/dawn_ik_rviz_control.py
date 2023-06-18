@@ -57,14 +57,16 @@ class RvizController:
       self.goal.m1_x = self.endpoint_pose.position.x
       self.goal.m1_y = self.endpoint_pose.position.y
       self.goal.m1_z = self.endpoint_pose.position.z
-      self.goal.m1_weight = 1.0
+      self.goal.m1_limit_dist = 0.1
+      self.goal.m1_weight = 4.0
     #############################################################################
     elif self.menu_entry_id == ENDPOINT_POSE_ORIENTATION:
       self.goal.mode = IKGoal.MODE_1 + IKGoal.MODE_2
       self.goal.m1_x = self.endpoint_pose.position.x
       self.goal.m1_y = self.endpoint_pose.position.y
       self.goal.m1_z = self.endpoint_pose.position.z
-      self.goal.m1_weight = 1.0
+      self.goal.m1_limit_dist = 0.1
+      self.goal.m1_weight = 4.0
       self.goal.m2_w = self.endpoint_pose.orientation.w
       self.goal.m2_x = self.endpoint_pose.orientation.x
       self.goal.m2_y = self.endpoint_pose.orientation.y
@@ -76,7 +78,8 @@ class RvizController:
       self.goal.m1_x = self.endpoint_pose.position.x
       self.goal.m1_y = self.endpoint_pose.position.y
       self.goal.m1_z = self.endpoint_pose.position.z
-      self.goal.m1_weight = 1.0
+      self.goal.m1_limit_dist = 0.1
+      self.goal.m1_weight = 4.0
       self.goal.m2_w = self.endpoint_pose.orientation.w
       self.goal.m2_x = self.endpoint_pose.orientation.x
       self.goal.m2_y = self.endpoint_pose.orientation.y

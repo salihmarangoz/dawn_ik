@@ -36,7 +36,38 @@ struct SharedBlock
   curr_target_velocities(curr_target_velocities),
   monitor_state(monitor_state),
   int_objects(int_objects)
-  {};
+  {
+    // limit m1 endpoint goal distance
+    if (ik_goal->m1_limit_dist > 0)
+    {
+      double xyz_length2 = std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+0] - ik_goal->m1_x, 2)+
+                           std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+1] - ik_goal->m1_y, 2)+
+                           std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+2] - ik_goal->m1_z, 2);
+      if (xyz_length2 < ik_goal->m1_limit_dist*ik_goal->m1_limit_dist)
+      {
+        m1_x_limited = ik_goal->m1_x;
+        m1_y_limited = ik_goal->m1_y;
+        m1_z_limited = ik_goal->m1_z;
+      }
+      else
+      {
+        double xyz_length = std::sqrt(xyz_length2);
+        m1_x_limited = monitor_state->link_state.transformations[7*robot::endpoint_link_idx+0] + 
+                                      (ik_goal->m1_limit_dist/xyz_length)*(ik_goal->m1_x - monitor_state->link_state.transformations[7*robot::endpoint_link_idx+0]);
+        m1_y_limited = monitor_state->link_state.transformations[7*robot::endpoint_link_idx+1] + 
+                                      (ik_goal->m1_limit_dist/xyz_length)*(ik_goal->m1_y - monitor_state->link_state.transformations[7*robot::endpoint_link_idx+1]);
+        m1_z_limited = monitor_state->link_state.transformations[7*robot::endpoint_link_idx+2] + 
+                                      (ik_goal->m1_limit_dist/xyz_length)*(ik_goal->m1_z - monitor_state->link_state.transformations[7*robot::endpoint_link_idx+2]);
+      }
+    }
+    else
+    {
+      m1_x_limited = ik_goal->m1_x;
+      m1_y_limited = ik_goal->m1_y;
+      m1_z_limited = ik_goal->m1_z;
+    }
+  }
+
   const dawn_ik::IKGoalPtr &ik_goal;
   std::queue< std::vector<double> > &solver_history;
   std::map<std::string, int> &joint_name_to_joint_idx;
@@ -46,6 +77,8 @@ struct SharedBlock
   double (&curr_target_velocities)[robot::num_targets];
   JointLinkCollisionStateConstPtr &monitor_state;
   const std::vector<CollisionObject*> &int_objects;
+  // modifications
+  double m1_x_limited, m1_y_limited, m1_z_limited;
 };
 //=================================================================================================
 
@@ -128,9 +161,12 @@ struct EndpointGoal {
     //                             global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
 
     // Position cost (SHOULD BE SAME AS ABOVE)
-    residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x) * shared_block.ik_goal->m1_weight;
-    residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y) * shared_block.ik_goal->m1_weight;
-    residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
+    //residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x) * shared_block.ik_goal->m1_weight;
+    //residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y) * shared_block.ik_goal->m1_weight;
+    //residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
+    residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight;
+    residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight;
+    residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight;
 
     // Orientation cost (FAST)
     residuals[0] = (global_link_rotations[4*robot::endpoint_link_idx+0] - shared_block.ik_goal->m2_w) * shared_block.ik_goal->m2_weight;

@@ -164,7 +164,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   // ========== Preferred Joint Position Goal ==========
   ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create(shared_block);
   ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.1); // goal weight
-  //problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
+  problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
 
   // ========== Minimal Joint Displacement Goal ==========
   //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
