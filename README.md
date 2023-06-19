@@ -23,7 +23,7 @@ $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_mara
 # Horti Robot
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
 
-# xArm ROS
+# xArm ROS (2983907b546e3c83d17a59a6639e3d407b50a53a)
 $ git clone clone git@github.com:salihmarangoz/xarm_ros.git
 $ cd xarm_ros
 $ git submodule update --init --remote
