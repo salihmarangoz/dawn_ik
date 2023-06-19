@@ -28,6 +28,9 @@ $ git clone clone git@github.com:salihmarangoz/xarm_ros.git
 $ cd xarm_ros
 $ git submodule update --init --remote
 
+# Fake Joints (optional alternative to Gazebo)
+$ git clone git@github.com:tork-a/fake_joint.git # Backup: https://github.com/salihmarangoz/fake_joint
+
 # Others
 $ cd catkin_ws
 $ rosdep install --from-paths src --ignore-src -r
@@ -73,6 +76,13 @@ $ roslaunch dawn_ik xarm5_sim.launch
 $ roslaunch dawn_ik xarm6_sim.launch
 $ roslaunch dawn_ik xarm7_sim.launch
 $ roslaunch dawn_ik horti_sim.launch
+
+# or without Gazebo (using fake_joints)
+$ roslaunch dawn_ik lite6_fake.launch
+$ roslaunch dawn_ik xarm5_fake.launch
+$ roslaunch dawn_ik xarm6_fake.launch
+$ roslaunch dawn_ik xarm7_fake.launch
+# TODO: horti fake_joints
 ```
 
 ### Code Generation
