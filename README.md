@@ -87,6 +87,8 @@ $ roslaunch dawn_ik xarm7_fake.launch
 
 ### Code Generation
 
+**BE CAREFUL:** MAKE SURE THE NOT-LIMITED ROBOT DESCRIPTION IS LOADED. SOME PACKAGES (E.G. XARM) LIMITS JOINTS FOR MORE STABLE MOVEIT EXPERIENCE.
+
 Make sure the robot description is loaded. (if the simulation is running then it is loaded). Re-compile the project after this step. 
 
 ```bash
