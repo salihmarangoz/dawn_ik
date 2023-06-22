@@ -31,7 +31,7 @@ bool CollisionCallBackCollect::exist(const CollisionPair& pair) const {
 RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh)
 {
   visualization_pub = priv_nh.advertise<visualization_msgs::MarkerArray>( "robot_monitor_visualization", 0 );
-  joint_state_sub = nh.subscribe("/joint_states", 2, &RobotMonitor::jointStateCallback, this);
+  joint_state_sub = nh.subscribe("joint_states", 2, &RobotMonitor::jointStateCallback, this);
   link_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateLinkThread, this));
   collision_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateCollisionThread, this));
   visualization_thread = new boost::thread(boost::bind(&RobotMonitor::updateVisualizationThread, this));

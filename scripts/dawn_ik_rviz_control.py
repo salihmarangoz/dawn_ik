@@ -16,7 +16,7 @@ class RvizController:
 
   def __init__(self):
     self.server = InteractiveMarkerServer("dawn_ik_rviz_controls")
-    self.goal_pub = rospy.Publisher("/dawn_ik_solver/ik_goal", IKGoal, queue_size=1)
+    self.goal_pub = rospy.Publisher("dawn_ik_solver/ik_goal", IKGoal, queue_size=1)
     self.goal = IKGoal()
 
     self.menu_handler = MenuHandler()
