@@ -66,6 +66,12 @@ struct SharedBlock
       m1_y_limited = ik_goal->m1_y;
       m1_z_limited = ik_goal->m1_z;
     }
+
+    // TODO: extra
+    double xyz_length2_ = std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+0] - ik_goal->m1_x, 2)+
+                          std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+1] - ik_goal->m1_y, 2)+
+                          std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+2] - ik_goal->m1_z, 2);
+    dist_to_target = sqrt(xyz_length2_);
   }
 
   const dawn_ik::IKGoalPtr &ik_goal;
@@ -79,6 +85,8 @@ struct SharedBlock
   const std::vector<CollisionObject*> &int_objects;
   // modifications
   double m1_x_limited, m1_y_limited, m1_z_limited;
+  // extra
+  double dist_to_target;
 };
 //=================================================================================================
 
@@ -111,6 +119,42 @@ struct PreferredJointPositionGoal {
    {
      return (new ceres::AutoDiffCostFunction<PreferredJointPositionGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new PreferredJointPositionGoal(shared_block)));
+   }
+
+   SharedBlock &shared_block;
+};
+
+/**
+ * AvoidJointLimitsGoal
+*/
+struct AvoidJointLimitsGoal {
+  AvoidJointLimitsGoal(SharedBlock &shared_block): shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+    {
+      int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+      if (robot::joint_is_position_bounded[joint_idx])
+      {
+        residuals[target_idx*2] = T(0.01) / (target_values[target_idx] - robot::joint_min_position[joint_idx] - 0.01);
+        residuals[target_idx*2+1] = T(0.01) / (target_values[target_idx] - robot::joint_max_position[joint_idx] - 0.01);
+      }
+      else
+      {
+        residuals[target_idx*2] = T(0.0);
+        residuals[target_idx*2+1] = T(0.0);
+      }
+    }
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     return (new ceres::AutoDiffCostFunction<AvoidJointLimitsGoal, robot::num_targets*2, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new AvoidJointLimitsGoal(shared_block)));
    }
 
    SharedBlock &shared_block;
@@ -179,7 +223,10 @@ struct EndpointGoal {
     //                (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
     //                (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
     //                (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
-    // residuals[1] = ceres::acos(2.0*tmp*tmp-1.0) * shared_block.ik_goal->m2_weight;
+    // residuals[0] = ceres::acos(2.0*tmp*tmp-1.0) * shared_block.ik_goal->m2_weight;
+    // residuals[1] = T(0.0);
+    // residuals[2] = T(0.0);
+    // residuals[3] = T(0.0);
 
     // Orientation cost (SUPER SLOW)
     // const T tmp =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
@@ -301,8 +348,11 @@ struct CollisionAvoidanceGoal {
       else
         residuals[i] = 0.0;
 
+      if (distance <= 0)
+        residuals[i] = 10.0;
+
       
-      if (distance < 0) return false; // TODO: maybe return false if there is a collision?
+      //if (distance < 0) return false; // TODO: maybe return false if there is a collision?
     }
 
     return true; 

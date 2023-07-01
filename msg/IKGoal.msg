@@ -27,7 +27,7 @@ float64 m1_x
 float64 m1_y
 float64 m1_z
 float64 m1_weight
-float64 m1_limit_dist
+float64 m1_limit_dist # TODO: handle zero cases
 
 ###################################################################################################
 # MODE_2: ENDPOINT ORIENTATION CONTROL IN WORLD FRAME VIA QUATERNION

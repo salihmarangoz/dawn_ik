@@ -40,8 +40,8 @@ DawnIK::~DawnIK()
 void
 DawnIK::readParameters()
 {
-  priv_nh.param("update_rate", p_update_rate, 20.0);
-  if (p_update_rate <= 0.0){ROS_ERROR("Invalid update_rate!"); p_update_rate = 20.0;}
+  priv_nh.param("update_rate", p_update_rate, 100.0);
+  if (p_update_rate <= 0.0){ROS_ERROR("Invalid update_rate!"); p_update_rate = 100.0;}
 
   priv_nh.param("init_noise", p_init_noise, 0.01);
   if (p_init_noise < 0.0){ROS_ERROR("Invalid init_noise!"); p_init_noise = 0.0;} // disable on error
@@ -163,13 +163,25 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
 
   // ========== Preferred Joint Position Goal ==========
   ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create(shared_block);
-  ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.1); // goal weight
+  //ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.25); // goal weight
+  //ceres::CauchyLoss *preferred_joint_position_loss = new ceres::CauchyLoss(0.05); // goal weight
+  // TODO
+  double dynamic_preferred_joint_position_weight = shared_block.dist_to_target;
+  if (dynamic_preferred_joint_position_weight > shared_block.ik_goal->m1_limit_dist)
+  {
+    dynamic_preferred_joint_position_weight = shared_block.ik_goal->m1_limit_dist;
+  }
+  // if (dynamic_preferred_joint_position_weight < shared_block.dist_to_target/2)
+  // {
+  //   dynamic_preferred_joint_position_weight = shared_block.dist_to_target/2;
+  // }
+  ceres::CauchyLoss *preferred_joint_position_loss = new ceres::CauchyLoss(dynamic_preferred_joint_position_weight*2); // goal weight
   problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
 
-  // ========== Minimal Joint Displacement Goal ==========
-  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
-  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.01); // goal weight
-  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
+  // ========== Avoid Joint Limits Goal ==========
+  ceres::CostFunction* avoid_joint_limits_goal = AvoidJointLimitsGoal::Create(shared_block);
+  //ceres::TukeyLoss *avoid_joint_limits_loss = new ceres::TukeyLoss(0.1); // goal weight
+  problem.AddResidualBlock(avoid_joint_limits_goal, nullptr, optm_target_positions);
 
   // ================== Endpoint Goal ==================
   ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block);
@@ -185,6 +197,15 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //=================================================================================================
   // Set parameter constraints
   //=================================================================================================
+
+  // TODO
+  //options.trust_region_strategy_type = DOGLEG;
+  //options.use_nonmonotonic_steps = true;
+  //options.preconditioner_type = JACOBI;
+  //options.minimizer_type = LINE_SEARCH;
+  //options.line_search_direction_type = BFGS;
+  options.jacobi_scaling = false;
+
   for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
     const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
@@ -199,6 +220,14 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
       if (robot::joint_max_position[joint_idx] < max_val) max_val = robot::joint_max_position[joint_idx];
       problem.SetParameterLowerBound(optm_target_positions, target_idx, min_val); 
       problem.SetParameterUpperBound(optm_target_positions, target_idx, max_val); 
+    }
+    else
+    {
+      // ========== Minimal Joint Displacement Goal ==========
+      ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
+      //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(0.005); // goal weight
+      ceres::TukeyLoss *minimal_joint_displacement_loss = new ceres::TukeyLoss(0.05); // goal weight
+      problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
     }
 
     // STANDARD WAY OF SETTING JOINT LIMITS
@@ -238,6 +267,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   // Keep history
   std::vector<double> optm_target_positions_v;
   for (int i=0; i<robot::num_targets; i++) optm_target_positions_v.push_back(optm_target_positions[i]);
+  //for (int i=0; i<robot::num_targets; i++) optm_target_positions_v.push_back((optm_target_positions[i] - curr_target_positions[i])*0.5 + curr_target_positions[i]);
   solver_history.push(optm_target_positions_v);
   if (solver_history.size() > 4) solver_history.pop();
 
