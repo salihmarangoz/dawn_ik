@@ -29,7 +29,7 @@ $ cd xarm_ros
 $ git submodule update --init --remote
 
 # Fake Joints (optional alternative to Gazebo)
-$ git clone git@github.com:tork-a/fake_joint.git # Backup: https://github.com/salihmarangoz/fake_joint
+$ git clone https://github.com/salihmarangoz/fake_joint
 
 # Others
 $ cd catkin_ws
