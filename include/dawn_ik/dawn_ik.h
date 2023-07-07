@@ -80,6 +80,9 @@ private:
   Eigen::Vector3d endpoint;
   Eigen::Quaterniond direction;
 
+  ros::Publisher debug_pub;
+
+
 };
 
 

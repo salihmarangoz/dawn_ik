@@ -139,9 +139,14 @@ struct LimitAccelerationGoal {
       //2 1 0 c -> history
       //c-1 -> current vel with central diff
       //0-2 -> last_vel with central diff
-      T current_vel = (target_values[target_idx] - shared_block.solver_history[1].at(target_idx)) / 0.02;
-      double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[2].at(target_idx)) / 0.02 ;
-      residuals[target_idx] = (current_vel - last_vel) / 0.02;
+      // T current_vel = (target_values[target_idx] - shared_block.solver_history[1].at(target_idx)) / 0.02;
+      // double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[2].at(target_idx)) / 0.02 ;
+      // residuals[target_idx] = (current_vel - last_vel) / 0.01;
+
+      T current_vel = (target_values[target_idx] - shared_block.solver_history[0].at(target_idx)) / 0.01;
+      double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx)) / 0.01 ;
+      residuals[target_idx] = (current_vel - last_vel) / 0.01;
+
     }
     return true;
   }
@@ -408,17 +413,14 @@ struct CollisionAvoidanceGoal {
                                                   pos_b, 
                                                   shape_b.radius-robot::default_inflation);
 
-      // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      if (distance < 0.05)
-        residuals[i] = 0.001 / (distance);
-      else
-        residuals[i] = 0.0;
-
+      double weight = 0.002;
+      double eps = 0.00001;
       if (distance <= 0)
-        residuals[i] = 10.0;
-
-      
-      //if (distance < 0) return false; // TODO: maybe return false if there is a collision?
+        residuals[i] = T(weight/eps);
+      else if (distance < 0.05)
+        residuals[i] = weight / (distance+eps);
+      else
+        residuals[i] = T(0.0);
     }
 
     return true; 
@@ -429,12 +431,58 @@ struct CollisionAvoidanceGoal {
   static ceres::CostFunction* Create(SharedBlock &shared_block)
   {
     int num_int_pairs = shared_block.monitor_state->collision_state.int_pair_a.size();
-    return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::FORWARD, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                new CollisionAvoidanceGoal(shared_block), ceres::TAKE_OWNERSHIP, num_int_pairs));
-    //return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-    //            new CollisionAvoidanceGoal(shared_block), num_int_pairs));
+    //return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::FORWARD, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+    //            new CollisionAvoidanceGoal(shared_block), ceres::TAKE_OWNERSHIP, num_int_pairs));
+    return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                new CollisionAvoidanceGoal(shared_block), num_int_pairs));
 
   }
+
+  SharedBlock &shared_block;
+};
+
+
+/**
+ * FutureEndpointGoal
+*/
+struct FutureEndpointGoal {
+  FutureEndpointGoal(SharedBlock &shared_block) : shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    T future_target_values[robot::num_targets];
+    for (int i=0; i<robot::num_targets; i++)
+    {
+      future_target_values[i] = 2.0*target_values[i] - shared_block.curr_target_positions[i];
+    }
+
+    T global_link_translations[3*robot::num_links];
+    T global_link_rotations[4*robot::num_links];
+    utils::computeGlobalLinkTransforms(future_target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
+
+    // Position cost
+    residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight/2.0;
+    residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight/2.0;
+    residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight/2.0;
+
+    // Orientation cost (FAST)
+    residuals[0] = (global_link_rotations[4*robot::endpoint_link_idx+0] - shared_block.ik_goal->m2_w) * shared_block.ik_goal->m2_weight/2.0;
+    residuals[1] = (global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x) * shared_block.ik_goal->m2_weight/2.0;
+    residuals[2] = (global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y) * shared_block.ik_goal->m2_weight/2.0;
+    residuals[3] = (global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z) * shared_block.ik_goal->m2_weight/2.0;
+
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     //return (new ceres::NumericDiffCostFunction<FutureEndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new FutureEndpointGoal(shared_block)));
+     return (new ceres::AutoDiffCostFunction<FutureEndpointGoal, 7, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new FutureEndpointGoal(shared_block)));
+   }
 
   SharedBlock &shared_block;
 };

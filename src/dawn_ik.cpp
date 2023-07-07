@@ -1,4 +1,5 @@
 #include <dawn_ik/dawn_ik.h>
+#include <std_msgs/Float64MultiArray.h>
 
 // TODO LIST
 // - remove interactive marker feedback stuff
@@ -24,6 +25,7 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   joint_controller = std::make_shared<JointTrajectoryControlInterface>(nh);
 
   solver_summary_pub = priv_nh.advertise<dawn_ik::SolverSummary>("solver_summary", 2);
+  debug_pub = priv_nh.advertise<std_msgs::Float64MultiArray>("debug", 2);
 
   loop_thread = new boost::thread(boost::bind(&DawnIK::loopThread, this)); // consumer
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
@@ -229,20 +231,22 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
+  /* TODO
   if (solver_history.size() == 3)
   {
     // ============= LimitAccelerationGoal ============
-    //ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
-    //ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(100.0, 0.05);
-    //ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(limit_acceleration_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
-    //problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
+    ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
+    ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(200.0, 0.05);
+    ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(limit_acceleration_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
+    problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
 
     // ============= LimitJerkGoal ============
-    //ceres::CostFunction* limit_jerk_goal = LimitJerkGoal::Create(shared_block);
-    //ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(0.2, 0.05);
-    //ceres::LossFunction *limit_jerk_scaled_loss = new ceres::ScaledLoss(limit_jerk_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
-    //problem.AddResidualBlock(limit_jerk_goal, limit_jerk_scaled_loss, optm_target_positions);
+    ceres::CostFunction* limit_jerk_goal = LimitJerkGoal::Create(shared_block);
+    //ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(0.02, 0.05);
+    ceres::LossFunction *limit_jerk_scaled_loss = new ceres::ScaledLoss(nullptr, 300.0, ceres::TAKE_OWNERSHIP); // goal weight
+    problem.AddResidualBlock(limit_jerk_goal, limit_jerk_scaled_loss, optm_target_positions);
   }
+  */
 
   //=================================================================================================
   // Set parameter constraints
@@ -301,6 +305,19 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     summary_msg.header = monitor_state->header;
     solver_summary_pub.publish(summary_msg);
   }
+
+  // DEBUG
+  std_msgs::Float64MultiArray debug_msg; 
+  if (shared_block.solver_history.size() == 3)
+  {
+    int idx = 1;
+    double current_vel = (optm_target_positions[idx] - shared_block.solver_history[0].at(idx)) / 0.01;
+    double last_vel = (shared_block.solver_history[0].at(idx) - shared_block.solver_history[1].at(idx)) / 0.01 ;
+    double acc = (current_vel - last_vel) / 0.01;
+    debug_msg.data.push_back(acc);
+    debug_pub.publish(debug_msg);
+  }
+
 
   //=================================================================================================
   // Return the solution
