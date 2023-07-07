@@ -3,7 +3,7 @@
 
 #include <random>
 #include <mutex>
-#include <queue>
+#include <deque>
 #include <boost/thread.hpp>
 
 #include <ros/ros.h>
@@ -32,6 +32,13 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
+struct IKSolution
+{
+  std::vector<double> target_positions;
+  ceres::Solver::Summary solver_summary;
+};
+
+
 class DawnIK
 {
 
@@ -39,7 +46,7 @@ public:
   DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh);
   ~DawnIK();
   void loopThread();
-  bool update(const dawn_ik::IKGoalPtr &ik_goal);
+  IKSolution update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initialization);
 
 private: // Parameters
   void readParameters();
@@ -61,7 +68,7 @@ private:
   ros::Subscriber ik_goal_sub;                                        // solver command input
   std::shared_ptr<JointTrajectoryControlInterface> joint_controller;  // solver control output
   ros::Publisher solver_summary_pub;                                  // solver log
-  std::queue< std::vector<double> > solver_history;                   // solver history
+  std::deque< std::vector<double> > solver_history;                   // solver history
 
   void goalCallback(const dawn_ik::IKGoalPtr &msg);
   std::mutex ik_goal_mutex;
