@@ -8,7 +8,7 @@
 #include <dawn_ik/IKGoal.h>
 #include <dawn_ik/JointLinkCollisionState.h>
 #include <map>
-#include <queue>
+#include <deque>
 #include <vector>
 
 namespace dawn_ik
@@ -18,7 +18,7 @@ namespace dawn_ik
 struct SharedBlock
 {
   SharedBlock(const dawn_ik::IKGoalPtr &ik_goal,
-              std::queue< std::vector<double> > solver_history,
+              std::deque< std::vector<double> >& solver_history,
               std::map<std::string, int> &joint_name_to_joint_idx,
               std::vector<double> &variable_positions,
               std::vector<double> &variable_velocities,
@@ -75,7 +75,7 @@ struct SharedBlock
   }
 
   const dawn_ik::IKGoalPtr &ik_goal;
-  std::queue< std::vector<double> > &solver_history;
+  std::deque< std::vector<double> > &solver_history;
   std::map<std::string, int> &joint_name_to_joint_idx;
   std::vector<double> &variable_positions;
   std::vector<double> &variable_velocities;
@@ -123,6 +123,72 @@ struct PreferredJointPositionGoal {
 
    SharedBlock &shared_block;
 };
+
+/**
+ * LimitAccelerationGoal
+ * WARNING: This goal may cause collisions or high speed motions
+*/
+struct LimitAccelerationGoal {
+  LimitAccelerationGoal(SharedBlock &shared_block): shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+    {
+      //2 1 0 c -> history
+      //c-1 -> current vel with central diff
+      //0-2 -> last_vel with central diff
+      T current_vel = (target_values[target_idx] - shared_block.solver_history[1].at(target_idx)) / 0.02;
+      double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[2].at(target_idx)) / 0.02 ;
+      residuals[target_idx] = (current_vel - last_vel) / 0.02;
+    }
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     return (new ceres::AutoDiffCostFunction<LimitAccelerationGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new LimitAccelerationGoal(shared_block)));
+   }
+
+   SharedBlock &shared_block;
+};
+
+/**
+ * LimitJerkGoal
+ * WARNING: This goal may cause collisions or high speed motions
+*/
+struct LimitJerkGoal {
+  LimitJerkGoal(SharedBlock &shared_block): shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+    {
+      //2 1 0 c -> history
+      T      v0 = (target_values[target_idx] - shared_block.solver_history[0].at(target_idx));
+      double v1 = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx));
+      double v2 = (shared_block.solver_history[1].at(target_idx) - shared_block.solver_history[2].at(target_idx));
+      T      a0 = (v0 - v1);
+      double a1 = (v1 - v2);
+      residuals[target_idx] = a0-a1;
+    }
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     return (new ceres::AutoDiffCostFunction<LimitJerkGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new LimitJerkGoal(shared_block)));
+   }
+
+   SharedBlock &shared_block;
+};
+
 
 /**
  * AvoidJointLimitsGoal

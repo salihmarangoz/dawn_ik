@@ -5,15 +5,15 @@ project(dawn_ik)
 add_compile_options(-std=c++17)
 
 ## Further optimizations
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wno-int-to-pointer-cast")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wno-int-to-pointer-cast")
 
 ## Disable assertions for more performance (maybe a little)
 #set(EIGEN_NO_DEBUG "1")
 #set(NDEBUG "1")
 
 # Memory error sanitizer
-#add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-#add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+# add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+# add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)

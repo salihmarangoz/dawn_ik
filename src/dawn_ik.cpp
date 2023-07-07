@@ -70,6 +70,13 @@ void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedb
 
 void DawnIK::loopThread()
 {
+  std::vector<std::string> target_names;
+  for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
+  {
+    int joint_idx = robot::target_idx_to_joint_idx[target_idx];
+    target_names.push_back(robot::joint_names[joint_idx]);
+  }
+
   ros::Rate r(p_update_rate);
   while (ros::ok())
   {
@@ -79,14 +86,47 @@ void DawnIK::loopThread()
 
     if (ik_goal_msg_copy->mode != IKGoal::MODE_0)
     {
-      update(ik_goal_msg_copy);
-    }
+      // Random initialization is important to escape from DOF-lowering singularities. But it is possible to get noisy results with a limited time budget.
+      // If we initialize using the previous joint state with added random noise, we can prevent these singularities, but we may not find a smooth solution with a limited time budget.
+      // If we initialize using the previous joint state without noise, we can find a smooth solution quickly, but we it may take some time for the robot to escape these singularities.
+      // Solution would be solving with both methods simultaneously (multi-threaded) and selecting the best solution.
+      // TODO: split to threads, otherwise this loop cycle may exceed the limit
+      IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
+      IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
+      if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
+      {
+        ik_solution = ik_solution_without_noise; // overwrite previous solution
+      }
 
+      // Publish output
+      joint_controller->setJointPositions(target_names, ik_solution.target_positions.data());
+
+      // Save history
+      bool keep_history_with_previous_solutions = true;
+      if (keep_history_with_previous_solutions)
+      {
+        // Option-1: Keep history of the previous solutions
+        // Pros: Discards joint state noise.
+        // Cons: Not realistic since robot may not be able to follow our solutions. Solutions may have noise too.
+        solver_history.push_front(ik_solution.target_positions);
+      }
+      else
+      {
+        // Option-2: Keep history of the previous joint states
+        // Pros: Discards solution noise.
+        // Cons: Joint state delay may be a problem. Joint states may have noise too.
+        // TODO
+      }
+
+      // Limit history
+      if (solver_history.size() >= 4) solver_history.pop_back();
+    }
+    ROS_INFO_THROTTLE(0.25, "cycle time: %f", r.cycleTime().toSec());
     r.sleep();
   }
 }
 
-bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
+IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initialization)
 {
   //=================================================================================================
   // Get current state
@@ -94,15 +134,8 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   JointLinkCollisionStateConstPtr monitor_state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
 
-  //endpoint.x() =  ik_goal->m1_x.value;
-  //endpoint.y() =  ik_goal->m1_y.value;
-  //endpoint.z() =  ik_goal->m1_z.value;
-  //direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
-
-  std::vector<double> variable_positions;
-  variable_positions.resize(robot::num_variables);
-  std::vector<double> variable_velocities;
-  variable_velocities.resize(robot::num_variables);
+  std::vector<double> variable_positions(robot::num_variables, 0.0);
+  std::vector<double> variable_velocities(robot::num_variables, 0.0);
   for (int i=0; i< monitor_state->joint_state.name.size(); i++)
   {
     if(joint_name_to_joint_idx.find(monitor_state->joint_state.name[i]) == joint_name_to_joint_idx.end()) continue;
@@ -129,7 +162,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
     curr_target_velocities[target_idx] = variable_velocities[variable_idx];
 
     // Add noise to the init state to quickly escape form gimball locks, etc.
-    if (p_init_noise > 0)
+    if (p_init_noise > 0 && noisy_initialization)
     {
       double sampling_min = curr_target_positions[target_idx]-p_init_noise;
       if (sampling_min<robot::joint_min_position[joint_idx]) sampling_min=robot::joint_min_position[joint_idx];
@@ -159,13 +192,12 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   ceres::Problem problem;
   ceres::Solver::Options options;
   robot::setSolverOptions(options);
-  ceres::Solver::Summary summary;
 
   // ========== Preferred Joint Position Goal ==========
   ceres::CostFunction* preferred_joint_position_goal = PreferredJointPositionGoal::Create(shared_block);
   //ceres::TukeyLoss *preferred_joint_position_loss = new ceres::TukeyLoss(0.25); // goal weight
   //ceres::CauchyLoss *preferred_joint_position_loss = new ceres::CauchyLoss(0.05); // goal weight
-  // TODO
+  // TODO: a small experiment
   double dynamic_preferred_joint_position_weight = shared_block.dist_to_target;
   if (dynamic_preferred_joint_position_weight > shared_block.ik_goal->m1_limit_dist)
   {
@@ -180,7 +212,6 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
 
   // ========== Avoid Joint Limits Goal ==========
   ceres::CostFunction* avoid_joint_limits_goal = AvoidJointLimitsGoal::Create(shared_block);
-  //ceres::TukeyLoss *avoid_joint_limits_loss = new ceres::TukeyLoss(0.1); // goal weight
   problem.AddResidualBlock(avoid_joint_limits_goal, nullptr, optm_target_positions);
 
   // ================== Endpoint Goal ==================
@@ -189,10 +220,29 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
   problem.AddResidualBlock(endpoint_goal, nullptr, optm_target_positions);
 
+  // ================== Future Endpoint Goal ==================
+  // TODO: a failed experiment
+  //ceres::CostFunction* future_endpoint_goal = FutureEndpointGoal::Create(shared_block);
+  //problem.AddResidualBlock(future_endpoint_goal, nullptr, optm_target_positions);
+
   // ============= Collision Avoidance Goal ============
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
+  if (solver_history.size() == 3)
+  {
+    // ============= LimitAccelerationGoal ============
+    //ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
+    //ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(100.0, 0.05);
+    //ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(limit_acceleration_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
+    //problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
+
+    // ============= LimitJerkGoal ============
+    //ceres::CostFunction* limit_jerk_goal = LimitJerkGoal::Create(shared_block);
+    //ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(0.2, 0.05);
+    //ceres::LossFunction *limit_jerk_scaled_loss = new ceres::ScaledLoss(limit_jerk_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
+    //problem.AddResidualBlock(limit_jerk_goal, limit_jerk_scaled_loss, optm_target_positions);
+  }
 
   //=================================================================================================
   // Set parameter constraints
@@ -204,7 +254,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //options.preconditioner_type = JACOBI;
   //options.minimizer_type = LINE_SEARCH;
   //options.line_search_direction_type = BFGS;
-  options.jacobi_scaling = false;
+  //options.jacobi_scaling = false;
 
   for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
@@ -230,7 +280,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
       problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
     }
 
-    // STANDARD WAY OF SETTING JOINT LIMITS
+    // STANDARD WAY OF SETTING JOINT LIMITS (suitable for globally solving)
     //problem.SetParameterLowerBound(target_positions, i, robot::joint_min_position[joint_i]); 
     //problem.SetParameterUpperBound(target_positions, i, robot::joint_max_position[joint_i]); 
   }
@@ -238,6 +288,7 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   //=================================================================================================
   // Solve!!!
   //=================================================================================================
+  ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
   if (solver_summary_pub.getNumSubscribers() > 0)
@@ -252,26 +303,12 @@ bool DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal)
   }
 
   //=================================================================================================
-  // Process the output
+  // Return the solution
   //=================================================================================================
-
-  // Publish output
-  std::vector<std::string> target_names;
-  for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
-  {
-    int joint_idx = robot::target_idx_to_joint_idx[target_idx];
-    target_names.push_back(robot::joint_names[joint_idx]);
-  }
-  joint_controller->setJointPositions(target_names, optm_target_positions);
-
-  // Keep history
-  std::vector<double> optm_target_positions_v;
-  for (int i=0; i<robot::num_targets; i++) optm_target_positions_v.push_back(optm_target_positions[i]);
-  //for (int i=0; i<robot::num_targets; i++) optm_target_positions_v.push_back((optm_target_positions[i] - curr_target_positions[i])*0.5 + curr_target_positions[i]);
-  solver_history.push(optm_target_positions_v);
-  if (solver_history.size() > 4) solver_history.pop();
-
-  return true;
+  IKSolution solution;
+  solution.solver_summary = summary;
+  for (int i=0; i<robot::num_targets; i++) solution.target_positions.push_back(optm_target_positions[i]);
+  return solution;
 }
 
 
