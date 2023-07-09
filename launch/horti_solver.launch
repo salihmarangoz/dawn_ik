@@ -3,7 +3,7 @@
 <launch>
 
   <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen">
-    <remap from="joint_trajectory_command" to="/head_pos_traj_controller/command"/>
+    <remap from="joint_trajectory_command" to="/head_controller/command"/>
   </node>
 
   <node name="dawn_ik_rviz_control" pkg="dawn_ik" type="dawn_ik_rviz_control.py" output="screen">

@@ -82,7 +82,7 @@ $ roslaunch dawn_ik lite6_fake.launch
 $ roslaunch dawn_ik xarm5_fake.launch
 $ roslaunch dawn_ik xarm6_fake.launch
 $ roslaunch dawn_ik xarm7_fake.launch
-# TODO: horti fake_joints
+$ roslaunch dawn_ik horti_fake.launch
 ```
 
 ### Code Generation

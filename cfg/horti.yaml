@@ -199,16 +199,16 @@ proximity:
 
 
 #########################################
-      
+
     - link: "arm_left_link_base"
-      shape: "Sphere(0.05)"
+      shape: "Sphere(0.06)"
       translation: [0.0, 0.0, 0.05]
     - link: "arm_left_link_base"
-      shape: "Sphere(0.05)"
+      shape: "Sphere(0.06)"
       translation: [0.0, 0.0, 0.15]
     - link: "arm_left_link_base"
-      shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.25]
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, 0.255]
 
     - link: "arm_left_link2"
       shape: "Sphere(0.05)"
@@ -216,36 +216,67 @@ proximity:
     - link: "arm_left_link2"
       shape: "Sphere(0.05)"
       translation: [0.0, 0.0, 0.08]
+    - link: "arm_left_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.1, 0.0]
+    - link: "arm_left_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.15, 0.0]
+
+    - link: "arm_left_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0525, 0.03, 0.0]
+    - link: "arm_left_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0525, -0.065, 0.0]
+    - link: "arm_left_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.06]
+
+    - link: "arm_left_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.08, -0.09, 0.0] 
+    - link: "arm_left_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.08, -0.09, 0.06] 
+    - link: "arm_left_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.08, -0.17, 0.0] 
+    - link: "arm_left_link4"
+      shape: "Sphere(0.04)"
+      translation: [0.04, -0.045, 0.07] 
 
     - link: "arm_left_link5"
       shape: "Sphere(0.04)"
       translation: [0.0, 0.05, 0.0]
     - link: "arm_left_link5"
-      shape: "Sphere(0.04)"
+      shape: "Sphere(0.05)"
       translation: [0.0, 0.04, -0.08]
 
     - link: "arm_left_link6"
       shape: "Sphere(0.04)"
-      translation: [0.0, 0.0, 0.01]
+      translation: [0.0, 0.0, 0.02]
     - link: "arm_left_link6"
-      shape: "Sphere(0.04)"
-      translation: [0.08, 0.0, 0.01]
+      shape: "Sphere(0.05)"
+      translation: [0.08, 0.0, 0.00]
 
     - link: "arm_left_link7"
       shape: "Sphere(0.05)"
       translation: [0.0, 0.0, 0.0]
 
+
+
 #########################################
 
     - link: "arm_right_link_base"
-      shape: "Sphere(0.05)"
+      shape: "Sphere(0.06)"
       translation: [0.0, 0.0, 0.05]
     - link: "arm_right_link_base"
-      shape: "Sphere(0.05)"
+      shape: "Sphere(0.06)"
       translation: [0.0, 0.0, 0.15]
     - link: "arm_right_link_base"
-      shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.25]
+      shape: "Sphere(0.06)"
+      translation: [0.0, 0.0, 0.255]
 
     - link: "arm_right_link2"
       shape: "Sphere(0.05)"
@@ -253,20 +284,49 @@ proximity:
     - link: "arm_right_link2"
       shape: "Sphere(0.05)"
       translation: [0.0, 0.0, 0.08]
+    - link: "arm_right_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.1, 0.0]
+    - link: "arm_right_link2"
+      shape: "Sphere(0.05)"
+      translation: [0.0, -0.15, 0.0]
+
+    - link: "arm_right_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0525, 0.03, 0.0]
+    - link: "arm_right_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0525, -0.065, 0.0]
+    - link: "arm_right_link3"
+      shape: "Sphere(0.05)"
+      translation: [0.0, 0.0, -0.06]
+
+    - link: "arm_right_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.08, -0.09, 0.0] 
+    - link: "arm_right_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.08, -0.09, 0.06] 
+    - link: "arm_right_link4"
+      shape: "Sphere(0.05)"
+      translation: [0.08, -0.17, 0.0] 
+    - link: "arm_right_link4"
+      shape: "Sphere(0.04)"
+      translation: [0.04, -0.045, 0.07] 
 
     - link: "arm_right_link5"
       shape: "Sphere(0.04)"
       translation: [0.0, 0.05, 0.0]
     - link: "arm_right_link5"
-      shape: "Sphere(0.04)"
+      shape: "Sphere(0.05)"
       translation: [0.0, 0.04, -0.08]
 
     - link: "arm_right_link6"
       shape: "Sphere(0.04)"
-      translation: [0.0, 0.0, 0.01]
+      translation: [0.0, 0.0, 0.02]
     - link: "arm_right_link6"
-      shape: "Sphere(0.04)"
-      translation: [0.08, 0.0, 0.01]
+      shape: "Sphere(0.05)"
+      translation: [0.08, 0.0, 0.00]
 
     - link: "arm_right_link7"
       shape: "Sphere(0.05)"
