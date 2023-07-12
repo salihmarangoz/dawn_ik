@@ -23,7 +23,7 @@ $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_mara
 # Horti Robot
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
 
-# xArm ROS (2983907b546e3c83d17a59a6639e3d407b50a53a)
+# xArm ROS
 $ git clone clone git@github.com:salihmarangoz/xarm_ros.git
 $ cd xarm_ros
 $ git submodule update --init --remote
@@ -48,14 +48,15 @@ $ cmake -DCMAKE_BUILD_TYPE=Release -DUSE_CUDA=OFF ..
 $ make -j8
 $ sudo make install
 
+# NOT USING RIGHT NOW
 # Ruckig
-$ cd $HOME
-$ git clone git@github.com:salihmarangoz/ruckig.git
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_BUILD_TYPE=Release ..
-$ make -j8
-$ sudo make install
+#$ cd $HOME
+#$ git clone git@github.com:salihmarangoz/ruckig.git
+#$ mkdir build
+#$ cd build
+#$ cmake -DCMAKE_BUILD_TYPE=Release ..
+#$ make -j8
+#$ sudo make install
 
 # Extra stuff
 $ sudo apt install python3-yaml python-is-python3
@@ -87,9 +88,9 @@ $ roslaunch dawn_ik horti_fake.launch
 
 ### Code Generation
 
-**BE CAREFUL:** MAKE SURE THE NOT-LIMITED ROBOT DESCRIPTION IS LOADED. SOME PACKAGES (E.G. XARM) LIMITS JOINTS FOR MORE STABLE MOVEIT EXPERIENCE.
+**BE CAREFUL:** MAKE SURE JOINTS  DONT HAVE EXTRA POSITION LIMITS. SOME CONFIGURATIONS LIMIT JOINT POSITIONS BETWEEN [-PI,+PI] FOR MORE STABLE MOVEIT SOLUTIONS. (See horti_model repository's salih_marangoz_thesis branch as an example and check the README.md)
 
-Make sure the robot description is loaded. (if the simulation is running then it is loaded). Re-compile the project after this step. 
+Make sure the robot description is loaded. (if the fake/sim is running then it is probably loaded). Re-compile the project after this step. 
 
 ```bash
 # select one!

@@ -413,7 +413,7 @@ struct CollisionAvoidanceGoal {
                                                   pos_b, 
                                                   shape_b.radius-robot::default_inflation);
 
-      double weight = 0.002;
+      double weight = 0.005;
       double eps = 0.00001;
       if (distance <= 0)
         residuals[i] = T(weight/eps);
