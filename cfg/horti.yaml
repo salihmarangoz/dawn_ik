@@ -135,6 +135,9 @@ proximity:
     - link: "head_link_base"
       shape: "Sphere(0.1)"
       translation: [0.0, 0.0, 0.04]
+    - link: "head_link_base"
+      shape: "Sphere(0.1)"
+      translation: [0.0, 0.05, -0.2]
 
     - link: "head_link1"
       shape: "Sphere(0.05)"
@@ -192,11 +195,18 @@ proximity:
       shape: "Sphere(0.05)"
       translation: [0.0, 0.0, 0.0]
 
+      # single sphere for sensor
+    # - link: "head_link6"
+    #   shape: "Sphere(0.1)"
+    #   translation: [0.0, 0.0, 0.05]
+
+      # multiple spheres for sensor
     - link: "head_link6"
       shape: "Sphere(0.05)"
-      translation: [0.0, 0.0, 0.0]
-
-
+      translation: [-0.03, 0.03, 0.05]
+    - link: "head_link6"
+      shape: "Sphere(0.05)"
+      translation: [0.03, -0.03, 0.05]
 
 #########################################
 
