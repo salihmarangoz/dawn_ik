@@ -48,7 +48,7 @@ solver_options:
   minimizer_type: TRUST_REGION # LINE_SEARCH methods don't support bounds
   linear_solver_type: DENSE_QR
   jacobi_scaling: true
-  minimizer_progress_to_stdout: true
+  minimizer_progress_to_stdout: false
   #line_search_direction_type: BFGS
   #use_inner_iterations: true # COORDINATE_DESCENT
   #use_approximate_eigenvalue_bfgs_scaling: true

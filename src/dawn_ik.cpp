@@ -231,6 +231,12 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
+  // ============= LimitAccelerationGoal ============
+  ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
+  //ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(200.0, 0.05);
+  ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 1.0, ceres::TAKE_OWNERSHIP); // goal weight
+  problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
+
   /* TODO
   if (solver_history.size() == 3)
   {
