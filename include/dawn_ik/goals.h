@@ -11,6 +11,7 @@
 #include <deque>
 #include <vector>
 
+static double acceleration_limit =  M_PI*0.01*0.01*0.5;
 namespace dawn_ik
 {
 
@@ -134,6 +135,7 @@ struct LimitAccelerationGoal {
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
+    
     for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
     {
       //2 1 0 c -> history
@@ -143,10 +145,15 @@ struct LimitAccelerationGoal {
       // double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[2].at(target_idx)) / 0.02 ;
       // residuals[target_idx] = (current_vel - last_vel) / 0.01;
 
-      T current_vel = (target_values[target_idx] - shared_block.solver_history[0].at(target_idx)) / 0.01;
-      double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx)) / 0.01 ;
-      residuals[target_idx] = (current_vel - last_vel) / 0.01;
+      // T current_vel = (target_values[target_idx] - shared_block.solver_history[0].at(target_idx)) / 0.01;
+      // double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx)) / 0.01 ;
+      // residuals[target_idx] = (current_vel - last_vel) / 0.01;
 
+      double q_max = double(shared_block.curr_target_positions[target_idx]) + acceleration_limit;
+      double q_min = double(shared_block.curr_target_positions[target_idx]) - acceleration_limit;
+     
+      residuals[target_idx*2]   = T(q_max) - target_values[target_idx];
+      residuals[target_idx*2+1] = T(q_min) - target_values[target_idx];
     }
     return true;
   }
@@ -154,7 +161,7 @@ struct LimitAccelerationGoal {
    // Factory to hide the construction of the CostFunction object from the client code.
    static ceres::CostFunction* Create(SharedBlock &shared_block)
    {
-     return (new ceres::AutoDiffCostFunction<LimitAccelerationGoal, robot::num_targets, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<LimitAccelerationGoal, robot::num_targets*2, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new LimitAccelerationGoal(shared_block)));
    }
 
