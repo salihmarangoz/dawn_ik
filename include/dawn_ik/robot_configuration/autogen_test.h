@@ -33,7 +33,7 @@ const int endpoint_link_idx = 43;
 const int num_joints = 60;
 const int num_variables = 20;
 const int num_links = 60;
-const int num_objects = 59;
+const int num_objects = 62;
 const int num_acm_link_pairs = 406;
 const int num_targets = 6;
 
@@ -42,7 +42,7 @@ const int joint_idx_to_variable_idx[60] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0
 const int variable_idx_to_joint_idx[20] = {12,13,14,15,16,17,18,24,25,26,27,28,29,30,37,38,39,40,41,42};
 const int joint_idx_to_target_idx[60] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,1,2,3,4,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 const int target_idx_to_joint_idx[6] = {37,38,39,40,41,42};
-const int object_idx_to_link_idx[59] = {36,36,37,37,38,38,38,38,38,38,39,39,39,40,40,40,40,40,41,42,42,11,11,11,13,13,13,13,14,14,14,15,15,15,15,16,16,17,17,18,23,23,23,25,25,25,25,26,26,26,27,27,27,27,28,28,29,29,30};
+const int object_idx_to_link_idx[62] = {36,36,36,37,37,38,38,38,38,38,38,39,39,39,40,40,40,40,40,41,42,42,11,11,11,13,13,13,13,14,14,14,15,15,15,15,16,16,17,17,18,18,23,23,23,25,25,25,25,26,26,26,27,27,27,27,28,28,29,29,30,30};
 
 // Joint info
 const std::string joint_names[60] = {"ASSUMED_FIXED_ROOT_JOINT","base_link_joint","base_control_joint","base_link_to_cam0","base_link_to_cam1","base_link_to_cam2","base_link_to_cam3","base_link_to_tracker","power_joint","trolley_platform_joint","arm_holder_joint","arm_left_world_joint","arm_left_joint1","arm_left_joint2","arm_left_joint3","arm_left_joint4","arm_left_joint5","arm_left_joint6","arm_left_joint7","arm_left_ft_joint","arm_left_gripper_joint","arm_left_eef_joint","arm_left_joint_eef","arm_right_world_joint","arm_right_joint1","arm_right_joint2","arm_right_joint3","arm_right_joint4","arm_right_joint5","arm_right_joint6","arm_right_joint7","arm_right_ft_joint","arm_right_gripper_joint","arm_right_eef_joint","arm_right_joint_eef","head_mount_joint","head_world_joint","head_joint1","head_joint2","head_joint3","head_joint4","head_joint5","head_joint6","head_joint_eef","zed2i_holder_joint","zed2i_base_joint","zed2i_camera_center_joint","zed2i_baro_joint","zed2i_left_camera_joint","zed2i_left_camera_optical_joint","zed2i_temp_left_joint","zed2i_mag_joint","zed2i_right_camera_joint","zed2i_right_camera_optical_joint","zed2i_temp_right_joint","arm_left_controller_joint","arm_right_controller_joint","basket_joint","trolley_back_joint","trolley_local_joint"};
@@ -251,8 +251,9 @@ const int acm[60][60]= {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 const double weight_preferred_joint_position_goal[60] = {1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000};
 
 // Collision objects info
-const double object_transform_translation_only[59][3] = {{0.000000, 0.000000, 0.040000},
-                                                         {0.000000, 0.050000, -0.200000},
+const double object_transform_translation_only[62][3] = {{0.000000, 0.000000, 0.040000},
+                                                         {0.100000, 0.000000, -0.100000},
+                                                         {0.200000, 0.000000, -0.200000},
                                                          {0.000000, 0.000000, 0.000000},
                                                          {0.000000, 0.000000, -0.075000},
                                                          {0.000000, 0.000000, 0.050000},
@@ -291,6 +292,7 @@ const double object_transform_translation_only[59][3] = {{0.000000, 0.000000, 0.
                                                          {0.000000, 0.000000, 0.020000},
                                                          {0.080000, 0.000000, 0.000000},
                                                          {0.000000, 0.000000, 0.000000},
+                                                         {0.000000, 0.000000, 0.100000},
                                                          {0.000000, 0.000000, 0.050000},
                                                          {0.000000, 0.000000, 0.150000},
                                                          {0.000000, 0.000000, 0.255000},
@@ -309,8 +311,12 @@ const double object_transform_translation_only[59][3] = {{0.000000, 0.000000, 0.
                                                          {0.000000, 0.040000, -0.080000},
                                                          {0.000000, 0.000000, 0.020000},
                                                          {0.080000, 0.000000, 0.000000},
-                                                         {0.000000, 0.000000, 0.000000}};
-const double object_transform_quaternion_only[59][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
+                                                         {0.000000, 0.000000, 0.000000},
+                                                         {0.000000, 0.000000, 0.100000}};
+const double object_transform_quaternion_only[62][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
+                                                        {1.000000, 0.000000, 0.000000, 0.000000},
+                                                        {1.000000, 0.000000, 0.000000, 0.000000},
+                                                        {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
@@ -369,8 +375,8 @@ const double object_transform_quaternion_only[59][4] = {{1.000000, 0.000000, 0.0
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000}};
-const int object_can_skip_translation[59] = {0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}; // bool
-const int object_can_skip_rotation[59] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; // bool
+const int object_can_skip_translation[62] = {0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0}; // bool
+const int object_can_skip_rotation[62] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; // bool
 
 // Collision Objects Function
 const double default_inflation = 0.075;
@@ -378,9 +384,10 @@ static inline std::vector<CollisionObject*> getRobotCollisionObjects(double infl
 {
   std::vector<CollisionObject*> objects;
 
-  objects.reserve(59);
+  objects.reserve(62);
   objects.push_back( inflatedCollisionObject(Sphere(0.1), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.1), inflation) );
+  objects.push_back( inflatedCollisionObject(Sphere(0.1), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
@@ -419,6 +426,7 @@ static inline std::vector<CollisionObject*> getRobotCollisionObjects(double infl
   objects.push_back( inflatedCollisionObject(Sphere(0.04), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
+  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.06), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.06), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.06), inflation) );
@@ -436,6 +444,7 @@ static inline std::vector<CollisionObject*> getRobotCollisionObjects(double infl
   objects.push_back( inflatedCollisionObject(Sphere(0.04), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.04), inflation) );
+  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
 
