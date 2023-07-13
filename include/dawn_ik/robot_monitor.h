@@ -81,7 +81,7 @@ public:
   ~RobotMonitor();
   const JointLinkCollisionStateConstPtr getState();
   const std::vector<CollisionObject*> getInternalObjects(){ return int_collision_objects; } // TODO: MUTEX AND COPY
-  std::deque<Command> getCommandHistory();
+  const std::deque<Command> getCommandHistory();
 
 private:
   void jointStateCallback(const sensor_msgs::JointStateConstPtr& msg);
@@ -124,9 +124,9 @@ private:
   JointLinkCollisionStatePtr last_joint_link_collision_state_msg;
 
   void jointTrajectoryControllerStateCallback(const control_msgs::JointTrajectoryControllerStatePtr & msg);
-  std::mutex jstrajstate_mutex;
+  std::mutex jstrajstate_mutex, cmd_mutex;
   control_msgs::JointTrajectoryControllerStatePtr joint_trajctrl_state_msg;
-  Command latest_command_recd_;
+  Command latest_command_recd_, cmd_a_j;
   void computeAccelerationandAddtoCommandHistory(Command&);
   std::deque<Command> command_history;
   double cycle_time = 0.01;

@@ -70,26 +70,17 @@ RobotMonitor::getState()
 
 void RobotMonitor::jointTrajectoryControllerStateCallback(const control_msgs::JointTrajectoryControllerStatePtr & msg)
 {
-  std::scoped_lock(jstrajstate_mutex);
+  //std::scoped_lock(jstrajstate_mutex);
+  jstrajstate_mutex.lock();
+
   joint_trajctrl_state_msg = msg;
   ROS_INFO_ONCE("First joint trajectory controller state msg");
 
   Command command(joint_trajctrl_state_msg);
-  computeAccelerationandAddtoCommandHistory(command);
+  latest_command_recd_ = command;
 
-  sensor_msgs::JointState command_msg;
-  command_msg.name.resize(robot::num_targets);
-  command_msg.position.resize(robot::num_targets);
-  command_msg.velocity.resize(robot::num_targets);
-  command_msg.effort.resize(robot::num_targets);
+  jstrajstate_mutex.unlock();
 
-  command_msg.header = joint_trajctrl_state_msg->header;
-  command_msg.name = joint_trajctrl_state_msg->joint_names;
-  command_msg.position = command.jerk;
-  command_msg.velocity = command.velocity;
-  command_msg.effort = command.acceleration;
-
-  acc_jerk_pub.publish(command_msg);
 }
 
 void RobotMonitor::computeAccelerationandAddtoCommandHistory(Command& latest_command)
@@ -117,11 +108,18 @@ void RobotMonitor::computeAccelerationandAddtoCommandHistory(Command& latest_com
     command_history.pop_back();
 }
 
-std::deque<Command> RobotMonitor::getCommandHistory()
+const std::deque<Command> RobotMonitor::getCommandHistory()
 {
   jstrajstate_mutex.lock();
-  std::deque<Command> cmd_history = command_history;
+  Command command = latest_command_recd_;
   jstrajstate_mutex.unlock();
+
+  computeAccelerationandAddtoCommandHistory(command);
+  cmd_mutex.lock();
+  cmd_a_j = command;
+  cmd_mutex.unlock();
+
+  std::deque<Command> cmd_history = command_history;
   return cmd_history;
 }
 
@@ -208,6 +206,24 @@ RobotMonitor::updateVisualizationThread()
     last_joint_link_state_mtx.unlock();
     
     computeAndPublishVisualization(cached_joint_link_collision_state_mtx);
+
+    cmd_mutex.lock();
+    Command command = cmd_a_j;
+    cmd_mutex.unlock();
+
+    sensor_msgs::JointState command_msg;
+    command_msg.name.resize(robot::num_targets);
+    command_msg.position.resize(robot::num_targets);
+    command_msg.velocity.resize(robot::num_targets);
+    command_msg.effort.resize(robot::num_targets);
+
+    command_msg.header = joint_trajctrl_state_msg->header;
+    command_msg.name = joint_trajctrl_state_msg->joint_names;
+    command_msg.position = command.jerk;
+    command_msg.velocity = command.velocity;
+    command_msg.effort = command.acceleration;
+
+    acc_jerk_pub.publish(command_msg);
 
     ROS_INFO_ONCE("RobotMonitor: Published visualization!");
     r.sleep();
