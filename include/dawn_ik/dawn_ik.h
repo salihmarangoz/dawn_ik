@@ -23,6 +23,10 @@
 
 #include <dawn_ik/experimental.h> // TODO: EXPERIMENTAL STUFF!
 
+#include <control_msgs/JointTrajectoryControllerState.h>
+
+#include <eigen3/Eigen/Core>
+
 namespace dawn_ik
 {
 
@@ -37,8 +41,6 @@ struct IKSolution
   std::vector<double> target_positions;
   ceres::Solver::Summary solver_summary;
 };
-
-
 class DawnIK
 {
 
@@ -80,7 +82,10 @@ private:
   Eigen::Vector3d endpoint;
   Eigen::Quaterniond direction;
 
+  double acc_loss_weight;
+
   ros::Publisher debug_pub;
+
 
 
 };

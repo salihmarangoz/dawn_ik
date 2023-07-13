@@ -35,6 +35,20 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh
   link_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateLinkThread, this));
   collision_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateCollisionThread, this));
   visualization_thread = new boost::thread(boost::bind(&RobotMonitor::updateVisualizationThread, this));
+
+  joint_trajctrl_state_sub = nh.subscribe("//ufactory/lite6_traj_controller/state", 2, &RobotMonitor::jointTrajectoryControllerStateCallback, this);
+
+  acc_jerk_pub = priv_nh.advertise<sensor_msgs::JointState>("calc_acc_jerk_command", 0);
+
+  auto command = Command(cycle_time);
+  command.relative_time_stamp = 0.0;
+  command.time_diff = cycle_time;
+  command_history.push_front(command);
+  command.relative_time_stamp = command.relative_time_stamp + cycle_time;
+  command.time_diff = cycle_time;
+  command_history.push_front(command);
+  command.relative_time_stamp = command.relative_time_stamp + cycle_time;
+  command_history.push_front(command);
 }
 
 RobotMonitor::~RobotMonitor()
@@ -52,6 +66,63 @@ RobotMonitor::getState()
   JointLinkCollisionStateConstPtr tmp = last_joint_link_collision_state_msg;
   last_joint_link_collision_state_mtx.unlock();
   return tmp;
+}
+
+void RobotMonitor::jointTrajectoryControllerStateCallback(const control_msgs::JointTrajectoryControllerStatePtr & msg)
+{
+  std::scoped_lock(jstrajstate_mutex);
+  joint_trajctrl_state_msg = msg;
+  ROS_INFO_ONCE("First joint trajectory controller state msg");
+
+  Command command(joint_trajctrl_state_msg);
+  computeAccelerationandAddtoCommandHistory(command);
+
+  sensor_msgs::JointState command_msg;
+  command_msg.name.resize(robot::num_targets);
+  command_msg.position.resize(robot::num_targets);
+  command_msg.velocity.resize(robot::num_targets);
+  command_msg.effort.resize(robot::num_targets);
+
+  command_msg.header = joint_trajctrl_state_msg->header;
+  command_msg.name = joint_trajctrl_state_msg->joint_names;
+  command_msg.position = command.jerk;
+  command_msg.velocity = command.velocity;
+  command_msg.effort = command.acceleration;
+
+  acc_jerk_pub.publish(command_msg);
+}
+
+void RobotMonitor::computeAccelerationandAddtoCommandHistory(Command& latest_command)
+{
+  auto prev_command = command_history.front();
+
+  if(prev_command.absolute_time_stamp < 0.0)
+  {
+    latest_command.time_diff = cycle_time;
+  }
+  else
+  {
+    latest_command.time_diff = cycle_time; //command_history[0].absolute_time_stamp - prev_command.absolute_time_stamp;
+  }
+  latest_command.relative_time_stamp = prev_command.relative_time_stamp + latest_command.time_diff;
+
+  for(int i = 0; i < robot::num_targets; i++)
+  {
+    latest_command.acceleration[i] = (latest_command.velocity[i] - prev_command.velocity[i])/latest_command.time_diff;
+    latest_command.jerk[i] = (latest_command.acceleration[i] - prev_command.acceleration[i])/latest_command.time_diff;
+  }
+
+  command_history.push_front(latest_command);
+  if (command_history.size() >= 10)
+    command_history.pop_back();
+}
+
+std::deque<Command> RobotMonitor::getCommandHistory()
+{
+  jstrajstate_mutex.lock();
+  std::deque<Command> cmd_history = command_history;
+  jstrajstate_mutex.unlock();
+  return cmd_history;
 }
 
 void

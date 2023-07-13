@@ -24,6 +24,7 @@
   <depend>visualization_msgs</depend>
   <depend>message_runtime</depend>
   <depend>hpp-fcl</depend>
+  <depend>control_msgs</depend>
 
   <export>
   </export>

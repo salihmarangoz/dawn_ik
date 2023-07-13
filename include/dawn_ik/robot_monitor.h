@@ -25,6 +25,8 @@ using namespace std::chrono;
 
 #include <dawn_ik/utils.h> // computeLinkTranslation, computeLinkRotation
 #include <dawn_ik/robot_configuration/robot_configuration.h>
+#include <control_msgs/JointTrajectoryControllerState.h>
+
 
 
 namespace dawn_ik
@@ -45,6 +47,33 @@ struct CollisionCallBackCollect : hpp::fcl::CollisionCallBackBase {
   size_t max_size;
 };
 
+struct Command
+{
+  double absolute_time_stamp = -1.0;
+  double time_diff = 0.01;
+  double relative_time_stamp = 0.0;
+  std::vector<double> position;
+  std::vector<double> velocity;
+  std::vector<double> acceleration;
+  std::vector<double> jerk;
+
+  //Command(){}
+  Command():position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0), jerk(robot::num_targets, 0.0)
+  {
+  }
+
+  Command(const double& cycle_time): position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0),jerk(robot::num_targets, 0.0), time_diff(cycle_time)
+  {
+  }
+  //Command(std::vector<double>&pos, std::vector<double>&vel, std::vector<double>&acc):position(robot::num_joints, pos),velocity(robot::num_joints, vel), acceleration(robot::num_joints, acc){}
+  Command(control_msgs::JointTrajectoryControllerStatePtr& msg):position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0), jerk(robot::num_targets, 0.0)
+  {
+    absolute_time_stamp = msg->header.stamp.toSec();
+    position = msg->desired.positions;
+    velocity = msg->desired.velocities;
+  }
+};
+
 class RobotMonitor
 {
 public:
@@ -52,6 +81,7 @@ public:
   ~RobotMonitor();
   const JointLinkCollisionStateConstPtr getState();
   const std::vector<CollisionObject*> getInternalObjects(){ return int_collision_objects; } // TODO: MUTEX AND COPY
+  std::deque<Command> getCommandHistory();
 
 private:
   void jointStateCallback(const sensor_msgs::JointStateConstPtr& msg);
@@ -69,6 +99,7 @@ private:
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh;
   ros::Subscriber joint_state_sub;
+  ros::Subscriber joint_trajctrl_state_sub;
   ros::Publisher visualization_pub;
   boost::thread* link_state_thread;
   boost::thread* collision_state_thread;
@@ -91,6 +122,16 @@ private:
 
   std::mutex last_joint_link_collision_state_mtx;
   JointLinkCollisionStatePtr last_joint_link_collision_state_msg;
+
+  void jointTrajectoryControllerStateCallback(const control_msgs::JointTrajectoryControllerStatePtr & msg);
+  std::mutex jstrajstate_mutex;
+  control_msgs::JointTrajectoryControllerStatePtr joint_trajctrl_state_msg;
+  Command latest_command_recd_;
+  void computeAccelerationandAddtoCommandHistory(Command&);
+  std::deque<Command> command_history;
+  double cycle_time = 0.01;
+
+  ros::Publisher acc_jerk_pub;
 
 };
 

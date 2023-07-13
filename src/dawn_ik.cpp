@@ -31,6 +31,7 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
 
   //endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
+
 }
 
 DawnIK::~DawnIK()
@@ -39,8 +40,7 @@ DawnIK::~DawnIK()
   delete loop_thread;
 }
 
-void
-DawnIK::readParameters()
+void DawnIK::readParameters()
 {
   priv_nh.param("update_rate", p_update_rate, 100.0);
   if (p_update_rate <= 0.0){ROS_ERROR("Invalid update_rate!"); p_update_rate = 100.0;}
@@ -54,6 +54,7 @@ DawnIK::readParameters()
 
 void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
 {
+  priv_nh.param("acc_loss_weight", acc_loss_weight, 10.0);
   std::scoped_lock(ik_goal_mutex);
   ik_goal_msg = msg;
   ROS_INFO_ONCE("First IK Goal Message Received!");
@@ -69,7 +70,6 @@ void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedb
   direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
   ik_goal_msg->mode = IKGoal::MODE_1;
 }
-
 void DawnIK::loopThread()
 {
   std::vector<std::string> target_names;
@@ -83,8 +83,11 @@ void DawnIK::loopThread()
   while (ros::ok())
   {
     ik_goal_mutex.lock();
+
     dawn_ik::IKGoalPtr ik_goal_msg_copy = ik_goal_msg;
     ik_goal_mutex.unlock();
+
+
 
     if (ik_goal_msg_copy->mode != IKGoal::MODE_0)
     {
@@ -136,6 +139,9 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   JointLinkCollisionStateConstPtr monitor_state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
 
+  auto command_history = robot_monitor->getCommandHistory();
+  auto latest_command = command_history.front();
+
   std::vector<double> variable_positions(robot::num_variables, 0.0);
   std::vector<double> variable_velocities(robot::num_variables, 0.0);
   for (int i=0; i< monitor_state->joint_state.name.size(); i++)
@@ -146,6 +152,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
     variable_positions[variable_idx] = monitor_state->joint_state.position[i];
     variable_velocities[variable_idx] = monitor_state->joint_state.velocity[i];
+
   }
 
   //=================================================================================================
@@ -159,10 +166,9 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
     const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
 
-    optm_target_positions[target_idx]  = variable_positions[variable_idx];
-    curr_target_positions[target_idx]  = variable_positions[variable_idx];
-    curr_target_velocities[target_idx] = variable_velocities[variable_idx];
-
+    optm_target_positions[target_idx]    = variable_positions[variable_idx];
+    curr_target_positions[target_idx]    = latest_command.position[target_idx];
+    curr_target_velocities[target_idx]   = latest_command.velocity[target_idx];
     // Add noise to the init state to quickly escape form gimball locks, etc.
     if (p_init_noise > 0 && noisy_initialization)
     {
@@ -186,7 +192,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
                                     curr_target_positions,
                                     curr_target_velocities,
                                     monitor_state,
-                                    int_objects);
+                                    int_objects,
+                                    command_history);
 
   //=================================================================================================
   // Set up the optimization problem
@@ -234,7 +241,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   // ============= LimitAccelerationGoal ============
   ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
   //ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(200.0, 0.05);
-  ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 1.0, ceres::TAKE_OWNERSHIP); // goal weight
+
+  ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 10.0, ceres::TAKE_OWNERSHIP); // goal weight
   problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
 
   /* TODO

@@ -12,8 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wno-int-to-pointer-cast")
 #set(NDEBUG "1")
 
 # Memory error sanitizer
-add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+#add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+#add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -32,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   message_generation
   sensor_msgs
+  control_msgs
 )
 
 ## System dependencies are found with CMake's conventions

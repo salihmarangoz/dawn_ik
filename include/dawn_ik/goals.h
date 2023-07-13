@@ -11,7 +11,7 @@
 #include <deque>
 #include <vector>
 
-static double acceleration_limit =  M_PI*0.01*0.01*0.5;
+static double acceleration_limit =  M_PI;
 namespace dawn_ik
 {
 
@@ -26,7 +26,8 @@ struct SharedBlock
               double (&curr_target_positions)[robot::num_targets],
               double (&curr_target_velocities)[robot::num_targets],
               JointLinkCollisionStateConstPtr &monitor_state,
-              const std::vector<CollisionObject*> &int_objects
+              const std::vector<CollisionObject*> &int_objects,
+              std::deque<Command>& command_history
   ):
   ik_goal(ik_goal),
   solver_history(solver_history),
@@ -36,7 +37,8 @@ struct SharedBlock
   curr_target_positions(curr_target_positions),
   curr_target_velocities(curr_target_velocities),
   monitor_state(monitor_state),
-  int_objects(int_objects)
+  int_objects(int_objects),
+  command_history(command_history)
   {
     // limit m1 endpoint goal distance
     if (ik_goal->m1_limit_dist > 0)
@@ -88,6 +90,7 @@ struct SharedBlock
   double m1_x_limited, m1_y_limited, m1_z_limited;
   // extra
   double dist_to_target;
+  std::deque<Command> command_history;
 };
 //=================================================================================================
 
@@ -149,11 +152,23 @@ struct LimitAccelerationGoal {
       // double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx)) / 0.01 ;
       // residuals[target_idx] = (current_vel - last_vel) / 0.01;
 
-      double q_max = double(shared_block.curr_target_positions[target_idx]) + acceleration_limit;
-      double q_min = double(shared_block.curr_target_positions[target_idx]) - acceleration_limit;
-     
-      residuals[target_idx*2]   = T(q_max) - target_values[target_idx];
-      residuals[target_idx*2+1] = T(q_min) - target_values[target_idx];
+      double qddot_max = double(shared_block.command_history[0].acceleration[target_idx]) + 10*0.01;
+      double qddot_min = double(shared_block.command_history[0].acceleration[target_idx]) - 10*0.01;
+
+      double qdot_max = double(shared_block.command_history[0].velocity[target_idx]) + qddot_max*0.01 ;
+      double qdot_min = double(shared_block.command_history[0].velocity[target_idx]) + qddot_min*0.01;
+      double q_max1 = double(shared_block.command_history[0].position[target_idx]) + qdot_max*0.01;
+      double q_max2 = double(shared_block.command_history[0].position[target_idx]) + qdot_min*0.01;
+
+      residuals[target_idx*2]   = target_values[target_idx] - T(q_max1);
+      residuals[target_idx*2+1] = target_values[target_idx] - T(q_max2);
+
+//        T qdot_target  = (target_values[target_idx] - T(shared_block.command_history[0].position[target_idx]));
+//        T qddot_target = (qdot_target - shared_block.command_history[0].velocity[target_idx]);
+
+//        residuals[target_idx] = qddot_target - shared_block.command_history[0].acceleration[target_idx];
+        //residuals[target_idx*2+1 ] = qddot_target;
+
     }
     return true;
   }
