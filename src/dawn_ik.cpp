@@ -31,6 +31,13 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
 
   //endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
+
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+  robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+  robot_model_ = robot_model_loader.getModel();
+  km_ = std::make_shared<kinematics_metrics::KinematicsMetrics>(robot_model_);
+  visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(robot_model_->getModelFrame(),"/moveit_visual_markers"));
+#endif
 }
 
 DawnIK::~DawnIK()
@@ -187,6 +194,11 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
                                     curr_target_velocities,
                                     monitor_state,
                                     int_objects);
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+  shared_block.robot_model_ = robot_model_;
+  shared_block.km_ = km_;
+  shared_block.visual_tools_ = visual_tools_;
+#endif
 
   //=================================================================================================
   // Set up the optimization problem
@@ -247,6 +259,13 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     problem.AddResidualBlock(limit_jerk_goal, limit_jerk_scaled_loss, optm_target_positions);
   }
   */
+
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+  ceres::CostFunction* manipulability_goal = ManipulabilityGoal::Create(shared_block);
+  ceres::HuberLoss *manipulability_loss = new ceres::HuberLoss(0.25); // goal weight
+  //ceres::LossFunction *manipulability_scaled_loss = new ceres::ScaledLoss(manipulability_loss, 0.1, ceres::TAKE_OWNERSHIP); // goal weight
+  problem.AddResidualBlock(manipulability_goal, manipulability_loss, optm_target_positions);
+#endif
 
   //=================================================================================================
   // Set parameter constraints

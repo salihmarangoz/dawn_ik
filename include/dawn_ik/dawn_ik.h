@@ -1,6 +1,9 @@
 #ifndef DAWN_IK_H
 #define DAWN_IK_H
 
+// ENABLE/DISABLE EXPERIMENTAL STUFF HERE!
+//#define ENABLE_EXPERIMENT_MANIPULABILITY
+
 #include <random>
 #include <mutex>
 #include <deque>
@@ -22,6 +25,12 @@
 #include <dawn_ik/SolverSummary.h>
 
 #include <dawn_ik/experimental.h> // TODO: EXPERIMENTAL STUFF!
+
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+#include <moveit/kinematics_metrics/kinematics_metrics.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
+#endif
 
 namespace dawn_ik
 {
@@ -82,7 +91,11 @@ private:
 
   ros::Publisher debug_pub;
 
-
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+  moveit::core::RobotModelPtr robot_model_;
+  kinematics_metrics::KinematicsMetricsPtr km_;
+  moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
+#endif
 };
 
 
