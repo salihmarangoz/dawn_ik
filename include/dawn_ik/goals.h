@@ -97,6 +97,8 @@ struct SharedBlock
   // extra
   double dist_to_target;
 
+  std::deque<Command> command_history;
+
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
   moveit::core::RobotModelPtr robot_model_;
   kinematics_metrics::KinematicsMetricsPtr km_;
