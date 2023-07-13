@@ -11,6 +11,12 @@
 #include <deque>
 #include <vector>
 
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+#include <moveit/kinematics_metrics/kinematics_metrics.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
+#endif
+
 static double acceleration_limit =  M_PI*0.01*0.01*0.5;
 namespace dawn_ik
 {
@@ -88,6 +94,12 @@ struct SharedBlock
   double m1_x_limited, m1_y_limited, m1_z_limited;
   // extra
   double dist_to_target;
+
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+  moveit::core::RobotModelPtr robot_model_;
+  kinematics_metrics::KinematicsMetricsPtr km_;
+  moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
+#endif
 };
 //=================================================================================================
 
@@ -495,6 +507,65 @@ struct FutureEndpointGoal {
 };
 
 
+#ifdef ENABLE_EXPERIMENT_MANIPULABILITY
+/**
+ * ManipulabilityGoal
+*/
+struct ManipulabilityGoal {
+  ManipulabilityGoal(SharedBlock &shared_block) : shared_block(shared_block)
+  {
+
+  }
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    moveit::core::RobotState robot_state(shared_block.robot_model_);
+    for(size_t variable_idx = 0; variable_idx < robot::num_variables; variable_idx++)
+    {
+      int joint_idx = robot::variable_idx_to_joint_idx[variable_idx];
+      int target_idx = robot::joint_idx_to_target_idx[joint_idx];
+
+      if (target_idx < 0)
+      {
+        robot_state.setVariablePosition(variable_idx, shared_block.variable_positions[variable_idx]);
+      }
+      else
+      {
+        robot_state.setVariablePosition(variable_idx, target_values[target_idx]);
+      }
+    }
+    robot_state.updateLinkTransforms();
+
+    // for debugging
+    //shared_block.visual_tools_->publishRobotState(robot_state);
+
+    double manipulability_index_tra;
+    //shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_tra, true);
+    shared_block.km_->getManipulabilityIndex(robot_state, "head", manipulability_index_tra, true);
+    ROS_INFO_THROTTLE(1.0, "manipulability_index_tra: %f", manipulability_index_tra);
+    if (std::isnan(manipulability_index_tra)) return false; // sad jacobian sounds
+
+    // double manipulability_index_rot;
+    // km_->getManipulabilityIndex(robot_state, group_name_, manipulability_index_rot, false);
+    // ROS_INFO_THROTTLE(1.0, "manipulability_index_rot: %f", manipulability_index_rot);
+    // if (std::isnan(manipulability_index_rot)) return 1.0; // sad jacobian sounds
+    residuals[0] = 1.0 - manipulability_index_tra;
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     return (new ceres::NumericDiffCostFunction<ManipulabilityGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new ManipulabilityGoal(shared_block)));
+     //return (new ceres::AutoDiffCostFunction<ManipulabilityGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new ManipulabilityGoal(shared_block)));
+   }
+
+  SharedBlock &shared_block;
+};
+#endif
 
 
 

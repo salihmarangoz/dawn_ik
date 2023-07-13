@@ -23,7 +23,6 @@
 #include <dawn_ik/Constraint.h>
 #include <dawn_ik/IKGoal.h>
 #include <dawn_ik/SolverSummary.h>
-
 #include <dawn_ik/experimental.h> // TODO: EXPERIMENTAL STUFF!
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
