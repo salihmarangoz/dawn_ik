@@ -165,13 +165,13 @@ struct LimitAccelerationGoal {
       // double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx)) / 0.01 ;
       // residuals[target_idx] = (current_vel - last_vel) / 0.01;
 
-      double qddot_max = double(shared_block.command_history[0].acceleration[target_idx]) + 10*0.01;
-      double qddot_min = double(shared_block.command_history[0].acceleration[target_idx]) - 10*0.01;
+      double qddot_max = (shared_block.command_history[0].acceleration[target_idx]) + (10*0.01);
+      double qddot_min = (shared_block.command_history[0].acceleration[target_idx]) - (10*0.01);
 
-      double qdot_max = double(shared_block.command_history[0].velocity[target_idx]) + qddot_max*0.01 ;
-      double qdot_min = double(shared_block.command_history[0].velocity[target_idx]) + qddot_min*0.01;
-      double q_max1 = double(shared_block.command_history[0].position[target_idx]) + qdot_max*0.01;
-      double q_max2 = double(shared_block.command_history[0].position[target_idx]) + qdot_min*0.01;
+      double qdot_max = (shared_block.command_history[0].velocity[target_idx]) + qddot_max*(0.01) ;
+      double qdot_min = (shared_block.command_history[0].velocity[target_idx]) + qddot_min*(0.01);
+      double q_max1 = (shared_block.command_history[0].position[target_idx]) + qdot_max*(0.01);
+      double q_max2 = (shared_block.command_history[0].position[target_idx]) + qdot_min*(0.01);
 
       residuals[target_idx*2]   = target_values[target_idx] - T(q_max1);
       residuals[target_idx*2+1] = target_values[target_idx] - T(q_max2);
