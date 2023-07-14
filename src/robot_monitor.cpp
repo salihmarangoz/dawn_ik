@@ -36,7 +36,7 @@ RobotMonitor::RobotMonitor(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh
   collision_state_thread = new boost::thread(boost::bind(&RobotMonitor::updateCollisionThread, this));
   visualization_thread = new boost::thread(boost::bind(&RobotMonitor::updateVisualizationThread, this));
 
-  joint_trajctrl_state_sub = nh.subscribe("//ufactory/lite6_traj_controller/state", 2, &RobotMonitor::jointTrajectoryControllerStateCallback, this);
+  joint_trajctrl_state_sub = nh.subscribe("joint_trajectory_state", 2, &RobotMonitor::jointTrajectoryControllerStateCallback, this);
 
   acc_jerk_pub = priv_nh.advertise<sensor_msgs::JointState>("calc_acc_jerk_command", 0);
 
@@ -207,23 +207,31 @@ RobotMonitor::updateVisualizationThread()
     
     computeAndPublishVisualization(cached_joint_link_collision_state_mtx);
 
-    cmd_mutex.lock();
-    Command command = cmd_a_j;
-    cmd_mutex.unlock();
+    if (joint_trajctrl_state_msg != nullptr)
+    {
+      cmd_mutex.lock();
+      Command command = cmd_a_j;
+      cmd_mutex.unlock();
 
-    sensor_msgs::JointState command_msg;
-    command_msg.name.resize(robot::num_targets);
-    command_msg.position.resize(robot::num_targets);
-    command_msg.velocity.resize(robot::num_targets);
-    command_msg.effort.resize(robot::num_targets);
+      sensor_msgs::JointState command_msg;
+      command_msg.name.resize(robot::num_targets);
+      command_msg.position.resize(robot::num_targets);
+      command_msg.velocity.resize(robot::num_targets);
+      command_msg.effort.resize(robot::num_targets);
 
-    command_msg.header = joint_trajctrl_state_msg->header;
-    command_msg.name = joint_trajctrl_state_msg->joint_names;
-    command_msg.position = command.jerk;
-    command_msg.velocity = command.velocity;
-    command_msg.effort = command.acceleration;
+      command_msg.header = joint_trajctrl_state_msg->header;
+      command_msg.name = joint_trajctrl_state_msg->joint_names;
+      command_msg.position = command.jerk;
+      command_msg.velocity = command.velocity;
+      command_msg.effort = command.acceleration;
 
-    acc_jerk_pub.publish(command_msg);
+      acc_jerk_pub.publish(command_msg);
+    }
+    else
+    {
+      ROS_WARN_THROTTLE(3.0, "Forget to map joint_trajectory_state topic?");
+    }
+
 
     ROS_INFO_ONCE("RobotMonitor: Published visualization!");
     r.sleep();
