@@ -106,7 +106,7 @@ class RvizController:
     self.feedback = feedback
     if feedback.marker_name == "endpoint":
       self.header = feedback.header
-      qnorm = (feedback.pose.orientation.w**2 + feedback.pose.orientation.x**2 + feedback.pose.orientation.y**2 + feedback.pose.orientation.z**2)**-2
+      qnorm = (feedback.pose.orientation.w**2 + feedback.pose.orientation.x**2 + feedback.pose.orientation.y**2 + feedback.pose.orientation.z**2)**0.5
       feedback.pose.orientation.w /= qnorm
       feedback.pose.orientation.x /= qnorm
       feedback.pose.orientation.y /= qnorm
