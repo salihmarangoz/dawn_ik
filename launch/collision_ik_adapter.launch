@@ -2,6 +2,8 @@
 
 <launch>
 
+  <!-- ============================ GOAL ADAPTER =============================== -->
+
   <!-- $ roslaunch dawn_ik horti_fake.launch -->
   <!-- rosrun relaxed_ik_ros1 rviz_viewer.py -->
   <!-- Copy the values here and dont forget to add commas -->
@@ -20,5 +22,7 @@
     <param name="base_frame" value="$(arg base_frame)"/>
     <param name="eef_frame" value="$(arg eef_frame)"/>
   </node>
+
+  <!-- ============================ COLLISION ADAPTER =============================== -->
 
 </launch>
