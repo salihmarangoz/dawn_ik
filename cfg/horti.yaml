@@ -53,10 +53,11 @@ solver_options:
   #use_inner_iterations: true # COORDINATE_DESCENT
   #use_approximate_eigenvalue_bfgs_scaling: true
   max_solver_time_in_seconds: 0.01
-  #eta: DBL_MIN
-  #function_tolerance: DBL_MIN
-  #gradient_tolerance: DBL_MIN
-  #parameter_tolerance: DBL_MIN
+  max_num_iterations: 999
+  eta: DBL_MIN
+  function_tolerance: DBL_MIN
+  gradient_tolerance: DBL_MIN
+  parameter_tolerance: DBL_MIN
 
 #########################################################
 ### Objective: Look at Goal #############################
