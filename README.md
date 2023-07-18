@@ -125,7 +125,7 @@ $ cp lite6_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik lite6_solver_collision_ik.launch
 ```
 
-## Evaluation
+## Experiments
 
 TODO
 
