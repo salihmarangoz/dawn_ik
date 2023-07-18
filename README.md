@@ -17,25 +17,27 @@ Previous recordings:
 
 ```bash
 ################# ROS DEPENDENCIES ##################################
-
 $ cd catkin_ws/src
 
 # This package
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git
 
-# Horti Robot
+# Horti Robot (use salih_master_thesis branch!)
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
 
-# xArm ROS
-$ git clone clone git@github.com:salihmarangoz/xarm_ros.git # (forked)
+# Mick Robot (modified copy of horti_model package)
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/mick_model.git
+
+# xArm ROS (forked)
+$ git clone clone git@github.com:salihmarangoz/xarm_ros.git
 $ cd xarm_ros
 $ git submodule update --init --remote
 
-# Fake Joints (optional alternative to Gazebo)
-$ git clone https://github.com/salihmarangoz/fake_joint # (forked and modified)
+# Fake Joints (optional alternative to Gazebo) (forked and modified)
+$ git clone https://github.com/salihmarangoz/fake_joint
 
 # OPTIONAL: Collision IK
-# Includes trained model for lite6
+# Includes trained model for lite6 (forked and heavily modified)
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/collision_ik.git
 
 # OPTIONAL: For robot state collision evaluation
