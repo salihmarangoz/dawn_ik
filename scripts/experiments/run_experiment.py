@@ -12,6 +12,8 @@ import sys
 from scipy import interpolate
 from visualization_msgs.msg import Marker
 
+AXES = "szyx"
+
 traj_pub = None
 listener = None
 current_joint_state = None
@@ -23,13 +25,13 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   dawnik_goal.m1_y = y
   dawnik_goal.m1_z = z
   dawnik_goal.m1_limit_dist = 0.1
-  dawnik_goal.m1_weight = 1
-  quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+  dawnik_goal.m1_weight = 4
+  quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw, axes=AXES)
   dawnik_goal.m2_x = quad[0]
   dawnik_goal.m2_y = quad[1]
   dawnik_goal.m2_z = quad[2]
   dawnik_goal.m2_w = quad[3]
-  dawnik_goal.m2_weight = 1
+  dawnik_goal.m2_weight = 2
   dawn_ik_goal_pub.publish(dawnik_goal)
 
   marker = Marker()
@@ -37,12 +39,11 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   pose.position.x = x
   pose.position.y = y
   pose.position.z = z
-  #quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+  #quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw, axes=AXES)
   pose.orientation.x =  quad[0]
   pose.orientation.y =  quad[1]
   pose.orientation.z =  quad[2]
   pose.orientation.w =  quad[3]
-  rangedik_goal.ee_poses.append(pose)
   marker.header.frame_id = "world"
   marker.type = marker.SPHERE
   marker.id = 53
@@ -61,14 +62,16 @@ def track_joint_state(msg):
   current_joint_state = msg
 
 if __name__ == "__main__":
-  rospy.init_node('publish_waypoints')
-  waypoints_file = rospy.get_param("~waypoints_file", "waypoints.txt")
+  rospy.init_node('run_experiment')
+  waypoints_file = rospy.get_param("~waypoints_file", "/veriler/salih/Desktop/master_thesis/catkin_ws/src/salih_marangoz_thesis/scripts/experiments/waypoints.txt")
   publish_rate = rospy.get_param("~publish_rate", 100.0)
+  world_frame = rospy.get_param("~world_frame", "world")
+  endpoint_frame = rospy.get_param("~endpoint_frame", "head_link_eef")
 
   listener = tf.TransformListener()
-  dawn_ik_goal_pub = rospy.Publisher("dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
-  marker_pub = rospy.Publisher("goal_marker", Marker, queue_size = 5)
-  rospy.Subscriber("joint_state", JointState, track_joint_state)
+  dawn_ik_goal_pub = rospy.Publisher("/dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
+  marker_pub = rospy.Publisher("~goal_marker", Marker, queue_size = 5)
+  rospy.Subscriber("/joint_states", JointState, track_joint_state)
 
   print("Reading file:", waypoints_file)
   waypoints = np.loadtxt(waypoints_file)
@@ -89,34 +92,54 @@ if __name__ == "__main__":
   f_yaw = interpolate.interp1d(w_t, w_yaw)
 
   rate = rospy.Rate(publish_rate)
-  t = np.min(w_t)
-  loop_counter = 0
-  waited_beforehand = False
-  lines = []
+  t = 0
+  rospy.sleep(1)
   while not rospy.is_shutdown():
-    t += 1/publish_rate
-    if t>0 and t>=t_max:
-      t = t % t_max
-      loop_counter += 1
-      break
+    t += 1.0/publish_rate
+    if t>=t_max:break
 
-    if t>=0 and not waited_beforehand:
-      waited_beforehand = True
-      rospy.sleep(1.0)
+    # Experiment entries...
+    entry = {}
 
-    publish_ee_goal(f_x(t),f_y(t),f_z(t),f_roll(t),f_pitch(t),f_yaw(t))
+    # ENTRY CURRENT TIME
+    entry["time"] = t
 
+    # ENTRY: EE GOAL
+    x = f_x(t)
+    y = f_y(t)
+    z = f_z(t)
+    roll = f_roll(t)
+    pitch = f_pitch(t)
+    yaw = f_yaw(t)
+    publish_ee_goal(x,y,z,roll,pitch,yaw)
+    entry["ee_goal"] = {"x": x, "y": y, "z": z, "roll": roll, "pitch": pitch, "yaw": yaw}
+
+    #################### wait for robots to move #################################
     rate.sleep()
 
-    if loop_counter==0 and t>=0:
-      try:
-        (test_trans, test_rot) = listener.lookupTransform('/world', '/head_link_eef', rospy.Time(0))
-        gt_rot = tf.transformations.quaternion_from_euler(f_roll(t),f_pitch(t),f_yaw(t))
-        gt_trans = [f_x(t),f_y(t),f_z(t)]
-        lines.append([t, test_trans[0], test_trans[1], test_trans[2], test_rot[0], test_rot[1], test_rot[2], test_rot[3],
-                      gt_trans[0], gt_trans[1], gt_trans[2], gt_rot[0], gt_rot[1], gt_rot[2], gt_rot[3]])
-      except:
-        print("tf error")
+    # ENTRY: EE CURRENT
+    try:
+      (curr_trans, curr_rot) = listener.lookupTransform(world_frame, endpoint_frame, rospy.Time(0))
+      (curr_roll, curr_pitch, curr_yaw) = tf.transformations.euler_from_quaternion(curr_rot)
+      curr_x = curr_trans[0]
+      curr_y = curr_trans[1]
+      curr_z = curr_trans[2]
+    except Exception as e:
+      rospy.logerr("tf error. experiment failed!")
+      print(e)
+      exit(-1)
+    entry["ee_curr"] = {"x": curr_x, "y": curr_y, "z": curr_z, "roll": curr_roll, "pitch": curr_pitch, "yaw": curr_yaw}
+
+    # ENTRY: JOINT STATES
+    entry["joint_names"] = current_joint_state.name
+    entry["joint_positions"] = current_joint_state.position
+    entry["joint_velocities"] = current_joint_state.velocity
+    entry["joint_efforts"] = current_joint_state.effort
+
+
+    # TODO: DEBUG ROTATIONS.............
+    print(entry["ee_goal"])
+    print(entry["ee_curr"])
 
   #rospy.spin()
 
