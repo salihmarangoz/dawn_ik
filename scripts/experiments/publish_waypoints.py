@@ -4,15 +4,6 @@ import rospy
 import tf
 import numpy as np
 
-from relaxed_ik_ros1.msg import EEPoseGoals
-
-USING_COLLISION_IK = False
-try:
-  from relaxed_ik_ros1.msg import EEVelGoals
-except:
-  USING_COLLISION_IK = True
-  from relaxed_ik_ros1.msg import JointAngles
-
 from dawn_ik.msg import IKGoal
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -25,46 +16,7 @@ traj_pub = None
 listener = None
 current_joint_state = None
 
-# example: rospy.Subscriber("relaxed_ik/joint_angle_solutions", JointState, process_rangedik_solution, (pub))
-def process_rangedik_solution(joint_state, args):
-  pub = args[0]
-  msg = JointTrajectory()
-  msg.joint_names = joint_state.name
-  p = JointTrajectoryPoint()
-  p.positions = joint_state.position
-  p.time_from_start = rospy.Duration(0.05)
-  msg.points.append(p)
-  msg.header.stamp = rospy.Time.now()
-  pub.publish(msg)
-
-def process_collisionik_solution(joint_state, args):
-  pub = args[0]
-  msg = JointTrajectory()
-  msg.joint_names = ["head_joint1", "head_joint2", "head_joint3", "head_joint4", "head_joint5", "head_joint6"]
-  p = JointTrajectoryPoint()
-  p.positions = joint_state.angles.data
-  p.time_from_start = rospy.Duration(0.05)
-  msg.points.append(p)
-  msg.header.stamp = rospy.Time.now()
-  pub.publish(msg)
-
 def publish_ee_goal(x, y, z, roll, pitch, yaw):
-  rangedik_goal = EEPoseGoals()
-  pose = Pose()
-
-  # lite6 init:
-  pose.position.x = x -8.69986108e-02 ############################################################### bad trick: copied from init_pos of rviz_viewer output
-  pose.position.y = y +7.13350537e-07 ############################################################### bad trick: copied from init_pos of rviz_viewer output
-  pose.position.z = z -1.54199361e-01 ############################################################### bad trick: copied from init_pos of rviz_viewer output
-
-  quad = tf.transformations.quaternion_from_euler(roll, pitch-np.pi, yaw)
-  pose.orientation.x =  quad[0]
-  pose.orientation.y =  quad[1]
-  pose.orientation.z =  quad[2]
-  pose.orientation.w =  quad[3]
-  rangedik_goal.ee_poses.append(pose)
-  ee_pose_goals_pub.publish(rangedik_goal)
-
   dawnik_goal = IKGoal()
   dawnik_goal.mode = IKGoal.MODE_1 + IKGoal.MODE_2
   dawnik_goal.m1_x = x
@@ -85,7 +37,7 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   pose.position.x = x
   pose.position.y = y
   pose.position.z = z
-  quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+  #quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
   pose.orientation.x =  quad[0]
   pose.orientation.y =  quad[1]
   pose.orientation.z =  quad[2]
@@ -109,26 +61,17 @@ def track_joint_state(msg):
   current_joint_state = msg
 
 if __name__ == "__main__":
-  rospy.init_node('follow_path_experiment')
+  rospy.init_node('publish_waypoints')
+  waypoints_file = rospy.get_param("~waypoints_file", "waypoints.txt")
+  publish_rate = rospy.get_param("~publish_rate", 100.0)
+
   listener = tf.TransformListener()
-  traj_pub = rospy.Publisher('head_controller/command', JointTrajectory, queue_size=2)
-  ee_pose_goals_pub = rospy.Publisher('relaxed_ik/ee_pose_goals', EEPoseGoals, queue_size=5)
   dawn_ik_goal_pub = rospy.Publisher("dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
   marker_pub = rospy.Publisher("goal_marker", Marker, queue_size = 5)
   rospy.Subscriber("joint_state", JointState, track_joint_state)
 
-
-  if USING_COLLISION_IK:
-    rospy.Subscriber("relaxed_ik/joint_angle_solutions", JointAngles, process_collisionik_solution, (traj_pub,))
-  else:
-    rospy.Subscriber("relaxed_ik/joint_angle_solutions", JointState, process_rangedik_solution, (traj_pub,))
-  
-  waypoints_file = rospy.get_param("~waypoints_file", "waypoints.txt")
-  publish_rate = rospy.get_param("~publish_rate", 100.0)
-
   print("Reading file:", waypoints_file)
   waypoints = np.loadtxt(waypoints_file)
-
   w_t = waypoints[:,0]
   w_x = waypoints[:,1]
   w_y = waypoints[:,2]
@@ -137,16 +80,6 @@ if __name__ == "__main__":
   w_pitch = waypoints[:,5]
   w_yaw = waypoints[:,6]
   t_max = np.max(w_t)
-
-  # initial condition for lite6 ########################################################
-  w_t = np.append(w_t, -5.0)
-  w_x = np.append(w_x, 0.1)
-  w_y = np.append(w_y, 0.01)
-  w_z = np.append(w_z, 0.15)
-  w_roll = np.append(w_roll, 0)
-  w_pitch = np.append(w_pitch, 3.1416)
-  w_yaw = np.append(w_yaw, 3.1416)
-  ######################################################################################
 
   f_x = interpolate.interp1d(w_t, w_x)
   f_y = interpolate.interp1d(w_t, w_y)
