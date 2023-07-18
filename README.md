@@ -27,12 +27,16 @@ $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_mara
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
 
 # xArm ROS
-$ git clone clone git@github.com:salihmarangoz/xarm_ros.git
+$ git clone clone git@github.com:salihmarangoz/xarm_ros.git # (forked)
 $ cd xarm_ros
 $ git submodule update --init --remote
 
 # Fake Joints (optional alternative to Gazebo)
-$ git clone https://github.com/salihmarangoz/fake_joint
+$ git clone https://github.com/salihmarangoz/fake_joint # (forked and modified)
+
+# Collision IK (OPTIONAL)
+# Includes trained model for lite6
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/collision_ik.git
 
 # Others
 $ cd catkin_ws
@@ -117,6 +121,10 @@ $ roslaunch dawn_ik xarm5_solver.launch
 $ roslaunch dawn_ik xarm6_solver.launch
 $ roslaunch dawn_ik xarm7_solver.launch
 $ roslaunch dawn_ik horti_solver.launch
+
+# If you installed collision_ik:
+$ roslaunch dawn_ik horti_solver_collision_ik.launch
+$ roslaunch dawn_ik lite6_solver_collision_ik.launch
 ```
 
 ### Footnotes
