@@ -34,13 +34,18 @@ $ git submodule update --init --remote
 # Fake Joints (optional alternative to Gazebo)
 $ git clone https://github.com/salihmarangoz/fake_joint # (forked and modified)
 
-# Collision IK (OPTIONAL)
+# OPTIONAL: Collision IK
 # Includes trained model for lite6
 $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/collision_ik.git
+
+# OPTIONAL: For robot state collision evaluation
+$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/moveit_collision_check.git
 
 # Others
 $ cd catkin_ws
 $ rosdep install --from-paths src --ignore-src -r
+$ sudo apt install python3-yaml python-is-python3
+$ pip install pyyaml
 
 ################## EXTERNAL DEPENDENCIES ############################
 
@@ -54,20 +59,6 @@ $ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release -DUSE_CUDA=OFF ..
 $ make -j8
 $ sudo make install
-
-# NOT USING RIGHT NOW
-# Ruckig
-#$ cd $HOME
-#$ git clone git@github.com:salihmarangoz/ruckig.git
-#$ mkdir build
-#$ cd build
-#$ cmake -DCMAKE_BUILD_TYPE=Release ..
-#$ make -j8
-#$ sudo make install
-
-# Extra stuff
-$ sudo apt install python3-yaml python-is-python3
-$ pip install pyyaml
 
 # Update dynamic linker run-time bindings
 sudo ldconfig
@@ -133,6 +124,10 @@ $ roscd relaxed_ik_ros1/relaxed_ik_core/config/
 $ cp lite6_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik lite6_solver_collision_ik.launch
 ```
+
+## Evaluation
+
+TODO
 
 ### Footnotes
 
