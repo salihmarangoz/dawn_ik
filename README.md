@@ -107,6 +107,8 @@ $ rosrun dawn_ik robot_parser_node _cfg:=horti
 
 ### Solver/Controller
 
+DawnIK and CollisionIK (with goal+collision adapter) are available.
+
 ```bash
 # If you would like to use our solver, select one!
 $ roslaunch dawn_ik lite6_solver.launch
@@ -127,9 +129,12 @@ $ cp lite6_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik lite6_solver_collision_ik.launch
 ```
 
-## Experiments
+### Experiments
 
-TODO
+```bash
+# UNDER CONSTRUCTION!!!
+$ rosrun dawn_ik run_experiment.py
+```
 
 ### Footnotes
 
