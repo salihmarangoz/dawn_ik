@@ -21,6 +21,4 @@
     <arg name="moveit_controller_manager" value="ros_control" />
   </include>
 
-  <node name="gazebo_killer_node" pkg="dawn_ik" type="gazebo_killer_node.py"/>
-
 </launch>
