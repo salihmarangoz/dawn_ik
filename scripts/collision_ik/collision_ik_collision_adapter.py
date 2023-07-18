@@ -83,7 +83,9 @@ def set_collision_world(server, fixed_frame, env_settings):
     if 'obstacles' in env_settings:
         obstacles = env_settings['obstacles']
     else:
-        raise NameError('Please define the obstacles in the environment!')
+        #raise NameError('Please define the obstacles in the environment!')
+        print("No obstacles are defined. Exiting...")
+        exit(0)
 
     if 'cuboids' in obstacles: 
         cuboids = obstacles['cuboids']

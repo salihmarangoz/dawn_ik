@@ -31,7 +31,7 @@ def quaternion_multiply(q1, q0):
 def dawn_ik_goal_cb(msg):
   if not is_init: return
   if msg.mode != 3:
-    rospy.logwarn("Only mode 3 is supported!")
+    rospy.logwarn_throttle(1.0, "Only mode 3 is supported!")
     return
   publish_collision_ik_goal(msg.m1_x, msg.m1_y, msg.m1_z, (msg.m2_w, msg.m2_x, msg.m2_y, msg.m2_z))
 
@@ -69,7 +69,7 @@ def publish_collision_ik_goal(x, y, z, quad):
   corr_position = inv_init_trans + np.array([p_out.pose.position.x, p_out.pose.position.y, p_out.pose.position.z])
   inv_init_rot = ( np.array(init_rot) * np.array([1,-1,-1,-1]) ) / np.linalg.norm(init_rot)
   corr_orientation = quaternion_multiply([p_out.pose.orientation.w, p_out.pose.orientation.x, p_out.pose.orientation.y, p_out.pose.orientation.z], inv_init_rot)
-  print(corr_position, corr_orientation)
+  #print(corr_position, corr_orientation)
 
   goal = EEPoseGoals()
   pose = Pose()
