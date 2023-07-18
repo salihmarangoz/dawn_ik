@@ -106,11 +106,11 @@ class RvizController:
     self.feedback = feedback
     if feedback.marker_name == "endpoint":
       self.header = feedback.header
-      qnorm = (feedback.pose.orientation.w**2 + feedback.pose.orientation.x**2 + feedback.pose.orientation.y**2 + feedback.pose.orientation.z**2)**0.5
-      feedback.pose.orientation.w /= qnorm
-      feedback.pose.orientation.x /= qnorm
-      feedback.pose.orientation.y /= qnorm
-      feedback.pose.orientation.z /= qnorm
+      # qnorm = (feedback.pose.orientation.w**2 + feedback.pose.orientation.x**2 + feedback.pose.orientation.y**2 + feedback.pose.orientation.z**2)**0.5
+      # feedback.pose.orientation.w /= qnorm
+      # feedback.pose.orientation.x /= qnorm
+      # feedback.pose.orientation.y /= qnorm
+      # feedback.pose.orientation.z /= qnorm
       self.endpoint_pose = feedback.pose
     elif feedback.marker_name == "target":
       self.header = feedback.header
@@ -160,8 +160,8 @@ class RvizController:
 
     if show_6dof: 
       control = InteractiveMarkerControl()
-      control.orientation.w = 1
-      control.orientation.x = 1
+      control.orientation.w = 2**-0.5
+      control.orientation.x = 2**-0.5
       control.orientation.y = 0
       control.orientation.z = 0
       control.name = "rotate_x"
@@ -169,8 +169,8 @@ class RvizController:
       int_marker.controls.append(control)
 
       control = InteractiveMarkerControl()
-      control.orientation.w = 1
-      control.orientation.x = 1
+      control.orientation.w = 2**-0.5
+      control.orientation.x = 2**-0.5
       control.orientation.y = 0
       control.orientation.z = 0
       control.name = "move_x"
@@ -178,37 +178,37 @@ class RvizController:
       int_marker.controls.append(control)
 
       control = InteractiveMarkerControl()
-      control.orientation.w = 1
+      control.orientation.w = 2**-0.5
       control.orientation.x = 0
-      control.orientation.y = 1
+      control.orientation.y = 2**-0.5
       control.orientation.z = 0
       control.name = "rotate_z"
       control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
       int_marker.controls.append(control)
 
       control = InteractiveMarkerControl()
-      control.orientation.w = 1
+      control.orientation.w = 2**-0.5
       control.orientation.x = 0
-      control.orientation.y = 1
+      control.orientation.y = 2**-0.5
       control.orientation.z = 0
       control.name = "move_z"
       control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
       int_marker.controls.append(control)
 
       control = InteractiveMarkerControl()
-      control.orientation.w = 1
+      control.orientation.w = 2**-0.5
       control.orientation.x = 0
       control.orientation.y = 0
-      control.orientation.z = 1
+      control.orientation.z = 2**-0.5
       control.name = "rotate_y"
       control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
       int_marker.controls.append(control)
 
       control = InteractiveMarkerControl()
-      control.orientation.w = 1
+      control.orientation.w = 2**-0.5
       control.orientation.x = 0
       control.orientation.y = 0
-      control.orientation.z = 1
+      control.orientation.z = 2**-0.5
       control.name = "move_y"
       control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
       int_marker.controls.append(control)
