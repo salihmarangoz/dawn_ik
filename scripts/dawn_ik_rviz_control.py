@@ -35,7 +35,7 @@ class RvizController:
     position = Point( 0.5, 0, 0)
     self.make6DofMarker("endpoint", InteractiveMarkerControl.MOVE_ROTATE_3D, position, True )
     position = Point( 0.7, 0, 0)
-    self.make6DofMarker("target", InteractiveMarkerControl.MOVE_3D, position, True )
+    #self.make6DofMarker("target", InteractiveMarkerControl.MOVE_3D, position, True )
 
     self.server.applyChanges()
 
