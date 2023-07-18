@@ -42,7 +42,7 @@ def print_cb(msg):
 def make_marker(name, fixed_frame, shape, scale, ts, quat, is_dynamic, 
                 points=None, color=[0.0,0.0,1.0,0.75], marker_scale=0.3):                
     int_marker = InteractiveMarker()
-    int_marker.header.frame_id = "head_" + fixed_frame # TODO: added a prefix for visualization
+    int_marker.header.frame_id = fixed_frame # TODO: added a prefix for visualization
     int_marker.name = name
     int_marker.pose.position.x = ts[0]
     int_marker.pose.position.y = ts[1]
@@ -141,10 +141,10 @@ def set_collision_world(server, fixed_frame, env_settings):
     return dyn_obs_handles
 
 def main():
-    rospy.init_node('rviz_viewer')
+    rospy.init_node('collision_ik_collision_adapter')
     tf_prefix = rospy.get_param('~tf_prefix', "")
-    world_frame = rospy.get_param('~world_frame', "world")
     base_frame = rospy.get_param('~base_frame', "head_link_base")
+    robot_name = rospy.get_param('~robot_name', "horti")
     tf_listener = tf.TransformListener()
 
     # Parse info from Collision IK
@@ -166,7 +166,7 @@ def main():
     # Parse cfg from Dawn IK
     dyn_obs_info = {}
     SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
-    YAML_PATH = SCRIPT_PATH + "/../../cfg/horti.yaml"
+    YAML_PATH = SCRIPT_PATH + "/../../cfg/"+robot_name+".yaml"
     with open(YAML_PATH, "r") as stream:
         try:
             dawn_ik_cfg = yaml.safe_load(stream)
