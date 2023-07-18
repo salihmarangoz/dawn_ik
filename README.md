@@ -115,22 +115,22 @@ $ rosrun dawn_ik robot_parser_node _cfg:=horti
 ### Solver/Controller
 
 ```bash
-# select one!
+# If you would like to use our solver, select one!
 $ roslaunch dawn_ik lite6_solver.launch
 $ roslaunch dawn_ik xarm5_solver.launch
 $ roslaunch dawn_ik xarm6_solver.launch
 $ roslaunch dawn_ik xarm7_solver.launch
 $ roslaunch dawn_ik horti_solver.launch
 
-# If you installed collision_ik...
+# If you would like to use collision_ik...
 # For horti + collision_ik:
 $ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp horti_settings.yaml settings.yaml
+$ cp horti_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik horti_solver_collision_ik.launch
 
 # For lite6 + collision_ik:
 $ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp lite6_settings.yaml settings.yaml
+$ cp lite6_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik lite6_solver_collision_ik.launch
 ```
 
