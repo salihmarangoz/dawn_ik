@@ -47,7 +47,7 @@ def parse_obj_parameters(obj):
 
 if __name__ == "__main__":
     SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
-    YAML_PATH = SCRIPT_PATH + "/../cfg/horti.yaml"
+    YAML_PATH = SCRIPT_PATH + "/../../cfg/horti.yaml"
     WORLD_FRAME = "head_link_base"
 
     rospy.init_node('export_to_collision_ik_obstacles')
