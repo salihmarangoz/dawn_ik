@@ -11,6 +11,11 @@ from geometry_msgs.msg import PoseStamped, Vector3Stamped, QuaternionStamped, Po
 import sys
 from scipy import interpolate
 from visualization_msgs.msg import Marker
+import time, os
+import yaml
+import json
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 AXES = "szyx"
 
@@ -63,7 +68,7 @@ def track_joint_state(msg):
 
 if __name__ == "__main__":
   rospy.init_node('run_experiment')
-  waypoints_file = rospy.get_param("~waypoints_file", "/veriler/salih/Desktop/master_thesis/catkin_ws/src/salih_marangoz_thesis/scripts/experiments/waypoints.txt")
+  waypoints_file = rospy.get_param("~waypoints_file", SCRIPT_DIR + "/waypoints.txt")
   publish_rate = rospy.get_param("~publish_rate", 100.0)
   world_frame = rospy.get_param("~world_frame", "world")
   endpoint_frame = rospy.get_param("~endpoint_frame", "head_link_eef")
@@ -92,12 +97,10 @@ if __name__ == "__main__":
   f_yaw = interpolate.interp1d(w_t, w_yaw)
 
   rate = rospy.Rate(publish_rate)
-  t = 0
+  t = 0.0
   rospy.sleep(1)
+  entries = []
   while not rospy.is_shutdown():
-    t += 1.0/publish_rate
-    if t>=t_max:break
-
     # Experiment entries...
     entry = {}
 
@@ -112,7 +115,7 @@ if __name__ == "__main__":
     pitch = f_pitch(t)
     yaw = f_yaw(t)
     publish_ee_goal(x,y,z,roll,pitch,yaw)
-    entry["ee_goal"] = {"x": x, "y": y, "z": z, "roll": roll, "pitch": pitch, "yaw": yaw}
+    entry["ee_goal"] = {"x": float(x), "y": float(y), "z": float(z), "roll": float(roll), "pitch": float(pitch), "yaw": float(yaw)}
 
     #################### wait for robots to move #################################
     rate.sleep()
@@ -128,27 +131,36 @@ if __name__ == "__main__":
       rospy.logerr("tf error. experiment failed!")
       print(e)
       exit(-1)
-    entry["ee_curr"] = {"x": curr_x, "y": curr_y, "z": curr_z, "roll": curr_roll, "pitch": curr_pitch, "yaw": curr_yaw}
+    entry["ee_curr"] = {"x": float(curr_x), "y": float(curr_y), "z": float(curr_z), "roll": float(curr_roll), "pitch": float(curr_pitch), "yaw": float(curr_yaw)}
 
     # ENTRY: JOINT STATES
-    entry["joint_names"] = current_joint_state.name
-    entry["joint_positions"] = current_joint_state.position
-    entry["joint_velocities"] = current_joint_state.velocity
-    entry["joint_efforts"] = current_joint_state.effort
+    entry["joint_names"] = list(current_joint_state.name)
+    entry["joint_positions"] = list(current_joint_state.position)
+    entry["joint_velocities"] = list(current_joint_state.velocity)
+    entry["joint_efforts"] = list(current_joint_state.effort)
 
 
     # TODO: DEBUG ROTATIONS.............
     print(entry["ee_goal"])
     print(entry["ee_curr"])
 
+    entries.append(entry)
+
+    t += 1.0/publish_rate
+    if t>t_max:break
+
   #rospy.spin()
 
   # save results to a file
-  import time, os
   timestr = time.strftime("%Y%m%d-%H%M%S")
-  script_dir = os.path.dirname(os.path.realpath(__file__))
-  out_filename_default = script_dir+"/../results/experiment_"+timestr+".csv"
+  
+  out_filename_default = SCRIPT_DIR + "/../../results/experiment_" + timestr + ".json" # or yaml
   out_filename = rospy.get_param("~out_filename", out_filename_default)
   if out_filename == "":
     out_filename = out_filename_default
-  np.savetxt(out_filename, np.asarray(lines), delimiter=",")
+
+  with open(out_filename, "w") as f:
+    #f.write(yaml.dump(entries, default_flow_style=None, sort_keys=False))
+    f.write(json.dumps(entries))
+
+  print("Experiment Finished!")
