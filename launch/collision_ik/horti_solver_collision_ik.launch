@@ -11,6 +11,12 @@
   </node>
 
   <include file="$(find dawn_ik)/launch/collision_ik/collision_ik_adapter.launch" >
+    <arg name="tf_prefix" value="head_"/>
+    <arg name="robot_name" value="horti"/>
+    <arg name="base_frame" value="head_link_base"/>
+    <arg name="eef_frame" value="head_link_eef"/>
+    <arg name="controller_command_topic" value="/head_controller/command"/>
+    <arg name="controller_state_topic" value="/head_controller/state"/>
   </include>
 
 </launch>

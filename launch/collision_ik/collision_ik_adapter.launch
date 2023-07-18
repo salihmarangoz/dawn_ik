@@ -17,6 +17,9 @@
   <arg name="tf_prefix" default="head_"/> <!-- collision ik is trained on lite6, so names are without head_ prefix -->
   <arg name="robot_name" default="horti"/> <!-- loads collisions from horti.yaml in this repository -->
 
+  <arg name="controller_command_topic" default="/head_controller/command"/>
+  <arg name="controller_state_topic" default="/head_controller/state"/>
+
   <!-- ============================ GOAL ADAPTER =============================== -->
   <node name="collision_ik_goal_adapter" pkg="dawn_ik" type="collision_ik_goal_adapter.py" output="screen">
     <param name="init_trans" value="$(arg init_trans)"/>
@@ -24,6 +27,9 @@
     <param name="world_frame" value="$(arg world_frame)"/>
     <param name="base_frame" value="$(arg base_frame)"/>
     <param name="eef_frame" value="$(arg eef_frame)"/>
+
+    <remap from="/head_controller/command" to="$(arg controller_command_topic)"/>
+    <remap from="/head_controller/state" to="$(arg controller_state_topic)"/>
   </node>
 
   <!-- ============================ COLLISION ADAPTER =============================== -->
