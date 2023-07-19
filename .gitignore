@@ -3,4 +3,4 @@ external
 #include/salih_marangoz_thesis/robot_configuration/autogen_test.h
 autogen_test.h.old*
 *.pyc
-results/*.json
+results/*/*.json

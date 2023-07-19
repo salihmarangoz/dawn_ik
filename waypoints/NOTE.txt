@@ -1,0 +1,4 @@
+make sure that wayponits file extensions are set to .txt
+
+also roll,pitch,yaw are in 'rxyz' convention. r -> rotational frame (not fixed/static), xyz -> the order of rotation
+

@@ -131,10 +131,23 @@ $ roslaunch dawn_ik lite6_solver_collision_ik.launch
 
 ### Experiments
 
+Before doing the experiments make sure that:
+
+- Generated code is for that robot, while using dawn_ik.
+- `settings.yaml` is set for that robot, while using collision_ik.
+
+For doing the experiments you can start everything **ALL-IN-ONE** line. Check the launch file for the description of the input args.
+
 ```bash
-# UNDER CONSTRUCTION!!!
-$ rosrun dawn_ik run_experiment.py
+$ roslaunch dawn_ik run_experiment.launch robot_name:=horti solver:=dawn_ik waypoints_file:=test endpoint_frame:=head_link_eef
 ```
+
+Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.
+
+### TODO
+
+- Let the solvers to go to the initialized position at the start.
+- 
 
 ### Footnotes
 

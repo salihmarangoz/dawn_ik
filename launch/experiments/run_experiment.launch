@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- =================== PARAMETERS ========================== -->
+  <arg name="robot_name" default="horti"/>
+  <arg name="waypoints_file" default="test"/>
+  <arg name="endpoint_frame" default="head_link_eef"/>
+  <arg name="solver" default="dawn_ik"/> <!-- values: dawn_ik or collision_ik or empty string to disable -->
+
+  <arg name="world_frame" default="world"/>
+  <arg name="start_sim" default="True"/>
+  <!-- ========================================================= -->
+
+  <!-- waypoint generator and logger -->
+  <node name="run_experiment" pkg="dawn_ik" type="run_experiment.py" output="screen" required="true">
+    <param name="waypoints_file" value="$(find dawn_ik)/waypoints/$(arg robot_name)/$(arg waypoints_file).txt"/>
+    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg waypoints_file)_$(arg solver).json"/>
+  </node>
+
+  <!-- offline collision check service used by run_experiment.py -->
+  <include file="$(find moveit_collision_check)/launch/start.launch">
+    <arg name="robot_name" value="$(arg robot_name)" />
+  </include>
+
+  <!-- fake simulator -->
+  <include file="$(find dawn_ik)/launch/$(arg robot_name)_fake.launch" if="$(arg start_sim)"/>
+
+  <!-- solver -->
+  <include file="$(find dawn_ik)/launch/$(arg robot_name)_solver.launch" if="$(eval solver == 'dawn_ik')"/>
+  <include file="$(find dawn_ik)/launch/collision_ik/$(arg robot_name)_solver_collision_ik.launch" if="$(eval solver == 'collision_ik')"/>
+
+</launch>
+

@@ -5,6 +5,8 @@ import tf
 import numpy as np
 
 from dawn_ik.msg import IKGoal
+from moveit_collision_check.srv import CheckCollision
+
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from geometry_msgs.msg import PoseStamped, Vector3Stamped, QuaternionStamped, Pose, Twist
@@ -73,6 +75,10 @@ if __name__ == "__main__":
   world_frame = rospy.get_param("~world_frame", "world")
   endpoint_frame = rospy.get_param("~endpoint_frame", "head_link_eef")
 
+  rospy.loginfo("Waiting for the check_collision service...")
+  rospy.wait_for_service('/moveit_collision_check/check_collision')
+  check_collision = rospy.ServiceProxy('/moveit_collision_check/check_collision', CheckCollision)
+
   listener = tf.TransformListener()
   dawn_ik_goal_pub = rospy.Publisher("/dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
   marker_pub = rospy.Publisher("~goal_marker", Marker, queue_size = 5)
@@ -95,6 +101,9 @@ if __name__ == "__main__":
   f_roll = interpolate.interp1d(w_t, w_roll)
   f_pitch = interpolate.interp1d(w_t, w_pitch)
   f_yaw = interpolate.interp1d(w_t, w_yaw)
+
+  # wait for everything to initialize
+  rospy.sleep(10.0)
 
   rate = rospy.Rate(publish_rate)
   t = 0.0
@@ -125,8 +134,7 @@ if __name__ == "__main__":
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     entry["ee_goal"] = {"x": x, "y": y, "z": z, "roll": goal_roll, "pitch": goal_pitch, "yaw": goal_yaw}
 
-    #################### wait for robots to move #################################
-    rate.sleep()
+    rate.sleep() #################### wait for robots to move #################################
 
     # ENTRY: EE CURRENT
     try:
@@ -160,21 +168,30 @@ if __name__ == "__main__":
     entries.append(entry)
 
     t += 1.0/publish_rate
-    if t>t_max: t=0.0
-    #if t>t_max:break
+    #if t>t_max: t=0.0
+    if t>t_max:break
 
   #rospy.spin()
 
-  # save results to a file
-  timestr = time.strftime("%Y%m%d-%H%M%S")
+  #################### check for collisions after the experiment is done #################################
+  rospy.loginfo("Started offline collision checking")
+  for entry in entries:
+    js = JointState()
+    js.name = entry["joint_names"]
+    js.position = entry["joint_positions"]
+    res = check_collision(js) # remove procedure call
+    entry["collision_state"] = res.collision_state
+    entry["collision_distance"] = res.collision_distance
+  rospy.loginfo("Finished offline collision checking")
   
+  #################### save results to a file #################################
+  timestr = time.strftime("%Y%m%d-%H%M%S")
   out_filename_default = SCRIPT_DIR + "/../../results/experiment_" + timestr + ".json" # or yaml
-  out_filename = rospy.get_param("~out_filename", out_filename_default)
-  if out_filename == "":
-    out_filename = out_filename_default
+  out_filename = rospy.get_param("~output_file", out_filename_default)
+  if out_filename == "": out_filename = out_filename_default
 
   with open(out_filename, "w") as f:
-    #f.write(yaml.dump(entries, default_flow_style=None, sort_keys=False))
-    f.write(json.dumps(entries))
+    #f.write(yaml.dump(entries, default_flow_style=None, sort_keys=False)) # yaml is better at storing human readable data
+    f.write(json.dumps(entries)) # json is better at storing machine readable data
 
   print("Experiment Finished!")
