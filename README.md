@@ -148,7 +148,16 @@ Before doing the experiments make sure that:
 For doing the experiments you can start everything **ALL-IN-ONE** line. Stop roscore and all other things. Available robots for experiments are `horti`, `lite6` and `mick`. Available solvers are `dawn_ik` and `collision_ik`.
 
 ```bash
+# Example: Horti + DawnIK + test.txt
+$ roscd dawn_ik/include/dawn_ik/robot_configuration
+$ cp horti.h autogen_test.h
+$ catkin build
 $ roslaunch dawn_ik run_experiment.launch robot_name:=horti solver:=dawn_ik waypoints_file:=test endpoint_frame:=head_link_eef
+
+# Example: Lite6 + CollisionIK + lower_y.txt
+$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
+$ cp lite6_settings.yaml settings.yaml # overwriting!
+$ roslaunch dawn_ik run_experiment.launch robot_name:=lite6 solver:=collision_ik waypoints_file:=lower_y endpoint_frame:=link_eef
 ```
 
 Waypoints are located in `waypoints` folder. Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.

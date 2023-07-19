@@ -21,6 +21,8 @@
     <param name="wait_for_init" value="$(arg wait_for_init)"/>
     <param name="wait_for_solver" value="$(arg wait_for_solver)"/>
     <param name="wait_for_shutdown" value="$(arg wait_for_shutdown)"/>
+    <param name="world_frame" value="$(arg world_frame)"/>
+    <param name="endpoint_frame" value="$(arg endpoint_frame)"/>
   </node>
 
   <!-- offline collision check service used by run_experiment.py -->
