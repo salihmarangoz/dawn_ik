@@ -46,8 +46,10 @@ def parse_obj_parameters(obj):
 
 
 if __name__ == "__main__":
+    print("This script has hardcoded values. Dont forget to check the code!")
     SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
-    YAML_PATH = SCRIPT_PATH + "/../../cfg/horti.yaml"
+    #YAML_PATH = SCRIPT_PATH + "/../../cfg/horti.yaml"
+    YAML_PATH = SCRIPT_PATH + "/../../cfg/mick.yaml"
     WORLD_FRAME = "head_link_base"
 
     rospy.init_node('export_to_collision_ik_obstacles')

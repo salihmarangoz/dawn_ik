@@ -135,7 +135,9 @@ $ cp horti_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik horti_solver_collision_ik.launch
 
 # For mick + collision_ik:
-# TODO
+$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
+$ cp mick_settings.yaml settings.yaml # overwriting!
+$ roslaunch dawn_ik mick_solver_collision_ik.launch
 ```
 
 ### Experiments
@@ -166,7 +168,6 @@ Waypoints are located in `waypoints` folder. Results are saved into the `results
 
 - Use PILZ planner for other arms.
 - Predefine movements for other arms.
-- Add collision_ik configurations for mick robot.
 - Add number of repetitions for the waypoints.
 
 ### Footnotes
