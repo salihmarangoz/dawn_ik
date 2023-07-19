@@ -147,7 +147,10 @@ Results are saved into the `results` folder. For analyzing and generating figure
 ### TODO
 
 - Let the solvers to go to the initialized position at the start.
-- 
+- Use PILZ planner for other arms.
+- Predefine movements for other arms.
+- Add configurations for mick robot.
+- Test experiments for lite6.
 
 ### Footnotes
 
