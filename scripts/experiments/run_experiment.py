@@ -175,6 +175,7 @@ if __name__ == "__main__":
 
   #################### check for collisions after the experiment is done #################################
   rospy.loginfo("Started offline collision checking")
+  total_collisions = 0
   for entry in entries:
     js = JointState()
     js.name = entry["joint_names"]
@@ -182,7 +183,9 @@ if __name__ == "__main__":
     res = check_collision(js) # remove procedure call
     entry["collision_state"] = res.collision_state
     entry["collision_distance"] = res.collision_distance
+    total_collisions += int(res.collision_state)
   rospy.loginfo("Finished offline collision checking")
+  rospy.loginfo("Total collisions: " + str(total_collisions))
   
   #################### save results to a file #################################
   timestr = time.strftime("%Y%m%d-%H%M%S")

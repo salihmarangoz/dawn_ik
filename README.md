@@ -77,6 +77,7 @@ $ roslaunch dawn_ik xarm5_sim.launch
 $ roslaunch dawn_ik xarm6_sim.launch
 $ roslaunch dawn_ik xarm7_sim.launch
 $ roslaunch dawn_ik horti_sim.launch
+#$ roslaunch dawn_ik mick_sim.launch TODO
 
 # or without Gazebo (using fake_joints)
 $ roslaunch dawn_ik lite6_fake.launch
@@ -84,6 +85,7 @@ $ roslaunch dawn_ik xarm5_fake.launch
 $ roslaunch dawn_ik xarm6_fake.launch
 $ roslaunch dawn_ik xarm7_fake.launch
 $ roslaunch dawn_ik horti_fake.launch
+$ roslaunch dawn_ik mick_fake.launch
 ```
 
 ### Code Generation
@@ -101,6 +103,7 @@ $ rosrun dawn_ik robot_parser_node _cfg:=xarm5
 $ rosrun dawn_ik robot_parser_node _cfg:=xarm6
 $ rosrun dawn_ik robot_parser_node _cfg:=xarm7
 $ rosrun dawn_ik robot_parser_node _cfg:=horti
+#$ rosrun dawn_ik robot_parser_node _cfg:=mick TODO
 
 # Re-compile the project after this step. 
 ```
@@ -116,17 +119,21 @@ $ roslaunch dawn_ik xarm5_solver.launch
 $ roslaunch dawn_ik xarm6_solver.launch
 $ roslaunch dawn_ik xarm7_solver.launch
 $ roslaunch dawn_ik horti_solver.launch
+#$ roslaunch dawn_ik mick_solver.launch TODO
 
 # If you would like to use collision_ik...
+# For lite6 + collision_ik:
+$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
+$ cp lite6_settings.yaml settings.yaml # overwriting!
+$ roslaunch dawn_ik lite6_solver_collision_ik.launch
+
 # For horti + collision_ik:
 $ roscd relaxed_ik_ros1/relaxed_ik_core/config/
 $ cp horti_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik horti_solver_collision_ik.launch
 
-# For lite6 + collision_ik:
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp lite6_settings.yaml settings.yaml # overwriting!
-$ roslaunch dawn_ik lite6_solver_collision_ik.launch
+# For mick + collision_ik:
+# TODO
 ```
 
 ### Experiments
@@ -136,13 +143,13 @@ Before doing the experiments make sure that:
 - Generated code is for that robot, while using dawn_ik.
 - `settings.yaml` is set for that robot, while using collision_ik.
 
-For doing the experiments you can start everything **ALL-IN-ONE** line. Check the launch file for the description of the input args.
+For doing the experiments you can start everything **ALL-IN-ONE** line. Stop roscore and all other things. Available robots for experiments are `horti`, `lite6` and `mick`. Available solvers are `dawn_ik` and `collision_ik`.
 
 ```bash
 $ roslaunch dawn_ik run_experiment.launch robot_name:=horti solver:=dawn_ik waypoints_file:=test endpoint_frame:=head_link_eef
 ```
 
-Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.
+Waypoints are located in `waypoints` folder. Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.
 
 ### TODO
 
@@ -153,6 +160,8 @@ Results are saved into the `results` folder. For analyzing and generating figure
 - Test experiments for lite6.
 - Make wait time at the start parametric.
 - Save pre-generated autogen headers for different robots to skip the code generation step.
+- Add wait time after the waypoints finished.
+- Add number of repetitions for the waypoints.
 
 ### Footnotes
 
