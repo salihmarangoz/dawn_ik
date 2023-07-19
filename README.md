@@ -151,6 +151,8 @@ Results are saved into the `results` folder. For analyzing and generating figure
 - Predefine movements for other arms.
 - Add configurations for mick robot.
 - Test experiments for lite6.
+- Make wait time at the start parametric.
+- Save pre-generated autogen headers for different robots to skip the code generation step.
 
 ### Footnotes
 

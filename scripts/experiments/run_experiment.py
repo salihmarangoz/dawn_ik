@@ -194,4 +194,6 @@ if __name__ == "__main__":
     #f.write(yaml.dump(entries, default_flow_style=None, sort_keys=False)) # yaml is better at storing human readable data
     f.write(json.dumps(entries)) # json is better at storing machine readable data
 
-  print("Experiment Finished!")
+  print("=====================================================")
+  print("Experiment Finished. Everything will be closed now...")
+  print("=====================================================")
