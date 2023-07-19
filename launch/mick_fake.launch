@@ -19,6 +19,9 @@
     <!-- robot description is loaded by gazebo.launch, to enable Gazebo features -->
     <arg name="load_robot_description" value="false" />
     <arg name="moveit_controller_manager" value="ros_control" />
+    <arg name="use_rviz" value="false"/>
   </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find dawn_ik)/dawn_ik.rviz"/>
 
 </launch>

@@ -43,13 +43,10 @@
 
  <arg name="controller_config_file" default="$(find mick_description)/config/gazebo_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
   <rosparam file="$(arg controller_config_file)" command="load"/>
-  <arg name="stopped_controllers" default="head_controller other_controller" doc="Controllers that are initally loaded, but not started."/>
+  <arg name="stopped_controllers" default="" doc="Controllers that are initally loaded, but not started."/>
   
 
-  <!-- Load other controllers, but do not start them -->
-  <node name="ros_control_stopped_spawner" pkg="controller_manager" type="spawner"
-    args="--stopped $(arg stopped_controllers)" output="screen" respawn="false" />
-    <arg name="controllers" default="joint_state_controller" doc="Controllers that are activated by default."/>
+    <arg name="controllers" default="joint_state_controller head_controller other_controller" doc="Controllers that are activated by default."/>
     <!-- Load and start the controllers listed in the 'controllers' arg. -->
   <node name="ros_control_controller_spawner" pkg="controller_manager" type="controller_manager"
     args="spawn $(arg controllers)" output="screen" respawn="false"  />

@@ -97,13 +97,15 @@ $ roslaunch dawn_ik mick_fake.launch
 Make sure the robot description is loaded. (if the fake/sim is running then it is probably loaded). Re-compile the project after this step. 
 
 ```bash
+# To skip the code generation step, replace autogen_test.h with pre-generated headers (lite6.h, horti.h, etc.)
+
 # select one!
 $ rosrun dawn_ik robot_parser_node _cfg:=lite6
 $ rosrun dawn_ik robot_parser_node _cfg:=xarm5
 $ rosrun dawn_ik robot_parser_node _cfg:=xarm6
 $ rosrun dawn_ik robot_parser_node _cfg:=xarm7
 $ rosrun dawn_ik robot_parser_node _cfg:=horti
-#$ rosrun dawn_ik robot_parser_node _cfg:=mick TODO
+$ rosrun dawn_ik robot_parser_node _cfg:=mick
 
 # Re-compile the project after this step. 
 ```
@@ -119,7 +121,7 @@ $ roslaunch dawn_ik xarm5_solver.launch
 $ roslaunch dawn_ik xarm6_solver.launch
 $ roslaunch dawn_ik xarm7_solver.launch
 $ roslaunch dawn_ik horti_solver.launch
-#$ roslaunch dawn_ik mick_solver.launch TODO
+$ roslaunch dawn_ik mick_solver.launch
 
 # If you would like to use collision_ik...
 # For lite6 + collision_ik:
@@ -153,14 +155,10 @@ Waypoints are located in `waypoints` folder. Results are saved into the `results
 
 ### TODO
 
-- Let the solvers to go to the initialized position at the start.
 - Use PILZ planner for other arms.
 - Predefine movements for other arms.
-- Add configurations for mick robot.
+- Add collision_ik configurations for mick robot.
 - Test experiments for lite6.
-- Make wait time at the start parametric.
-- Save pre-generated autogen headers for different robots to skip the code generation step.
-- Add wait time after the waypoints finished.
 - Add number of repetitions for the waypoints.
 
 ### Footnotes

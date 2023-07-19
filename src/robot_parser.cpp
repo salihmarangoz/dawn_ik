@@ -214,6 +214,15 @@ bool RobotParser::parse()
           processed_acm(i,j) = 1;
           continue;
         }
+
+        // mick tricks...
+        if (all_links[i].find("other_") != std::string::npos && all_links[j].find("other_") != std::string::npos)
+        {
+          ROS_FATAL_ONCE("Applying extra rules for mick robot!!!");
+          ROS_WARN("Discarding collision checking between %s and %s", all_links[i].c_str(), all_links[j].c_str());
+          processed_acm(i,j) = 1;
+          continue;
+        }
       }
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
     }

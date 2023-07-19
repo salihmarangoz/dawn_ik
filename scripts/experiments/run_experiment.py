@@ -51,7 +51,7 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   pose.orientation.y =  quad[1]
   pose.orientation.z =  quad[2]
   pose.orientation.w =  quad[3]
-  marker.header.frame_id = "world"
+  marker.header.frame_id = world_frame
   marker.type = marker.SPHERE
   marker.id = 53
   marker.action = marker.ADD
@@ -74,6 +74,9 @@ if __name__ == "__main__":
   publish_rate = rospy.get_param("~publish_rate", 100.0)
   world_frame = rospy.get_param("~world_frame", "world")
   endpoint_frame = rospy.get_param("~endpoint_frame", "head_link_eef")
+  wait_for_init = rospy.get_param("~wait_for_init", 5.0)
+  wait_for_solver = rospy.get_param("~wait_for_solver", 5.0)
+  wait_for_shutdown = rospy.get_param("~wait_for_shutdown", 2.0)
 
   rospy.loginfo("Waiting for the check_collision service...")
   rospy.wait_for_service('/moveit_collision_check/check_collision')
@@ -103,12 +106,24 @@ if __name__ == "__main__":
   f_yaw = interpolate.interp1d(w_t, w_yaw)
 
   # wait for everything to initialize
-  rospy.sleep(10.0)
+  rospy.sleep(wait_for_init)
+
+  # let the solvers to move the arm to the initial state
+  t = 0.0
+  x = float(f_x(t))
+  y = float(f_y(t))
+  z = float(f_z(t))
+  roll = f_roll(t)
+  pitch = float(f_pitch(t))
+  yaw = float(f_yaw(t))
+  publish_ee_goal(x,y,z,roll,pitch,yaw)
+
+  # wait for the solver to move the robot to the initial pose
+  rospy.sleep(wait_for_solver)
 
   rate = rospy.Rate(publish_rate)
-  t = 0.0
-  rospy.sleep(1)
   entries = []
+  wait_for_shutdown_remained = wait_for_shutdown
   while not rospy.is_shutdown():
     # Experiment entries...
     entry = {}
@@ -168,10 +183,10 @@ if __name__ == "__main__":
     entries.append(entry)
 
     t += 1.0/publish_rate
-    #if t>t_max: t=0.0
-    if t>t_max:break
-
-  #rospy.spin()
+    if t>t_max:
+      t = t_max
+      wait_for_shutdown_remained -= 1.0/publish_rate
+      if wait_for_shutdown_remained < 0: break
 
   #################### check for collisions after the experiment is done #################################
   rospy.loginfo("Started offline collision checking")
