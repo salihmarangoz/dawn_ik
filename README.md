@@ -73,17 +73,11 @@ sudo ldconfig
 ```bash
 # select one!
 $ roslaunch dawn_ik lite6_sim.launch
-$ roslaunch dawn_ik xarm5_sim.launch
-$ roslaunch dawn_ik xarm6_sim.launch
-$ roslaunch dawn_ik xarm7_sim.launch
 $ roslaunch dawn_ik horti_sim.launch
 #$ roslaunch dawn_ik mick_sim.launch TODO
 
 # or without Gazebo (using fake_joints)
 $ roslaunch dawn_ik lite6_fake.launch
-$ roslaunch dawn_ik xarm5_fake.launch
-$ roslaunch dawn_ik xarm6_fake.launch
-$ roslaunch dawn_ik xarm7_fake.launch
 $ roslaunch dawn_ik horti_fake.launch
 $ roslaunch dawn_ik mick_fake.launch
 ```
@@ -101,9 +95,6 @@ Make sure the robot description is loaded. (if the fake/sim is running then it i
 
 # select one!
 $ rosrun dawn_ik robot_parser_node _cfg:=lite6
-$ rosrun dawn_ik robot_parser_node _cfg:=xarm5
-$ rosrun dawn_ik robot_parser_node _cfg:=xarm6
-$ rosrun dawn_ik robot_parser_node _cfg:=xarm7
 $ rosrun dawn_ik robot_parser_node _cfg:=horti
 $ rosrun dawn_ik robot_parser_node _cfg:=mick
 
@@ -117,9 +108,6 @@ DawnIK and CollisionIK (with goal+collision adapter) are available.
 ```bash
 # If you would like to use our solver, select one!
 $ roslaunch dawn_ik lite6_solver.launch
-$ roslaunch dawn_ik xarm5_solver.launch
-$ roslaunch dawn_ik xarm6_solver.launch
-$ roslaunch dawn_ik xarm7_solver.launch
 $ roslaunch dawn_ik horti_solver.launch
 $ roslaunch dawn_ik mick_solver.launch
 
