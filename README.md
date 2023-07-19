@@ -167,7 +167,6 @@ Waypoints are located in `waypoints` folder. Results are saved into the `results
 - Use PILZ planner for other arms.
 - Predefine movements for other arms.
 - Add collision_ik configurations for mick robot.
-- Test experiments for lite6.
 - Add number of repetitions for the waypoints.
 
 ### Footnotes
