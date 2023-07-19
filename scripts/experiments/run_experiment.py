@@ -17,7 +17,7 @@ import json
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-AXES = "szyx"
+AXES = "rxyz"
 
 traj_pub = None
 listener = None
@@ -31,12 +31,12 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   dawnik_goal.m1_z = z
   dawnik_goal.m1_limit_dist = 0.1
   dawnik_goal.m1_weight = 4
-  quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw, axes=AXES)
+  quad = tf.transformations.quaternion_from_euler(float(roll), float(pitch), float(yaw), axes=AXES)
   dawnik_goal.m2_x = quad[0]
   dawnik_goal.m2_y = quad[1]
   dawnik_goal.m2_z = quad[2]
   dawnik_goal.m2_w = quad[3]
-  dawnik_goal.m2_weight = 2
+  dawnik_goal.m2_weight = 10
   dawn_ik_goal_pub.publish(dawnik_goal)
 
   marker = Marker()
@@ -44,7 +44,7 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   pose.position.x = x
   pose.position.y = y
   pose.position.z = z
-  #quad = tf.transformations.quaternion_from_euler(roll, pitch, yaw, axes=AXES)
+  #quad = tf.transformations.quaternion_from_euler(float(roll), float(pitch), float(yaw), axes=AXES)
   pose.orientation.x =  quad[0]
   pose.orientation.y =  quad[1]
   pose.orientation.z =  quad[2]
@@ -108,14 +108,22 @@ if __name__ == "__main__":
     entry["time"] = t
 
     # ENTRY: EE GOAL
-    x = f_x(t)
-    y = f_y(t)
-    z = f_z(t)
+    x = float(f_x(t))
+    y = float(f_y(t))
+    z = float(f_z(t))
     roll = f_roll(t)
-    pitch = f_pitch(t)
-    yaw = f_yaw(t)
+    pitch = float(f_pitch(t))
+    yaw = float(f_yaw(t))
     publish_ee_goal(x,y,z,roll,pitch,yaw)
-    entry["ee_goal"] = {"x": float(x), "y": float(y), "z": float(z), "roll": float(roll), "pitch": float(pitch), "yaw": float(yaw)}
+
+    # casting to float to avoid an annoying bug which can modifiy the input variables. See the PR: https://github.com/ros/geometry/pull/241
+    goal_quad = np.array( tf.transformations.quaternion_from_euler(float(roll), float(pitch), float(yaw), axes=AXES) )
+    (goal_roll, goal_pitch, goal_yaw) = tf.transformations.euler_from_quaternion(goal_quad)
+
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # roll,pitch,yaw are in "rxyz" but goal_roll, goal_pitch, goal_yaw are in "sxyz" which is the default in ROS.
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    entry["ee_goal"] = {"x": x, "y": y, "z": z, "roll": goal_roll, "pitch": goal_pitch, "yaw": goal_yaw}
 
     #################### wait for robots to move #################################
     rate.sleep()
@@ -124,14 +132,24 @@ if __name__ == "__main__":
     try:
       (curr_trans, curr_rot) = listener.lookupTransform(world_frame, endpoint_frame, rospy.Time(0))
       (curr_roll, curr_pitch, curr_yaw) = tf.transformations.euler_from_quaternion(curr_rot)
-      curr_x = curr_trans[0]
-      curr_y = curr_trans[1]
-      curr_z = curr_trans[2]
+      curr_roll = float(curr_roll)
+      curr_pitch = float(curr_pitch)
+      curr_yaw = float(curr_yaw)
+      curr_x = float(curr_trans[0])
+      curr_y = float(curr_trans[1])
+      curr_z = float(curr_trans[2])
     except Exception as e:
       rospy.logerr("tf error. experiment failed!")
       print(e)
       exit(-1)
-    entry["ee_curr"] = {"x": float(curr_x), "y": float(curr_y), "z": float(curr_z), "roll": float(curr_roll), "pitch": float(curr_pitch), "yaw": float(curr_yaw)}
+    entry["ee_curr"] = {"x": curr_x, "y": curr_y, "z": curr_z, "roll": curr_roll, "pitch": curr_pitch, "yaw": curr_yaw}
+    #print(curr_roll, curr_pitch, curr_yaw, "-->", goal_roll, goal_pitch, goal_yaw)
+
+    # ENTRY: theta_diff
+    # https://math.stackexchange.com/questions/90081/quaternion-distance
+    theta_diff = np.arccos( 2*np.sum((goal_quad*curr_rot))**2 - 1 )
+    entry["theta_diff"] = theta_diff
+    #print(theta_diff)
 
     # ENTRY: JOINT STATES
     entry["joint_names"] = list(current_joint_state.name)
@@ -139,15 +157,11 @@ if __name__ == "__main__":
     entry["joint_velocities"] = list(current_joint_state.velocity)
     entry["joint_efforts"] = list(current_joint_state.effort)
 
-
-    # TODO: DEBUG ROTATIONS.............
-    print(entry["ee_goal"])
-    print(entry["ee_curr"])
-
     entries.append(entry)
 
     t += 1.0/publish_rate
-    if t>t_max:break
+    if t>t_max: t=0.0
+    #if t>t_max:break
 
   #rospy.spin()
 
