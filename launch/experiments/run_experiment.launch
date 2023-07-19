@@ -14,7 +14,7 @@
   <!-- waypoint generator and logger -->
   <node name="run_experiment" pkg="dawn_ik" type="run_experiment.py" output="screen" required="true">
     <param name="waypoints_file" value="$(find dawn_ik)/waypoints/$(arg robot_name)/$(arg waypoints_file).txt"/>
-    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg waypoints_file)_$(arg solver).json"/>
+    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg waypoints_file)-$(arg solver).json"/>
   </node>
 
   <!-- offline collision check service used by run_experiment.py -->
