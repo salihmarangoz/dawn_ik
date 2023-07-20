@@ -89,6 +89,8 @@ private:
   Eigen::Vector3d endpoint;
   Eigen::Quaterniond direction;
 
+  std::deque<Command> command_history;
+
   double acc_loss_weight;
 
   ros::Publisher debug_pub;

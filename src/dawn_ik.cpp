@@ -102,6 +102,10 @@ void DawnIK::loopThread()
       // If we initialize using the previous joint state without noise, we can find a smooth solution quickly, but we it may take some time for the robot to escape these singularities.
       // Solution would be solving with both methods simultaneously (multi-threaded) and selecting the best solution.
       // TODO: split to threads, otherwise this loop cycle may exceed the limit
+      command_history.clear();
+      command_history = robot_monitor->getCommandHistory();
+      auto latest_command = command_history.front();
+
       IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
       IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
       if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
@@ -111,6 +115,7 @@ void DawnIK::loopThread()
 
       // Publish output
       joint_controller->setJointPositions(target_names, ik_solution.target_positions.data());
+      //joint_controller->setJointPositionsWithOTG(target_names, ik_solution.target_positions.data(), latest_command.position, latest_command.velocity);
 
       // Save history
       bool keep_history_with_previous_solutions = true;
@@ -145,9 +150,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   JointLinkCollisionStateConstPtr monitor_state = robot_monitor->getState();
   const std::vector<CollisionObject*> int_objects = robot_monitor->getInternalObjects();
 
-  auto command_history = robot_monitor->getCommandHistory();
+  //auto command_history = robot_monitor->getCommandHistory();
   auto latest_command = command_history.front();
-
   std::vector<double> variable_positions(robot::num_variables, 0.0);
   std::vector<double> variable_velocities(robot::num_variables, 0.0);
   for (int i=0; i< monitor_state->joint_state.name.size(); i++)
@@ -172,7 +176,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
     const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
 
-    optm_target_positions[target_idx]    = variable_positions[variable_idx];
+    optm_target_positions[target_idx]    = latest_command.position[target_idx];
     curr_target_positions[target_idx]    = latest_command.position[target_idx];
     curr_target_velocities[target_idx]   = latest_command.velocity[target_idx];
     // Add noise to the init state to quickly escape form gimball locks, etc.
