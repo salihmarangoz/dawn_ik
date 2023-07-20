@@ -10,6 +10,7 @@ from interactive_markers.menu_handler import *
 from dawn_ik.msg import *
 from visualization_msgs.msg import *
 from geometry_msgs.msg import Point
+import tf
 
 
 class RvizController:
@@ -20,6 +21,7 @@ class RvizController:
     self.goal = IKGoal()
 
     self.menu_handler = MenuHandler()
+    self.menu_handler.insert( "PRINT_POSE", callback=self.processFeedback )
     self.menu_handler.insert( "IDLE", callback=self.processFeedback )
     self.menu_handler.insert( "ENDPOINT_POSE", callback=self.processFeedback )
     self.menu_handler.insert( "ENDPOINT_POSE_ORIENTATION", callback=self.processFeedback )
@@ -29,7 +31,7 @@ class RvizController:
     self.header = None
     self.endpoint_pose = None
     self.target_pose = None
-    self.menu_entry_id = 1
+    self.menu_entry_id = 2
     self.feedback = None
 
     position = Point( 0.5, 0, 0)
@@ -42,14 +44,20 @@ class RvizController:
   def updateGoal(self):
     self.goal = IKGoal()
 
-    IDLE                        = 1
-    ENDPOINT_POSE               = 2
-    ENDPOINT_POSE_ORIENTATION   = 3
-    ENDPOINT_POSE_ORIENTATION_A = 4
-    ENDPOINT_POSE_LOOKATGOAL    = 5
+    PRINT_POSE                  = 1
+    IDLE                        = 2
+    ENDPOINT_POSE               = 3
+    ENDPOINT_POSE_ORIENTATION   = 4
+    ENDPOINT_POSE_ORIENTATION_A = 5
+    ENDPOINT_POSE_LOOKATGOAL    = 6
 
     #############################################################################
-    if self.menu_entry_id == IDLE:
+    if self.menu_entry_id == PRINT_POSE:
+      (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([self.endpoint_pose.orientation.x, self.endpoint_pose.orientation.y, self.endpoint_pose.orientation.z, self.endpoint_pose.orientation.w], axes="rxyz")
+      x, y, z = self.endpoint_pose.position.x, self.endpoint_pose.position.y, self.endpoint_pose.position.z
+      rospy.logwarn("POSE (xyzrpy): {} {} {} {} {} {}".format(x,y,z,roll,pitch,yaw))
+    #############################################################################
+    elif self.menu_entry_id == IDLE:
       self.goal.mode = IKGoal.MODE_0
     #############################################################################
     elif self.menu_entry_id == ENDPOINT_POSE:
