@@ -159,8 +159,6 @@ Waypoints are located in `waypoints` folder. Results are saved into the `results
 
 ### TODO
 
-- Use PILZ planner for other arms.
-- Predefine movements for other arms.
 - Add number of repetitions for the waypoints.
 
 ### Footnotes

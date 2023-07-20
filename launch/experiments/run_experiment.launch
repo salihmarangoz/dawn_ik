@@ -17,7 +17,7 @@
   <!-- waypoint generator and logger -->
   <node name="run_experiment" pkg="dawn_ik" type="run_experiment.py" output="screen" required="true">
     <param name="waypoints_file" value="$(find dawn_ik)/waypoints/$(arg robot_name)/$(arg waypoints_file).txt"/>
-    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg waypoints_file)-$(arg solver)-$(arg trajectory_file).json"/>
+    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg solver)-$(arg waypoints_file)-$(arg trajectory_file).json"/>
     <param name="wait_for_init" value="$(arg wait_for_init)"/>
     <param name="wait_for_solver" value="$(arg wait_for_solver)"/>
     <param name="wait_for_shutdown" value="$(arg wait_for_shutdown)"/>
