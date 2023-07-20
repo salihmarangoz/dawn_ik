@@ -314,6 +314,19 @@ double computeSquaredDistancePointToLineSegment(double p_[3], double a_[3], doub
   return e.dot(e);
 }
 
+template< typename T>
+T getBoundedValue(const T& value, const T& bound)
+{
+  if(value > bound)
+    return bound;
+  if(value < -bound)
+    return -bound;
+
+  return value;
+}
+
+
+
 } // namespace utils
 
 #endif // DAWN_IK_UTILS_H

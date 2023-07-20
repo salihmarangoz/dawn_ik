@@ -249,11 +249,11 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
   // ============= LimitAccelerationGoal ============
-  ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
+  //ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
   //ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(200.0, 0.05);
 
-  ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 10.0, ceres::TAKE_OWNERSHIP); // goal weight
-  problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
+  //ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 10.0, ceres::TAKE_OWNERSHIP); // goal weight
+  //problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
 
   /* TODO
   if (solver_history.size() == 3)
@@ -297,10 +297,18 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     if (!robot::joint_is_position_bounded[joint_idx]) continue;
 
     // TODO: EXPERIMENTAL PROBLEM BOUNDARIES
+
+    double qddot_max =  utils::getBoundedValue((shared_block.command_history[0].acceleration[target_idx]) + (10*0.1), M_PI);
+    double qddot_min =  utils::getBoundedValue((shared_block.command_history[0].acceleration[target_idx]) - (10*0.1), M_PI);
+
+    double qdot_max = utils::getBoundedValue((shared_block.command_history[0].velocity[target_idx]) + qddot_max*(0.1), M_PI);
+    double qdot_min = utils::getBoundedValue((shared_block.command_history[0].velocity[target_idx]) + qddot_min*(0.1), M_PI);
+    //double q_max1 = (shared_block.command_history[0].position[target_idx]) + qdot_max*(0.01);
+    //double q_max2 = (shared_block.command_history[0].position[target_idx]) + qdot_min*(0.01);
     if (p_max_step_size > 0.0 && options.minimizer_type == TRUST_REGION)
     {
-      double min_val = curr_target_positions[target_idx] - p_max_step_size;
-      double max_val = curr_target_positions[target_idx] + p_max_step_size;
+      double min_val = curr_target_positions[target_idx] - p_max_step_size; //qdot_min*0.1; //p_max_step_size;
+      double max_val = curr_target_positions[target_idx] + p_max_step_size; //qdot_max*0.1; //p_max_step_size;
       if (robot::joint_min_position[joint_idx] > min_val) min_val = robot::joint_min_position[joint_idx];
       if (robot::joint_max_position[joint_idx] < max_val) max_val = robot::joint_max_position[joint_idx];
       problem.SetParameterLowerBound(optm_target_positions, target_idx, min_val); 
