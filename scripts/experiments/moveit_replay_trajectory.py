@@ -31,7 +31,7 @@ def trigger_cb(req):
   global is_triggered
   rospy.loginfo("moveit_replay_trajectory triggered!")
   is_triggered = True
-  return True
+  return std_srvs.srv.EmptyResponse()
 
 if __name__ == "__main__":
   rospy.init_node('moveit_replay_trajectory')

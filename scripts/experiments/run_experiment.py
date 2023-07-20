@@ -6,6 +6,7 @@ import numpy as np
 
 from dawn_ik.msg import IKGoal
 from moveit_collision_check.srv import CheckCollision
+from std_srvs.srv import Empty
 
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -77,10 +78,15 @@ if __name__ == "__main__":
   wait_for_init = rospy.get_param("~wait_for_init", 5.0)
   wait_for_solver = rospy.get_param("~wait_for_solver", 5.0)
   wait_for_shutdown = rospy.get_param("~wait_for_shutdown", 2.0)
+  trigger_moveit_replay_trajectory = rospy.get_param("~trigger_moveit_replay_trajectory", False)
 
   rospy.loginfo("Waiting for the check_collision service...")
   rospy.wait_for_service('/moveit_collision_check/check_collision')
   check_collision = rospy.ServiceProxy('/moveit_collision_check/check_collision', CheckCollision)
+
+  if trigger_moveit_replay_trajectory:
+    rospy.wait_for_service('/moveit_replay_trajectory/trigger')
+    replay_trigger = rospy.ServiceProxy('/moveit_replay_trajectory/trigger', Empty)
 
   listener = tf.TransformListener()
   dawn_ik_goal_pub = rospy.Publisher("/dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
@@ -120,6 +126,9 @@ if __name__ == "__main__":
 
   # wait for the solver to move the robot to the initial pose
   rospy.sleep(wait_for_solver)
+
+  if trigger_moveit_replay_trajectory:
+    res = replay_trigger()
 
   rate = rospy.Rate(publish_rate)
   entries = []
