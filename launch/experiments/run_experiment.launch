@@ -9,9 +9,9 @@
   <arg name="solver" default="dawn_ik"/> <!-- values: dawn_ik or collision_ik or empty string to disable -->
   <arg name="world_frame" default="world"/>
   <arg name="start_sim" default="True"/>
-  <arg name="wait_for_init" default="5.0"/>
-  <arg name="wait_for_solver" default="5.0"/>
-  <arg name="wait_for_shutdown" default="2.0"/>
+  <arg name="wait_for_init" default="10.0"/>
+  <arg name="wait_for_solver" default="10.0"/>
+  <arg name="wait_for_shutdown" default="1.0"/>
   <!-- ========================================================= -->
 
   <!-- waypoint generator and logger -->

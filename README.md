@@ -93,6 +93,17 @@ Make sure the robot description is loaded. (if the fake/sim is running then it i
 
 ```bash
 # To skip the code generation step, replace autogen_test.h with pre-generated headers (lite6.h, horti.h, etc.)
+$ roscd dawn_ik/include/dawn_ik/robot_configuration
+
+# select one!
+$ cp lite6.h autogen_test.h
+$ cp horti.h autogen_test.h
+$ cp mick.h autogen_test.h
+
+$ catkin build
+
+############################################
+# To do the code generation step:
 
 # select one!
 $ rosrun dawn_ik robot_parser_node _cfg:=lite6
