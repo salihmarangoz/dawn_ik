@@ -24,3 +24,11 @@ For different use cases and parameters, check the script.
 $ rosrun dawn_ik moveit_replay_trajectory.py _bag_filename:="$(rospack find dawn_ik)/trajectories/2023-07-20-03-21-24.bag"
 ```
 
+Full example with `horti` fruit picking:
+
+```bash
+$ roslaunch dawn_ik horti_fake.launch
+$ roslaunch dawn_ik horti_solver.launch
+$ rosrun dawn_ik moveit_replay_trajectory.py _bag_filename:="$(rospack find dawn_ik)/trajectories/horti/fruit_picking.bag" _num_repeats:=-1
+```
+
