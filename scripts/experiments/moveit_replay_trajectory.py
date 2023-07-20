@@ -38,7 +38,7 @@ if __name__ == "__main__":
   delay = rospy.get_param("~delay", 0.0)
   bag_filename = rospy.get_param("~bag_filename", BAG_FILE)
   num_repeats = rospy.get_param("~num_repeats", 1) # num_repeats<=0 for infinite loop
-  wait_for_trigger = rospy.get_param("~wait_for_trigger", True)
+  wait_for_trigger = rospy.get_param("~wait_for_trigger", False)
   if int(num_repeats) == 0: num_repeats = -1
 
   is_triggered = not wait_for_trigger
