@@ -150,7 +150,7 @@ struct LimitVelocityGoal{
 
     for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
     {
-      residuals[target_idx] = T(3.0)*(target_values[target_idx] - shared_block.solver_history[0].at(target_idx));
+      residuals[target_idx] = T(1.0)*(target_values[target_idx] - shared_block.solver_history[0].at(target_idx));
     }
 
     return true;
@@ -182,9 +182,9 @@ struct LimitAccelerationGoal {
       //2 1 0 c -> history
       //c-1 -> current vel with central diff
       //0-2 -> last_vel with central diff
-      T current_vel = T(10)*(target_values[target_idx] - shared_block.solver_history[1].at(target_idx));
-      double last_vel = 10*(shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx));
-      residuals[target_idx] = T(20)*(current_vel - T(last_vel));
+      T current_vel = T(30)*(target_values[target_idx] - shared_block.solver_history[1].at(target_idx));
+      double last_vel = 30*(shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx));
+      residuals[target_idx] = T(30)*(current_vel - T(last_vel));
 
       // T current_vel = (target_values[target_idx] - shared_block.solver_history[0].at(target_idx)) / 0.01;
       // double last_vel = (shared_block.solver_history[0].at(target_idx) - shared_block.solver_history[1].at(target_idx)) / 0.01 ;
@@ -223,7 +223,7 @@ struct LimitJerkGoal {
       double v2 = (shared_block.solver_history[1].at(target_idx) - shared_block.solver_history[2].at(target_idx));
       T      a0 = (v0 - v1);
       double a1 = (v1 - v2);
-      residuals[target_idx] = T(200)*(a0-a1);
+      residuals[target_idx] = T(1000)*(a0-a1);
     }
     return true;
   }

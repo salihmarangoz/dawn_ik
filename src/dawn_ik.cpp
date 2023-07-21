@@ -48,8 +48,8 @@ DawnIK::~DawnIK()
 
 void DawnIK::readParameters()
 {
-  priv_nh.param("update_rate", p_update_rate, 100.0);
-  if (p_update_rate <= 0.0){ROS_ERROR("Invalid update_rate!"); p_update_rate = 100.0;}
+  priv_nh.param("update_rate", p_update_rate, 500.0);
+  if (p_update_rate <= 0.0){ROS_ERROR("Invalid update_rate!"); p_update_rate = 500.0;}
 
   priv_nh.param("init_noise", p_init_noise, 0.01);
   if (p_init_noise < 0.0){ROS_ERROR("Invalid init_noise!"); p_init_noise = 0.0;} // disable on error
@@ -289,13 +289,13 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
 //    // ============= LimitAccelerationGoal ============
     ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
-    ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(10.0, 1.1);
+    ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(1.2, 0.4);
 //    ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(limit_acceleration_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
     problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_loss, optm_target_positions);
 
 //    // ============= LimitJerkGoal ============
     ceres::CostFunction* limit_jerk_goal = LimitJerkGoal::Create(shared_block);
-    ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(10.0, 1.1);
+    ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(1.2, 0.4);
 //    ceres::LossFunction *limit_jerk_scaled_loss = new ceres::ScaledLoss(nullptr, 300.0, ceres::TAKE_OWNERSHIP); // goal weight
     problem.AddResidualBlock(limit_jerk_goal, limit_jerk_loss, optm_target_positions);
   }
