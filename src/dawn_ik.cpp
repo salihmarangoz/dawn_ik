@@ -106,7 +106,7 @@ void DawnIK::loopThread()
       command_history = robot_monitor->getCommandHistory();
       auto latest_command = command_history.front();
 
-      IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
+      IKSolution ik_solution = update(ik_goal_msg_copy, false); // noisy init
       IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
       if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
       {
@@ -114,9 +114,14 @@ void DawnIK::loopThread()
       }
 
       // Publish output
-      joint_controller->setJointPositions(target_names, ik_solution.target_positions.data());
-      //joint_controller->setJointPositionsWithOTG(target_names, ik_solution.target_positions.data(), latest_command.position, latest_command.velocity);
+//      if(latest_command.position_set)
+//      {
+//        joint_controller->setJointPositionsWithOTG(target_names, ik_solution.target_positions.data(), latest_command.position, latest_command.velocity);
 
+//      }
+//      else
+        joint_controller->setJointPositions(target_names, ik_solution.target_positions.data(), latest_command.position.data(), latest_command.velocity.data());
+      //
       // Save history
       bool keep_history_with_previous_solutions = true;
       if (keep_history_with_previous_solutions)
@@ -176,8 +181,17 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
     const int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
 
-    optm_target_positions[target_idx]    = latest_command.position[target_idx];
-    curr_target_positions[target_idx]    = latest_command.position[target_idx];
+    if(solver_history.size() > 0)
+    {
+
+      optm_target_positions[target_idx]    = solver_history[0].at(target_idx);
+      curr_target_positions[target_idx]    = solver_history[0].at(target_idx);
+    }
+    else
+    {
+      optm_target_positions[target_idx]    = latest_command.position[target_idx];
+      curr_target_positions[target_idx]    = latest_command.position[target_idx];
+    }
     curr_target_velocities[target_idx]   = latest_command.velocity[target_idx];
     // Add noise to the init state to quickly escape form gimball locks, etc.
     if (p_init_noise > 0 && noisy_initialization)
@@ -239,9 +253,10 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
   // ================== Endpoint Goal ==================
   ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block);
-  //ceres::HuberLoss *endpoint_loss = new ceres::HuberLoss(1.0); // goal weight
+  ceres::ArctanLoss *endpoint_loss = new ceres::ArctanLoss(0.4); // goal weight
   //ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
-  problem.AddResidualBlock(endpoint_goal, nullptr, optm_target_positions);
+  ceres::LossFunction *endpoint_scaled_loss = new ceres::ScaledLoss(endpoint_loss, 20000.0, ceres::TAKE_OWNERSHIP); // goal weight
+  problem.AddResidualBlock(endpoint_goal, endpoint_scaled_loss, optm_target_positions);
 
   // ================== Future Endpoint Goal ==================
   // TODO: a failed experiment
@@ -252,6 +267,9 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
+
+
+
   // ============= LimitAccelerationGoal ============
   //ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
   //ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(200.0, 0.05);
@@ -259,22 +277,29 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   //ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 10.0, ceres::TAKE_OWNERSHIP); // goal weight
   //problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
 
-  /* TODO
-  if (solver_history.size() == 3)
+  //TODO
+  if (solver_history.size() > 2)
   {
-    // ============= LimitAccelerationGoal ============
-    ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
-    ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(200.0, 0.05);
-    ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(limit_acceleration_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
-    problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_scaled_loss, optm_target_positions);
+    // ============= LimitVelocityGoal ============
+    ceres::CostFunction* limit_velocity_goal = LimitVelocityGoal::Create(shared_block);
+    ceres::LossFunction *limit_velocity_loss = new ceres::TolerantLoss(10.0, 1.1);
 
-    // ============= LimitJerkGoal ============
+    //ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 10.0, ceres::TAKE_OWNERSHIP); // goal weight
+    problem.AddResidualBlock(limit_velocity_goal, limit_velocity_loss, optm_target_positions);
+
+//    // ============= LimitAccelerationGoal ============
+    ceres::CostFunction* limit_acceleration_goal = LimitAccelerationGoal::Create(shared_block);
+    ceres::LossFunction *limit_acceleration_loss = new ceres::TolerantLoss(10.0, 1.1);
+//    ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(limit_acceleration_loss, 100.0, ceres::TAKE_OWNERSHIP); // goal weight
+    problem.AddResidualBlock(limit_acceleration_goal, limit_acceleration_loss, optm_target_positions);
+
+//    // ============= LimitJerkGoal ============
     ceres::CostFunction* limit_jerk_goal = LimitJerkGoal::Create(shared_block);
-    //ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(0.02, 0.05);
-    ceres::LossFunction *limit_jerk_scaled_loss = new ceres::ScaledLoss(nullptr, 300.0, ceres::TAKE_OWNERSHIP); // goal weight
-    problem.AddResidualBlock(limit_jerk_goal, limit_jerk_scaled_loss, optm_target_positions);
+    ceres::LossFunction *limit_jerk_loss = new ceres::TolerantLoss(10.0, 1.1);
+//    ceres::LossFunction *limit_jerk_scaled_loss = new ceres::ScaledLoss(nullptr, 300.0, ceres::TAKE_OWNERSHIP); // goal weight
+    problem.AddResidualBlock(limit_jerk_goal, limit_jerk_loss, optm_target_positions);
   }
-  */
+
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
   ceres::CostFunction* manipulability_goal = ManipulabilityGoal::Create(shared_block);
@@ -311,8 +336,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     //double q_max2 = (shared_block.command_history[0].position[target_idx]) + qdot_min*(0.01);
     if (p_max_step_size > 0.0 && options.minimizer_type == TRUST_REGION)
     {
-      double min_val = curr_target_positions[target_idx] - p_max_step_size; //qdot_min*0.1; //p_max_step_size;
-      double max_val = curr_target_positions[target_idx] + p_max_step_size; //qdot_max*0.1; //p_max_step_size;
+      double min_val = curr_target_positions[target_idx] - 3.14*0.05; //p_max_step_size; //qdot_min*0.1; //p_max_step_size;
+      double max_val = curr_target_positions[target_idx] + 3.14*0.05; //qdot_max*0.1; //p_max_step_size;
       if (robot::joint_min_position[joint_idx] > min_val) min_val = robot::joint_min_position[joint_idx];
       if (robot::joint_max_position[joint_idx] < max_val) max_val = robot::joint_max_position[joint_idx];
       problem.SetParameterLowerBound(optm_target_positions, target_idx, min_val); 
@@ -351,7 +376,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
   // DEBUG
   std_msgs::Float64MultiArray debug_msg; 
-  if (shared_block.solver_history.size() == 3)
+  if (shared_block.solver_history.size() > 2)
   {
     int idx = 1;
     double current_vel = (optm_target_positions[idx] - shared_block.solver_history[0].at(idx)) / 0.01;

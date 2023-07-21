@@ -56,23 +56,28 @@ struct Command
   std::vector<double> velocity;
   std::vector<double> acceleration;
   std::vector<double> jerk;
+  std::vector<double> velocity_smoothed;
+  bool position_set = false;
 
   //Command(){}
   Command():position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0), jerk(robot::num_targets, 0.0)
   {
   }
 
-  Command(const double& cycle_time): position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0),jerk(robot::num_targets, 0.0), time_diff(cycle_time)
+  Command(const double& cycle_time): position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0),jerk(robot::num_targets, 0.0), velocity_smoothed(robot::num_targets, 0.0), time_diff(cycle_time)
   {
   }
   //Command(std::vector<double>&pos, std::vector<double>&vel, std::vector<double>&acc):position(robot::num_joints, pos),velocity(robot::num_joints, vel), acceleration(robot::num_joints, acc){}
-  Command(control_msgs::JointTrajectoryControllerStatePtr& msg):position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0), jerk(robot::num_targets, 0.0)
+  Command(control_msgs::JointTrajectoryControllerStatePtr& msg):position(robot::num_targets), velocity(robot::num_targets, 0.0), acceleration(robot::num_targets, 0.0), jerk(robot::num_targets, 0.0), velocity_smoothed(robot::num_targets, 0.0)
   {
     absolute_time_stamp = msg->header.stamp.toSec();
     position = msg->desired.positions;
     velocity = msg->desired.velocities;
+    velocity_smoothed = msg->desired.velocities;
+    position_set = true;
   }
 };
+
 
 class RobotMonitor
 {

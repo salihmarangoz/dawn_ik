@@ -325,6 +325,18 @@ T getBoundedValue(const T& value, const T& bound)
   return value;
 }
 
+template< typename T>
+T getBoundedValueMinMax(const T& value, const T& min, const T& max)
+{
+  if(value > max)
+    return max;
+  if(value < min)
+    return min;
+
+  return value;
+}
+
+
 
 
 } // namespace utils

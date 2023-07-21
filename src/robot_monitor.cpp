@@ -85,7 +85,23 @@ void RobotMonitor::jointTrajectoryControllerStateCallback(const control_msgs::Jo
 
 void RobotMonitor::computeAccelerationandAddtoCommandHistory(Command& latest_command)
 {
+  //std::vector<double> vel_avg(robot::num_targets, 0.0);
+  // if(command_history.size() > 0)
+  // {
+  //   for(int j = 0; j < robot::num_targets; ++j)
+  //   {
+  //     double sum = 0.0;
+  //     for(int i = 0; i < command_history.size(); ++i)
+  //     {
+  //       sum = sum + command_history[i].velocity[j];
+  //     }
+  //     vel_avg[j] = sum/command_history.size();
+  //   }
+  // }
+  // latest_command.velocity_smoothed = vel_avg;
+
   auto prev_command = command_history.front();
+
 
   if(prev_command.absolute_time_stamp < 0.0)
   {
