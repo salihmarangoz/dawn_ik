@@ -244,7 +244,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   // {
   //   dynamic_preferred_joint_position_weight = shared_block.dist_to_target/2;
   // }
-  ceres::CauchyLoss *preferred_joint_position_loss = new ceres::CauchyLoss(dynamic_preferred_joint_position_weight*2); // goal weight
+  // ceres::CauchyLoss *preferred_joint_position_loss = new ceres::CauchyLoss(dynamic_preferred_joint_position_weight*2); // goal weight
+  ceres::CauchyLoss *preferred_joint_position_loss = new ceres::CauchyLoss(1.0); // goal weight
   problem.AddResidualBlock(preferred_joint_position_goal, preferred_joint_position_loss, optm_target_positions);
 
   // ========== Avoid Joint Limits Goal ==========

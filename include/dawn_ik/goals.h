@@ -352,23 +352,24 @@ struct EndpointGoal {
 
 
     // Look at goal cost
-    T x = shared_block.ik_goal->m3_x - global_link_translations[3*robot::endpoint_link_idx+0];
-    T y = shared_block.ik_goal->m3_y - global_link_translations[3*robot::endpoint_link_idx+1];
-    T z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
-    T target_pitch = ceres::atan2(x, z);
-    T target_yaw = ceres::atan2(y, x);
+    // T x = shared_block.ik_goal->m3_x - global_link_translations[3*robot::endpoint_link_idx+0];
+    // T y = shared_block.ik_goal->m3_y - global_link_translations[3*robot::endpoint_link_idx+1];
+    // T z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
+    // T target_pitch = ceres::atan2(x, z);
+    // T target_yaw = ceres::atan2(y, x);
 
-    T& qw = global_link_rotations[4*robot::endpoint_link_idx+0];
-    T& qx = global_link_rotations[4*robot::endpoint_link_idx+1];
-    T& qy = global_link_rotations[4*robot::endpoint_link_idx+2];
-    T& qz = global_link_rotations[4*robot::endpoint_link_idx+3];
-    T roll = ceres::atan2(2.0*(qw*qx+qy*qz), 1.0-2.0*(qx*qx+qy*qy));
-    T pitch = ceres::asin(2.0*(qw*qy-qx*qz));
-    T yaw = ceres::atan2(2.0*(qw*qz+qx*qy), 1.0-2.0*(qy*qy+qz*qz));
+    // T& qw = global_link_rotations[4*robot::endpoint_link_idx+0];
+    // T& qx = global_link_rotations[4*robot::endpoint_link_idx+1];
+    // T& qy = global_link_rotations[4*robot::endpoint_link_idx+2];
+    // T& qz = global_link_rotations[4*robot::endpoint_link_idx+3];
+    // T roll = ceres::atan2(2.0*(qw*qx+qy*qz), 1.0-2.0*(qx*qx+qy*qy));
+    // T pitch = ceres::asin(2.0*(qw*qy-qx*qz));
+    // T yaw = ceres::atan2(2.0*(qw*qz+qx*qy), 1.0-2.0*(qy*qy+qz*qz));
 
-    residuals[7] = (yaw-target_yaw) * shared_block.ik_goal->m3_weight;
-    residuals[8] = (pitch-target_pitch) * shared_block.ik_goal->m3_weight;
-    residuals[9] = (roll-M_PI) * shared_block.ik_goal->m3_weight;
+    // residuals[7] = (yaw-target_yaw) * shared_block.ik_goal->m3_weight;
+    // residuals[8] = (pitch-target_pitch) * shared_block.ik_goal->m3_weight;
+    // residuals[9] = (roll-M_PI) * shared_block.ik_goal->m3_weight;
+
 
 
     //residuals[8] = (endpoint_euler[1]) * shared_block.ik_goal->m3_weight;
@@ -382,7 +383,7 @@ struct EndpointGoal {
    {
      //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      //            new EndpointGoal(shared_block)));
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 10, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 7, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new EndpointGoal(shared_block)));
    }
 
@@ -566,8 +567,8 @@ struct ManipulabilityGoal {
     //shared_block.visual_tools_->publishRobotState(robot_state);
 
     double manipulability_index_tra;
-    //shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_tra, true);
-    shared_block.km_->getManipulabilityIndex(robot_state, "head", manipulability_index_tra, true);
+    shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_tra, true);
+    //shared_block.km_->getManipulabilityIndex(robot_state, "head", manipulability_index_tra, true);
     ROS_INFO_THROTTLE(1.0, "manipulability_index_tra: %f", manipulability_index_tra);
     if (std::isnan(manipulability_index_tra)) return false; // sad jacobian sounds
 
