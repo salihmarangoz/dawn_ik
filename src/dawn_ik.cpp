@@ -283,7 +283,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   {
     // ============= LimitVelocityGoal ============
     ceres::CostFunction* limit_velocity_goal = LimitVelocityGoal::Create(shared_block);
-    ceres::LossFunction *limit_velocity_loss = new ceres::TolerantLoss(10.0, 1.1);
+    ceres::LossFunction *limit_velocity_loss = new ceres::TolerantLoss(15.0, 1.1);
 
     //ceres::LossFunction *limit_acceleration_scaled_loss = new ceres::ScaledLoss(nullptr, 10.0, ceres::TAKE_OWNERSHIP); // goal weight
     problem.AddResidualBlock(limit_velocity_goal, limit_velocity_loss, optm_target_positions);
