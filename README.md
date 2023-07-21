@@ -169,6 +169,24 @@ $ roslaunch dawn_ik run_experiment.launch robot_name:=mick solver:=collision_ik 
 
 Waypoints are located in `waypoints` folder. Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.
 
+### Lite6 Experiment
+
+```bash
+# Setup CollisionIK
+$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
+$ cp lite6_settings.yaml settings.yaml # overwriting!
+
+# Setup DawnIK
+$ roscd dawn_ik/include/dawn_ik/robot_configuration
+$ cp lite6.h autogen_test.h
+$ catkin build
+
+$ roscd dawn_ik/scripts/experiments
+$ bash lite6_experiments.sh
+```
+
+
+
 ### TODO
 
 - Add number of repetitions for the waypoints.
