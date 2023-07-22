@@ -128,7 +128,7 @@ void DawnIK::loopThread()
       solver_history.push_front(ik_solution.target_positions);
       if (solver_history.size() >= 32) solver_history.pop_back();
 
-      if (solver_history.size() >= 3) // todo
+      if (solver_history.size() >= 6) // todo
       {
         if (prev_pos.size() == 0)
         {
@@ -138,16 +138,28 @@ void DawnIK::loopThread()
         }
         for (int i=0; i<robot::num_targets; i++)
         {
+          // backward diff
           double sig_vel0 = solver_history[0][i] - solver_history[1][i];
           double sig_vel1 = solver_history[1][i] - solver_history[2][i];
-          //double sig_vel2 = solver_history[2][i] - solver_history[3][i];
           double sig_acc0 = sig_vel0 - sig_vel1;
-          //double sig_acc1 = sig_vel1 - sig_vel2;
 
+          // center diff
+          //double sig_vel0 = (solver_history[0][i] - solver_history[2][i])/2;
+          //double sig_vel1 = (solver_history[1][i] - solver_history[3][i])/2;
+          //double sig_acc0 = sig_vel0 - sig_vel1;
+
+          // Finite Difference Equation
+          // -5,-4,-3,-2,-1,0 -> derivative order 1
+          //double sig_vel0 = (-12*solver_history[5][i]+75*solver_history[4][i]-200*solver_history[3][i]+300*solver_history[2][i]-300*solver_history[1][i]+137*solver_history[0][i])/(60);
+          // -5,-4,-3,-2,-1,0 -> derivative order 2
+          //double sig_acc0 = (-10*solver_history[5][i]+61*solver_history[4][i]-156*solver_history[3][i]+214*solver_history[2][i]-154*solver_history[1][i]+45*solver_history[0][i])/(12);
+
+          // exp weighted avg
           double alpha = 0.8;
           double new_pos = alpha*prev_pos[i] + (1-alpha)*solver_history[0][i];
           double new_vel = alpha*prev_vel[i] + (1-alpha)*(sig_vel0);
           double new_acc = alpha*prev_acc[i] + (1-alpha)*(sig_acc0);
+
 
           prev_pos[i] = new_pos;
           prev_vel[i] = new_vel;
@@ -286,7 +298,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
   // ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(10.0); // goal weight
   // ceres::TukeyLoss *minimal_joint_displacement_loss = new ceres::TukeyLoss(0.05); // goal weight
-  ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight
+  ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 1.75, ceres::TAKE_OWNERSHIP); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
 
 
@@ -364,8 +376,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
       if (solver_history.size() > 30)
       {
-        double jerk_limit = 500.0*0.01*0.01*0.01; // 500rad/s^3
-        double acc_limit = 20.0*0.01*0.01; // 20rad/s^2
+        double jerk_limit = 1.0* 500.0*0.01*0.01*0.01; // 500rad/s^3
+        double acc_limit = 1.0 * 20.0*0.01*0.01; // 20rad/s^2
         double vel_limit = 0.6* 1.0*0.01; // 1rad/s
         double limited_vel = utils::getBoundedValue(prev_vel[target_idx], vel_limit);
         double limited_acc = utils::getBoundedValue(prev_acc[target_idx], acc_limit);
