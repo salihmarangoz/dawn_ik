@@ -286,7 +286,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
   //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(10.0); // goal weight
   //ceres::TukeyLoss *minimal_joint_displacement_loss = new ceres::TukeyLoss(0.05); // goal weight
-  ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 3.0, ceres::TAKE_OWNERSHIP); // goal weight
+  ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight
   problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
 
 
@@ -364,7 +364,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
       if (prev_vel.size() > 0)
       {
-        double jerk_limit = 0.005;
+        double jerk_limit = 0.001; // 10rad/s^3
         min_step = prev_vel[target_idx] + prev_acc[target_idx] - jerk_limit;
         max_step = prev_vel[target_idx] + prev_acc[target_idx] + jerk_limit;
         ROS_WARN_THROTTLE(0.1, "%f %f", min_step, max_step);
