@@ -167,6 +167,14 @@ $ roslaunch dawn_ik run_experiment.launch robot_name:=lite6 solver:=collision_ik
 $ roscd relaxed_ik_ros1/relaxed_ik_core/config/
 $ cp mick_settings.yaml settings.yaml # overwriting!
 $ roslaunch dawn_ik run_experiment.launch robot_name:=mick solver:=collision_ik waypoints_file:=mid_y trajectory_file:=test endpoint_frame:=head_link_eef
+
+###### EXTRA ######
+# MANUALLY STOP WHEN THE EXPERIMENT IS FINISHED
+# Example: Mick + Two DawnIK's
+$ roscd dawn_ik/include/dawn_ik/robot_configuration
+$ cp mick.h autogen_test.h
+$ catkin build
+$ roslaunch dawn_ik run_experiment_other.launch robot_name:=mick solver:=dawn_ik waypoints_file:=circle_xy waypoints_file_other:=circle_yz endpoint_frame:=head_link_eef endpoint_frame_other:=other_link_eef
 ```
 
 Waypoints are located in `waypoints` folder. Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.

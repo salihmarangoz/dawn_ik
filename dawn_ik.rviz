@@ -283,7 +283,7 @@ Visualization Manager:
       Marker Topic: /run_experiment/goal_marker
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/InteractiveMarkers
@@ -294,6 +294,14 @@ Visualization Manager:
       Show Descriptions: true
       Show Visual Aids: false
       Update Topic: /dawn_ik_rviz_controls_other/update
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /run_experiment_other/goal_marker
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -323,7 +331,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.5241444110870361
+      Distance: 1.302897334098816
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -339,9 +347,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2703990340232849
+      Pitch: 0.4603988528251648
       Target Frame: <Fixed Frame>
-      Yaw: 1.370405912399292
+      Yaw: 1.555403232574463
     Saved: ~
 Window Geometry:
   Displays:
