@@ -54,7 +54,7 @@ void DawnIK::readParameters()
   priv_nh.param("init_noise", p_init_noise, 0.01);
   if (p_init_noise < 0.0){ROS_ERROR("Invalid init_noise!"); p_init_noise = 0.0;} // disable on error
 
-  priv_nh.param("max_step_size", p_max_step_size, 0.2);
+  priv_nh.param("max_step_size", p_max_step_size, 0.01);
   if (p_max_step_size < 0.0){ROS_ERROR("Invalid max_step_size!"); p_max_step_size = 0.0;} // disable on error
 }
 
@@ -106,12 +106,13 @@ void DawnIK::loopThread()
       command_history = robot_monitor->getCommandHistory();
       auto latest_command = command_history.front();
 
-      IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
-      IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
-      if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
-      {
-        ik_solution = ik_solution_without_noise; // overwrite previous solution
-      }
+      // IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
+      // IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
+      // if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
+      // {
+      //   ik_solution = ik_solution_without_noise; // overwrite previous solution
+      // }
+      IKSolution ik_solution = update(ik_goal_msg_copy, false); // clean init
 
       // Publish output
 //      if(latest_command.position_set)
@@ -283,11 +284,11 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
   // ========== Minimal Joint Displacement Goal ==========
-  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
-  //ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(10.0); // goal weight
-  //ceres::TukeyLoss *minimal_joint_displacement_loss = new ceres::TukeyLoss(0.05); // goal weight
-  ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight
-  problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
+  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
+  // ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(10.0); // goal weight
+  // ceres::TukeyLoss *minimal_joint_displacement_loss = new ceres::TukeyLoss(0.05); // goal weight
+  //ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 0.1, ceres::TAKE_OWNERSHIP); // goal weight
+  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
 
 
   // ============= LimitAccelerationGoal ============
@@ -362,12 +363,18 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
       double min_step = -p_max_step_size;
       double max_step = p_max_step_size;
 
-      if (prev_vel.size() > 0)
+      if (solver_history.size() > 30)
       {
-        double jerk_limit = 0.001; // 10rad/s^3
-        min_step = prev_vel[target_idx] + prev_acc[target_idx] - jerk_limit;
-        max_step = prev_vel[target_idx] + prev_acc[target_idx] + jerk_limit;
-        ROS_WARN_THROTTLE(0.1, "%f %f", min_step, max_step);
+        double jerk_limit = 2* 500.0*0.01*0.01*0.01; // 500rad/s^3
+        double acc_limit = 2* 20.0*0.01*0.01; // 20rad/s^2
+        double vel_limit = 0.8* 1.0*0.01; // 1rad/s
+        double limited_vel = utils::getBoundedValue(prev_vel[target_idx], vel_limit);
+        double limited_acc = utils::getBoundedValue(prev_acc[target_idx], acc_limit);
+
+        min_step = limited_vel + limited_acc - jerk_limit;
+        max_step = limited_vel + limited_acc + jerk_limit;
+        //ROS_WARN_THROTTLE(0.1, "%f %f", min_step, max_step);
+        ROS_WARN_THROTTLE(0.1, "%f", prev_acc[target_idx]);
       }
       ///////////////////////////////////////////////////////////////////
 
