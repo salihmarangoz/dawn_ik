@@ -257,8 +257,8 @@ struct AvoidJointLimitsGoal {
       int joint_idx = robot::target_idx_to_joint_idx[target_idx];
       if (robot::joint_is_position_bounded[joint_idx])
       {
-        residuals[target_idx*2] = T(0.01) / (target_values[target_idx] - robot::joint_min_position[joint_idx] - 0.01);
-        residuals[target_idx*2+1] = T(0.01) / (target_values[target_idx] - robot::joint_max_position[joint_idx] - 0.01);
+        residuals[target_idx*2] = T(0.01) / (target_values[target_idx] - robot::joint_min_position[joint_idx]);
+        residuals[target_idx*2+1] = T(0.01) / (target_values[target_idx] - robot::joint_max_position[joint_idx]);
       }
       else
       {
