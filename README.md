@@ -122,6 +122,8 @@ DawnIK and CollisionIK (with goal+collision adapter) are available.
 $ roslaunch dawn_ik lite6_solver.launch
 $ roslaunch dawn_ik horti_solver.launch
 $ roslaunch dawn_ik mick_solver.launch
+# Extra: Control two arms at the same time:
+$ roslaunch dawn_ik mick_other.launch
 
 # If you would like to use collision_ik...
 # For lite6 + collision_ik:

@@ -29,19 +29,19 @@ CollisionObject* inflatedCollisionObject(const T &shape, double inflation)
 }
 
 // Constants
-const int endpoint_link_idx = 8;
+const int endpoint_link_idx = 17;
 const int num_joints = 18;
 const int num_variables = 13;
 const int num_links = 18;
 const int num_objects = 38;
 const int num_acm_link_pairs = 108;
-const int num_targets = 6;
+const int num_targets = 7;
 
 // Mapping vectors
 const int joint_idx_to_variable_idx[18] = {-1,-1,0,1,2,3,4,5,-1,-1,6,7,8,9,10,11,12,-1}; // -1 if no variable available. Can be used as joint_has_variable vector
 const int variable_idx_to_joint_idx[13] = {2,3,4,5,6,7,10,11,12,13,14,15,16};
-const int joint_idx_to_target_idx[18] = {-1,-1,0,1,2,3,4,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-const int target_idx_to_joint_idx[6] = {2,3,4,5,6,7};
+const int joint_idx_to_target_idx[18] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,1,2,3,4,5,6,-1};
+const int target_idx_to_joint_idx[7] = {10,11,12,13,14,15,16};
 const int object_idx_to_link_idx[38] = {1,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,6,9,9,9,11,11,11,11,12,12,12,13,13,13,13,14,14,15,15,16,16};
 
 // Joint info
