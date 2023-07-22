@@ -33,7 +33,8 @@ struct SharedBlock
               double (&curr_target_velocities)[robot::num_targets],
               JointLinkCollisionStateConstPtr &monitor_state,
               const std::vector<CollisionObject*> &int_objects,
-              std::deque<Command>& command_history
+              std::deque<Command>& command_history,
+              std::vector<double> &filtered_curr_positions
   ):
   ik_goal(ik_goal),
   solver_history(solver_history),
@@ -44,7 +45,8 @@ struct SharedBlock
   curr_target_velocities(curr_target_velocities),
   monitor_state(monitor_state),
   int_objects(int_objects),
-  command_history(command_history)
+  command_history(command_history),
+  filtered_curr_positions(filtered_curr_positions)
   {
     // limit m1 endpoint goal distance
     if (ik_goal->m1_limit_dist > 0)
@@ -98,6 +100,8 @@ struct SharedBlock
   double dist_to_target;
 
   std::deque<Command> command_history;
+
+  std::vector<double> &filtered_curr_positions;
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
   moveit::core::RobotModelPtr robot_model_;
@@ -286,7 +290,10 @@ struct MinimalJointDisplacementGoal {
   {
     for (int i=0; i<robot::num_targets; i++)
     {
-      residuals[i] = target_values[i] - shared_block.curr_target_positions[i];
+      if (shared_block.filtered_curr_positions.size() > 0 )
+        residuals[i] = target_values[i] - shared_block.filtered_curr_positions[i];
+      else
+        residuals[i] = target_values[i] - shared_block.curr_target_positions[i];
     }
     return true;
   }
@@ -462,10 +469,10 @@ struct CollisionAvoidanceGoal {
       double eps = 0.00001;
       if (distance <= 0)
         residuals[i] = T(weight/eps);
-      else if (distance < 0.05)
+      else// if (distance < 0.1)
         residuals[i] = weight / (distance+eps);
-      else
-        residuals[i] = T(0.0);
+      //else
+      //  residuals[i] = T(0.0);
     }
 
     return true; 

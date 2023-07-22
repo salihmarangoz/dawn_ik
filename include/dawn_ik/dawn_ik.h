@@ -90,6 +90,7 @@ private:
   Eigen::Quaterniond direction;
 
   std::deque<Command> command_history;
+  std::vector<double> prev_pos, prev_vel, prev_acc;
 
   double acc_loss_weight;
 
