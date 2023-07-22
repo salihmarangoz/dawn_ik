@@ -19,7 +19,7 @@
   <!-- waypoint generator and logger -->
   <node name="run_experiment" pkg="dawn_ik" type="run_experiment.py" output="screen" required="false">
     <param name="waypoints_file" value="$(find dawn_ik)/waypoints/$(arg robot_name)/$(arg waypoints_file).txt"/>
-    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg solver)-$(arg waypoints_file)-$(arg trajectory_file).json"/>
+    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg solver)-$(arg waypoints_file)-$(arg trajectory_file)_multiple_head.json"/>
     <param name="wait_for_init" value="$(arg wait_for_init)"/>
     <param name="wait_for_solver" value="$(arg wait_for_solver)"/>
     <param name="wait_for_shutdown" value="$(arg wait_for_shutdown)"/>
@@ -30,7 +30,7 @@
 
   <node name="run_experiment_other" pkg="dawn_ik" type="run_experiment.py" output="screen" required="false">
     <param name="waypoints_file" value="$(find dawn_ik)/waypoints/$(arg robot_name)/$(arg waypoints_file_other).txt"/>
-    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg solver)-$(arg waypoints_file)-$(arg trajectory_file)_other.json"/>
+    <param name="output_file" value="$(find dawn_ik)/results/$(arg robot_name)/$(arg solver)-$(arg waypoints_file)-$(arg trajectory_file)_multiple_other.json"/>
     <param name="wait_for_init" value="$(arg wait_for_init)"/>
     <param name="wait_for_solver" value="$(arg wait_for_solver)"/>
     <param name="wait_for_shutdown" value="$(arg wait_for_shutdown)"/>

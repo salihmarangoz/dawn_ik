@@ -174,7 +174,7 @@ $ roslaunch dawn_ik run_experiment.launch robot_name:=mick solver:=collision_ik 
 $ roscd dawn_ik/include/dawn_ik/robot_configuration
 $ cp mick.h autogen_test.h
 $ catkin build
-$ roslaunch dawn_ik run_experiment_other.launch robot_name:=mick solver:=dawn_ik waypoints_file:=circle_xy waypoints_file_other:=circle_yz endpoint_frame:=head_link_eef endpoint_frame_other:=other_link_eef
+$ roslaunch dawn_ik run_experiment_other.launch robot_name:=mick solver:=dawn_ik waypoints_file:=eight_yz waypoints_file_other:=square_xy_other endpoint_frame:=head_link_eef endpoint_frame_other:=other_link_eef
 ```
 
 Waypoints are located in `waypoints` folder. Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.
