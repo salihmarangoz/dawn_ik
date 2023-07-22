@@ -197,7 +197,6 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
     if(solver_history.size() > 0)
     {
-
       optm_target_positions[target_idx]    = solver_history[0].at(target_idx);
       curr_target_positions[target_idx]    = solver_history[0].at(target_idx);
     }
@@ -284,11 +283,11 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
 
   // ========== Minimal Joint Displacement Goal ==========
-  //ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
+  ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);
   // ceres::CauchyLoss *minimal_joint_displacement_loss = new ceres::CauchyLoss(10.0); // goal weight
   // ceres::TukeyLoss *minimal_joint_displacement_loss = new ceres::TukeyLoss(0.05); // goal weight
-  //ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 0.1, ceres::TAKE_OWNERSHIP); // goal weight
-  //problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
+  ceres::LossFunction *minimal_joint_displacement_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight
+  problem.AddResidualBlock(minimal_joint_displacement_goal, minimal_joint_displacement_loss, optm_target_positions);
 
 
   // ============= LimitAccelerationGoal ============
@@ -365,9 +364,9 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
 
       if (solver_history.size() > 30)
       {
-        double jerk_limit = 2* 500.0*0.01*0.01*0.01; // 500rad/s^3
-        double acc_limit = 2* 20.0*0.01*0.01; // 20rad/s^2
-        double vel_limit = 0.8* 1.0*0.01; // 1rad/s
+        double jerk_limit = 500.0*0.01*0.01*0.01; // 500rad/s^3
+        double acc_limit = 20.0*0.01*0.01; // 20rad/s^2
+        double vel_limit = 0.6* 1.0*0.01; // 1rad/s
         double limited_vel = utils::getBoundedValue(prev_vel[target_idx], vel_limit);
         double limited_acc = utils::getBoundedValue(prev_acc[target_idx], acc_limit);
 

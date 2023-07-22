@@ -290,9 +290,9 @@ struct MinimalJointDisplacementGoal {
   {
     for (int i=0; i<robot::num_targets; i++)
     {
-      if (shared_block.filtered_curr_positions.size() > 0 )
-        residuals[i] = target_values[i] - shared_block.filtered_curr_positions[i];
-      else
+      //if (shared_block.filtered_curr_positions.size() > 0 )
+      //  residuals[i] = target_values[i] - shared_block.filtered_curr_positions[i];
+      //else
         residuals[i] = target_values[i] - shared_block.curr_target_positions[i];
     }
     return true;
