@@ -39,7 +39,7 @@ def publish_ee_goal(x, y, z, roll, pitch, yaw):
   dawnik_goal.m2_y = quad[1]
   dawnik_goal.m2_z = quad[2]
   dawnik_goal.m2_w = quad[3]
-  dawnik_goal.m2_weight = 10
+  dawnik_goal.m2_weight = 1
   dawn_ik_goal_pub.publish(dawnik_goal)
 
   marker = Marker()

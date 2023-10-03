@@ -30,102 +30,75 @@ CollisionObject* inflatedCollisionObject(const T &shape, double inflation)
 
 // Constants
 const int endpoint_link_idx = 8;
-const int num_joints = 18;
-const int num_variables = 13;
-const int num_links = 18;
-const int num_objects = 38;
-const int num_acm_link_pairs = 108;
+const int num_joints = 9;
+const int num_variables = 6;
+const int num_links = 9;
+const int num_objects = 19;
+const int num_acm_link_pairs = 18;
 const int num_targets = 6;
 
 // Mapping vectors
-const int joint_idx_to_variable_idx[18] = {-1,-1,0,1,2,3,4,5,-1,-1,6,7,8,9,10,11,12,-1}; // -1 if no variable available. Can be used as joint_has_variable vector
-const int variable_idx_to_joint_idx[13] = {2,3,4,5,6,7,10,11,12,13,14,15,16};
-const int joint_idx_to_target_idx[18] = {-1,-1,0,1,2,3,4,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+const int joint_idx_to_variable_idx[9] = {-1,-1,0,1,2,3,4,5,-1}; // -1 if no variable available. Can be used as joint_has_variable vector
+const int variable_idx_to_joint_idx[6] = {2,3,4,5,6,7};
+const int joint_idx_to_target_idx[9] = {-1,-1,0,1,2,3,4,5,-1};
 const int target_idx_to_joint_idx[6] = {2,3,4,5,6,7};
-const int object_idx_to_link_idx[38] = {1,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,6,9,9,9,11,11,11,11,12,12,12,13,13,13,13,14,14,15,15,16,16};
+const int object_idx_to_link_idx[19] = {1,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,6,7};
 
 // Joint info
-const std::string joint_names[18] = {"world_joint","head_world_joint","head_joint1","head_joint2","head_joint3","head_joint4","head_joint5","head_joint6","head_joint_eef","other_world_joint","other_joint1","other_joint2","other_joint3","other_joint4","other_joint5","other_joint6","other_joint7","other_joint_eef"};
-const int joint_child_link_idx[18] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
-const int joint_parent_link_idx[18] = {-1,0,1,2,3,4,5,6,7,0,9,10,11,12,13,14,15,16}; // -1 if no link available
-const int joint_is_position_bounded[18] = {0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0}; // bool
-const double joint_preferred_position[18] = {0.000000,0.000000,0.000000,0.000000,2.587451,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.017700,0.000000,1.867510,0.000000,0.724311,0.000000,0.000000};
-const double joint_max_position[18] = {0.000000,0.000000,6.283185,2.617990,5.235988,6.283185,2.164200,6.283185,0.000000,0.000000,6.283185,2.094400,6.283185,3.927000,6.283185,3.141593,6.283185,0.000000};
-const double joint_min_position[18] = {0.000000,0.000000,-6.283185,-2.617990,-0.061087,-6.283185,-2.164200,-6.283185,0.000000,0.000000,-6.283185,-2.059000,-6.283185,-0.191980,-6.283185,-1.692970,-6.283185,0.000000};
-const int joint_is_velocity_bounded[18] = {0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0}; // bool
-const double joint_max_velocity[18] = {0.000000,0.000000,3.140000,3.140000,3.140000,3.140000,3.140000,3.140000,0.000000,0.000000,3.140000,3.140000,3.140000,3.140000,3.140000,3.140000,3.140000,0.000000};
-const double joint_min_velocity[18] = {0.000000,0.000000,-3.140000,-3.140000,-3.140000,-3.140000,-3.140000,-3.140000,0.000000,0.000000,-3.140000,-3.140000,-3.140000,-3.140000,-3.140000,-3.140000,-3.140000,0.000000};
-const int joint_is_acceleration_bounded[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // bool
-const double joint_max_acceleration[18] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
-const double joint_min_acceleration[18] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
+const std::string joint_names[9] = {"ASSUMED_FIXED_ROOT_JOINT","world_joint","joint1","joint2","joint3","joint4","joint5","joint6","joint_eef"};
+const int joint_child_link_idx[9] = {0,1,2,3,4,5,6,7,8};
+const int joint_parent_link_idx[9] = {-1,0,1,2,3,4,5,6,7}; // -1 if no link available
+const int joint_is_position_bounded[9] = {0,0,1,1,1,1,1,1,0}; // bool
+const double joint_preferred_position[9] = {0.000000,0.000000,0.000000,0.000000,2.587451,0.000000,0.000000,0.000000,0.000000};
+const double joint_max_position[9] = {0.000000,0.000000,6.283185,2.617990,5.235988,6.283185,2.164200,6.283185,0.000000};
+const double joint_min_position[9] = {0.000000,0.000000,-6.283185,-2.617990,-0.061087,-6.283185,-2.164200,-6.283185,0.000000};
+const int joint_is_velocity_bounded[9] = {0,0,1,1,1,1,1,1,0}; // bool
+const double joint_max_velocity[9] = {0.000000,0.000000,2.140000,2.140000,2.140000,2.140000,2.140000,2.140000,0.000000};
+const double joint_min_velocity[9] = {0.000000,0.000000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,-2.140000,0.000000};
+const int joint_is_acceleration_bounded[9] = {0,0,0,0,0,0,0,0,0}; // bool
+const double joint_max_acceleration[9] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
+const double joint_min_acceleration[9] = {0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
 
 // Link info
-const std::string link_names[18] = {"ground","head_link_base","head_link1","head_link2","head_link3","head_link4","head_link5","head_link6","head_link_eef","other_link_base","other_link1","other_link2","other_link3","other_link4","other_link5","other_link6","other_link7","other_link_eef"};
-const int link_parent_joint_idx[18] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
-const double link_transform_translation_only[18][3] = {{0.000000, 0.000000, 0.000000},
-                                                       {0.000000, 0.000000, 0.000000},
-                                                       {0.000000, 0.000000, 0.243300},
-                                                       {0.000000, 0.000000, 0.000000},
-                                                       {0.200000, 0.000000, 0.000000},
-                                                       {0.087000, -0.227600, 0.000000},
-                                                       {0.000000, 0.000000, 0.000000},
-                                                       {0.000000, 0.061500, 0.000000},
-                                                       {0.000000, 0.000000, 0.000000},
-                                                       {0.500000, 0.000000, 0.000000},
-                                                       {0.000000, 0.000000, 0.267000},
-                                                       {0.000000, 0.000000, 0.000000},
-                                                       {0.000000, -0.293000, 0.000000},
-                                                       {0.052500, 0.000000, 0.000000},
-                                                       {0.077500, -0.342500, 0.000000},
-                                                       {0.000000, 0.000000, 0.000000},
-                                                       {0.076000, 0.097000, 0.000000},
-                                                       {0.000000, 0.000000, 0.000000}};
-const double link_transform_quaternion_only[18][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
-                                                      {1.000000, 0.000000, 0.000000, 0.000000},
-                                                      {1.000000, 0.000000, 0.000000, 0.000000},
-                                                      {0.500004, -0.499998, -0.500002, -0.499996},
-                                                      {0.000003, 0.707105, 0.707108, 0.000003},
-                                                      {0.707105, 0.707108, 0.000000, 0.000000},
-                                                      {0.707105, 0.707108, 0.000000, 0.000000},
-                                                      {0.707105, -0.707108, 0.000000, 0.000000},
-                                                      {1.000000, 0.000000, 0.000000, 0.000000},
-                                                      {-0.000000, 0.000000, 0.000000, 1.000000},
-                                                      {1.000000, 0.000000, 0.000000, 0.000000},
-                                                      {0.707105, -0.707108, 0.000000, 0.000000},
-                                                      {0.707105, 0.707108, 0.000000, 0.000000},
-                                                      {0.707105, 0.707108, 0.000000, 0.000000},
-                                                      {0.707105, 0.707108, 0.000000, 0.000000},
-                                                      {0.707105, 0.707108, 0.000000, 0.000000},
-                                                      {0.707105, -0.707108, 0.000000, 0.000000},
-                                                      {1.000000, 0.000000, 0.000000, 0.000000}};
-const int link_can_skip_translation[18] = {1,1,0,1,0,0,1,0,1,0,0,1,0,0,0,1,0,1}; // bool
-const int link_can_skip_rotation[18] = {1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1}; // bool
+const std::string link_names[9] = {"world","link_base","link1","link2","link3","link4","link5","link6","link_eef"};
+const int link_parent_joint_idx[9] = {0,1,2,3,4,5,6,7,8};
+const double link_transform_translation_only[9][3] = {{0.000000, 0.000000, 0.000000},
+                                                      {0.000000, 0.000000, 0.000000},
+                                                      {0.000000, 0.000000, 0.243300},
+                                                      {0.000000, 0.000000, 0.000000},
+                                                      {0.200000, 0.000000, 0.000000},
+                                                      {0.087000, -0.227600, 0.000000},
+                                                      {0.000000, 0.000000, 0.000000},
+                                                      {0.000000, 0.061500, 0.000000},
+                                                      {0.000000, 0.000000, 0.000000}};
+const double link_transform_quaternion_only[9][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
+                                                     {1.000000, 0.000000, 0.000000, 0.000000},
+                                                     {1.000000, 0.000000, 0.000000, 0.000000},
+                                                     {0.500004, -0.499998, -0.500002, -0.499996},
+                                                     {0.000003, 0.707105, 0.707108, 0.000003},
+                                                     {0.707105, 0.707108, 0.000000, 0.000000},
+                                                     {0.707105, 0.707108, 0.000000, 0.000000},
+                                                     {0.707105, -0.707108, 0.000000, 0.000000},
+                                                     {1.000000, 0.000000, 0.000000, 0.000000}};
+const int link_can_skip_translation[9] = {1,1,0,1,0,0,1,0,1}; // bool
+const int link_can_skip_rotation[9] = {1,1,1,0,0,0,0,0,1}; // bool
 
 // ACM
-const int acm[18][18]= {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                        {1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
-                        {1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
-                        {1,0,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,1},
-                        {1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1},
-                        {1,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,1},
-                        {1,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1},
-                        {1,0,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,1},
-                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                        {1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
+const int acm[9][9]= {{1,1,1,1,1,1,1,1,1},
+                      {1,1,1,1,0,0,0,0,1},
+                      {1,1,1,1,1,0,0,0,1},
+                      {1,1,1,1,1,1,0,0,1},
+                      {1,0,1,1,1,1,1,1,1},
+                      {1,0,0,1,1,1,1,1,1},
+                      {1,0,0,0,1,1,1,1,1},
+                      {1,0,0,0,1,1,1,1,1},
+                      {1,1,1,1,1,1,1,1,1}};
 
 // Objective weights
-const double weight_preferred_joint_position_goal[18] = {1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000};
+const double weight_preferred_joint_position_goal[9] = {1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000,1.000000};
 
 // Collision objects info
-const double object_transform_translation_only[38][3] = {{0.000000, 0.000000, 0.040000},
+const double object_transform_translation_only[19][3] = {{0.000000, 0.000000, 0.040000},
                                                          {0.000000, 0.000000, 0.000000},
                                                          {0.000000, 0.000000, -0.075000},
                                                          {0.000000, 0.000000, 0.050000},
@@ -143,46 +116,8 @@ const double object_transform_translation_only[38][3] = {{0.000000, 0.000000, 0.
                                                          {0.000000, -0.050000, -0.050000},
                                                          {0.000000, -0.050000, 0.000000},
                                                          {0.000000, 0.000000, 0.000000},
-                                                         {0.000000, 0.000000, 0.050000},
-                                                         {0.000000, 0.000000, 0.150000},
-                                                         {0.000000, 0.000000, 0.255000},
-                                                         {0.000000, -0.100000, 0.080000},
-                                                         {0.000000, 0.000000, 0.080000},
-                                                         {0.000000, -0.100000, 0.000000},
-                                                         {0.000000, -0.150000, 0.000000},
-                                                         {0.052500, 0.030000, 0.000000},
-                                                         {0.052500, -0.065000, 0.000000},
-                                                         {0.000000, 0.000000, -0.060000},
-                                                         {0.080000, -0.090000, 0.000000},
-                                                         {0.080000, -0.090000, 0.060000},
-                                                         {0.080000, -0.170000, 0.000000},
-                                                         {0.040000, -0.045000, 0.070000},
-                                                         {0.000000, 0.050000, 0.000000},
-                                                         {0.000000, 0.040000, -0.080000},
-                                                         {0.000000, 0.000000, 0.020000},
-                                                         {0.080000, 0.000000, 0.000000},
-                                                         {0.000000, 0.000000, 0.000000},
-                                                         {0.000000, 0.000000, 0.100000}};
-const double object_transform_quaternion_only[38][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
-                                                        {1.000000, 0.000000, 0.000000, 0.000000},
+                                                         {0.000000, 0.000000, 0.000000}};
+const double object_transform_quaternion_only[19][4] = {{1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
@@ -201,16 +136,16 @@ const double object_transform_quaternion_only[38][4] = {{1.000000, 0.000000, 0.0
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000},
                                                         {1.000000, 0.000000, 0.000000, 0.000000}};
-const int object_can_skip_translation[38] = {0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0}; // bool
-const int object_can_skip_rotation[38] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; // bool
+const int object_can_skip_translation[19] = {0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1}; // bool
+const int object_can_skip_rotation[19] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; // bool
 
 // Collision Objects Function
-const double default_inflation = 0.075;
+const double default_inflation = 0.05;
 static inline std::vector<CollisionObject*> getRobotCollisionObjects(double inflation = 0.0)
 {
   std::vector<CollisionObject*> objects;
 
-  objects.reserve(38);
+  objects.reserve(19);
   objects.push_back( inflatedCollisionObject(Sphere(0.1), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
@@ -227,25 +162,6 @@ static inline std::vector<CollisionObject*> getRobotCollisionObjects(double infl
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.06), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.06), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.06), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.04), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.04), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
-  objects.push_back( inflatedCollisionObject(Sphere(0.04), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );
   objects.push_back( inflatedCollisionObject(Sphere(0.05), inflation) );

@@ -15,6 +15,9 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
 {
   readParameters();
 
+  problem_options.context = ceres::Context::Create();
+  //problem_options.disable_all_safety_checks = true;
+
   for (int i=0; i<robot::num_joints; i++) joint_name_to_joint_idx[robot::joint_names[i]] = i;
 
   ik_goal_msg = boost::make_shared<dawn_ik::IKGoal>();
@@ -252,7 +255,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   //=================================================================================================
   // Set up the optimization problem
   //=================================================================================================
-  ceres::Problem problem;
+  ceres::Problem problem(problem_options);
   ceres::Solver::Options options;
   robot::setSolverOptions(options);
 

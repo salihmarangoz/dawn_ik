@@ -62,6 +62,7 @@ private: // Parameters
   double p_update_rate;
   double p_init_noise;
   double p_max_step_size;
+  ceres::Problem::Options problem_options;
 
 private:
   std::random_device rand_dev;
