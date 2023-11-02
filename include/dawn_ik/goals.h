@@ -330,22 +330,23 @@ struct EndpointGoal {
     //residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x) * shared_block.ik_goal->m1_weight;
     //residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y) * shared_block.ik_goal->m1_weight;
     //residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
-    residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight;
-    residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight;
-    residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight;
+    residuals[1] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight;
+    residuals[2] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight;
+    residuals[3] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight;
 
     // Orientation cost (FAST)
-    residuals[0] = (ceres::abs(global_link_rotations[4*robot::endpoint_link_idx+0]) - abs(shared_block.ik_goal->m2_w)) * shared_block.ik_goal->m2_weight;
-    residuals[1] = (global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x) * shared_block.ik_goal->m2_weight;
-    residuals[2] = (global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y) * shared_block.ik_goal->m2_weight;
-    residuals[3] = (global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z) * shared_block.ik_goal->m2_weight;
+    // NOTE: abs is wrong here...
+    // residuals[0] = (ceres::abs(global_link_rotations[4*robot::endpoint_link_idx+0]) - abs(shared_block.ik_goal->m2_w)) * shared_block.ik_goal->m2_weight;
+    // residuals[1] = (global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x) * shared_block.ik_goal->m2_weight;
+    // residuals[2] = (global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y) * shared_block.ik_goal->m2_weight;
+    // residuals[3] = (global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z) * shared_block.ik_goal->m2_weight;
 
     // Orientation cost (FAST) (Mathematically the same as L2 dist, but the jabobian should be smaller)
-    // const T tmp =  (ceres::abs(global_link_rotations[4*robot::endpoint_link_idx+0]) * abs(shared_block.ik_goal->m2_w)) + 
-    //                (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
-    //                (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
-    //                (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
-    // residuals[0] = (1.0 - tmp) * shared_block.ik_goal->m2_weight * 20.0;
+    const T tmp =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
+                   (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
+                   (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
+                   (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
+    residuals[0] = (1.0 - ceres::abs(tmp)) * shared_block.ik_goal->m2_weight * 20.0; // quaternion duality fix
 
     // Orientation cost (not correct)
     // const T tmp =  (ceres::abs(global_link_rotations[4*robot::endpoint_link_idx+0]) * abs(shared_block.ik_goal->m2_w)) + 
@@ -375,7 +376,7 @@ struct EndpointGoal {
     //residuals[8] = shared_block.ik_goal->m3_weight*(target_y/target_norm - eef_y/eef_norm);
     //residuals[9] = shared_block.ik_goal->m3_weight*(target_z/target_norm - eef_z/eef_norm);
 
-    residuals[7] = shared_block.ik_goal->m3_weight*ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
+    residuals[4] = shared_block.ik_goal->m3_weight*ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
 
     return true;
   }
@@ -385,7 +386,7 @@ struct EndpointGoal {
    {
      //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      //            new EndpointGoal(shared_block)));
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 8, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new EndpointGoal(shared_block)));
    }
 
