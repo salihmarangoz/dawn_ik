@@ -195,6 +195,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     int variable_idx = robot::joint_idx_to_variable_idx[joint_idx];
 
     variable_positions[variable_idx] = monitor_state->joint_state.position[i];
+    
+    // if (monitor_state->joint_state.velocity.size() > i) TODO: PRINT WARNING!
     variable_velocities[variable_idx] = monitor_state->joint_state.velocity[i];
 
   }
@@ -356,6 +358,8 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   //options.minimizer_type = LINE_SEARCH;
   //options.line_search_direction_type = BFGS;
   //options.jacobi_scaling = false;
+
+  //options.use_mixed_precision_solves = true; // Can't use this with DENSE_QR
 
   for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
