@@ -2,10 +2,10 @@
 <launch>
 
   <!-- =================== PARAMETERS ========================== -->
-  <arg name="robot_name" default="horti"/>
+  <arg name="robot_name" default="repair"/>
   <arg name="waypoints_file" default="test"/>
   <arg name="trajectory_file" default=""/> <!-- empty to disable -->
-  <arg name="endpoint_frame" default="head_link_eef"/>
+  <arg name="endpoint_frame" default="right_hand_v1s_grasp_link"/>
   <arg name="solver" default="dawn_ik"/> <!-- values: dawn_ik or collision_ik or empty string to disable -->
   <arg name="world_frame" default="world"/>
   <arg name="start_sim" default="True"/>
@@ -47,4 +47,3 @@
   </node>
 
 </launch>
-
