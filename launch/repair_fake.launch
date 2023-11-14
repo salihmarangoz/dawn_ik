@@ -1,7 +1,53 @@
 <?xml version="1.0"?>
-
 <launch>
+  <!-- launch gazebo flag -->
+  <arg name="launch_gazebo" default="false" />
 
-  <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" />
+  <!-- Run the main MoveIt executable with trajectory execution -->
+  <include file="$(find repair_moveit_config_v2)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true" />
+    <arg name="moveit_controller_manager" value="ros_control" />
+    <arg name="fake_execution_type" value="interpolate" />
+    <arg name="info" value="true" />
+    <arg name="debug" value="false" />
+    <arg name="pipeline" value="ompl" />
+    <arg name="load_robot_description" value="true" />
+  </include>
 
+  <!-- Start the controllers and robot state publisher-->
+  <!-- Robot state publisher -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+    <param name="tf_prefix" type="string" value="" />
+  </node>
+
+  <!-- Joint trajectory controller -->
+  <rosparam file="$(find repair_gazebo)/config/controllers.yaml" command="load" />
+  <node name="repair_controller_spawner" pkg="controller_manager" type="spawner" output="screen"
+    args="joint_state_controller arm_1_trajectory_controller arm_2_trajectory_controller torso_trajectory_controller" />
+
+  <!-- Start the simulated robot in an empty Gazebo world -->
+  <group if="$(arg launch_gazebo)">
+    <include file="$(find repair_gazebo)/launch/repair_gazebo.launch" />
+  </group>
+  <group unless="$(arg launch_gazebo)">
+    <!-- fake_joint_driver_node -->
+    <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node">
+      <!-- Set joint start position -->
+      <rosparam param="start_position">{j_torso_1: 0.0, j_arm_1_1: 0.0, j_arm_1_2: -0.8812, j_arm_1_3: 0.3813,
+        j_arm_1_4: -1.0462, j_arm_1_5: -0.6933, j_arm_1_6: 0.8388, j_arm_1_7: 0.0, j_arm_2_1: 0.0,
+        j_arm_2_2: 0.6156, j_arm_2_3: -0.1312, j_arm_2_4: 1.4346, j_arm_2_5: 0.3096, j_arm_2_6:
+        -0.3323, j_arm_2_7: 0.0}</rosparam>
+      <!-- Set - `exclude_joints` -->
+      <!-- <rosparam param="exclude_joints">[j_torso_1]</rosparam> -->
+    </node>
+  </group>
+
+  <!-- Start moveit_rviz with the motion planning plugin -->
+  <include file="$(find repair_moveit_config_v2)/launch/moveit_rviz.launch">
+    <arg name="rviz_config" value="$(find repair_moveit_config_v2)/launch/moveit.rviz" />
+  </include>
+
+  <!-- launch the repair_interface node -->
+  <node name="repair_interface" pkg="repair_interface" type="repair_interface_node" output="screen" />
 </launch>
