@@ -245,6 +245,7 @@ bool RobotParser::parse()
   joint_idx_to_variable_idx.resize(num_joints, -1);
   variable_idx_to_joint_idx.resize(num_joints); // will be shrink after this block
   joint_names.resize(num_joints);
+  joint_axis.resize(num_joints);
   joint_child_link_idx.resize(num_joints);
   joint_parent_link_idx.resize(num_joints);
   joint_is_position_bounded.resize(num_joints);
@@ -266,6 +267,30 @@ bool RobotParser::parse()
     int joint_idx = j->getJointIndex(); // joint idx in robot model
     ROS_INFO("joint idx: %d", joint_idx);
     joint_names[joint_idx] = j->getName();
+
+    // Add joint type
+    if (j->getType() == moveit::core::JointModel::REVOLUTE)
+    {
+      const moveit::core::RevoluteJointModel *j_revolute = dynamic_cast<const robot_model::RevoluteJointModel*>(j);
+      auto j_axis = j_revolute->getAxis();
+      if (j_axis[0] > 0.99)       joint_axis[joint_idx] = 1; // +x
+      else if (j_axis[1] > 0.99)  joint_axis[joint_idx] = 2; // +y
+      else if (j_axis[2] > 0.99)  joint_axis[joint_idx] = 3; // +z
+      else if (j_axis[0] < -0.99) joint_axis[joint_idx] = -1; // -x
+      else if (j_axis[1] < -0.99) joint_axis[joint_idx] = -2; // -y
+      else if (j_axis[2] < -0.99) joint_axis[joint_idx] = -3; // -z
+      else
+      {
+        // Well... We only support aligned axes.
+        ROS_FATAL("Unsupported joint axis: %s", j->getName().c_str());
+        exit(-1);
+      }
+    }
+    else
+    {
+      joint_axis[joint_idx] = 0;
+    }
+    ROS_INFO("joint type (0:nan, 1:x, 2:y, 3:z, -1:-x, -2:-y, -3:-z): %d", joint_axis[joint_idx]);
 
     // Get parent link
     const moveit::core::LinkModel* parent_link = j->getParentLinkModel(); // if j is the ROOT joint this will return NULL pointer!!!
@@ -343,7 +368,17 @@ bool RobotParser::parse()
   variable_idx_to_joint_idx.resize(num_variables);
 
   // Find partial chain to get targets, exclude targets according to yaml, exclude static targets
-  auto tmp_targets = findPartialChain(endpoint_link_idx);
+  // TODO: add a parameter to process joints
+  std::vector<int> tmp_targets;
+  if (cfg["extra"]["use_partial_chain_targets"].As<bool>()) 
+  {
+    tmp_targets = findPartialChain(endpoint_link_idx);
+  }
+  else
+  {
+    for (int i=0; i<num_joints; i++) tmp_targets.push_back(i);
+  }
+
   for (int i=0; i<tmp_targets.size(); i++)
   {
     int curr_joint_idx = tmp_targets[i];
@@ -523,6 +558,7 @@ std::string RobotParser::generateCodeForParsedRobot()
   // Joint info
   out_stream << "// Joint info" << std::endl;
   out_stream << prefix << strVector2Str("std::string joint_names", joint_names) << std::endl;
+  out_stream << prefix << primitiveVector2Str("int joint_axis", joint_axis) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_child_link_idx", joint_child_link_idx) << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_parent_link_idx", joint_parent_link_idx) << " // -1 if no link available" << std::endl;
   out_stream << prefix << primitiveVector2Str("int joint_is_position_bounded", joint_is_position_bounded) << " // bool" << std::endl;

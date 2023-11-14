@@ -202,6 +202,15 @@ $ bash lite6_experiments.sh
 
 - Add number of repetitions for the waypoints.
 
+### F.A.Q.
+
+- Solver crashes:
+  - Make sure to disable `horti_acm_tricks` for robots that are not Horti.
+
+- Parser crashes:
+  - Only single-axis revolute joints and static joints are supported.
+
+
 ### Footnotes
 
 - [1] [Ceres Solver](http://ceres-solver.org/) is heavily used in this project so we named this project similar to [how Ceres Solver is named](http://ceres-solver.org/#f1). [Dawn](https://solarsystem.nasa.gov/missions/dawn/overview/) is the spacecraft launched in 2007 by NASA, reached to Ceres in 2015 and acquired the dwarf planet's information of global shape, mean density, surface morphology, mineralogy, etc. by the middle of 2016. 

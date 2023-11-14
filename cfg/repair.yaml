@@ -11,7 +11,7 @@
 
 #DONE
 # Starting from this endpoint to the root, all joints will be the optimization parameter
-endpoint_link: "right_hand_v1s_grasp_link"
+endpoint_link: "arm_2_tcp"
 
 world_frame: "world"
 
@@ -240,4 +240,5 @@ proximity:
 #########################################################
 #DONE
 extra:
-  horti_acm_tricks: true # hardcoded acm modification trick for horti robot. TODO: this should be automated
+  horti_acm_tricks: false # hardcoded acm modification trick for horti robot. TODO: this should be automated
+  use_partial_chain_targets: true # only include kinematic chains that are in control

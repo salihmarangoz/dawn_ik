@@ -47,12 +47,43 @@ inline void computeLinkTranslation(const T* current_translation, const T* curren
 // ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
 // WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
-inline void computeLinkRotation(const T* current_rotation, const T& joint_value, T* result)
+inline void computeLinkRotation(const T* current_rotation, const T& joint_value, int joint_axis, T* result)
 {
   T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
-  angle_axis[0] = T(0.0);
-  angle_axis[1] = T(0.0);
-  angle_axis[2] = joint_value;
+  switch (joint_axis)
+  {
+    case 1:
+      angle_axis[0] = joint_value;
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = T(0.0);
+      break;
+    case -1:
+      angle_axis[0] = -joint_value;
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = T(0.0);
+      break;
+    case 2:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = joint_value;
+      angle_axis[2] = T(0.0);
+      break;
+    case -2:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = -joint_value;
+      angle_axis[2] = T(0.0);
+      break;
+    case 3:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = joint_value;
+      break;
+    case -3:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = -joint_value;
+      break;
+  }
+
   T joint_rotation[4];
   ceres::AngleAxisToQuaternion(angle_axis, joint_rotation);
   ceres::QuaternionProduct(current_rotation, joint_rotation, result);
@@ -63,12 +94,43 @@ inline void computeLinkRotation(const T* current_rotation, const T& joint_value,
 // ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
 // WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
-inline void computeLinkRotation(const T* current_rotation, const T* link_rotation, const T& joint_value, T* result)
+inline void computeLinkRotation(const T* current_rotation, const T* link_rotation, const T& joint_value, int joint_axis, T* result)
 {
   T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
-  angle_axis[0] = T(0.0);
-  angle_axis[1] = T(0.0);
-  angle_axis[2] = joint_value;
+  switch (joint_axis)
+  {
+    case 1:
+      angle_axis[0] = joint_value;
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = T(0.0);
+      break;
+    case -1:
+      angle_axis[0] = -joint_value;
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = T(0.0);
+      break;
+    case 2:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = joint_value;
+      angle_axis[2] = T(0.0);
+      break;
+    case -2:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = -joint_value;
+      angle_axis[2] = T(0.0);
+      break;
+    case 3:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = joint_value;
+      break;
+    case -3:
+      angle_axis[0] = T(0.0);
+      angle_axis[1] = T(0.0);
+      angle_axis[2] = -joint_value;
+      break;
+  }
+
   T joint_rotation[4];
   ceres::AngleAxisToQuaternion(angle_axis, joint_rotation);
   T link_and_joint_rotation[4];
@@ -188,6 +250,7 @@ inline void computeGlobalLinkTransforms(const JetT* target_positions,
       {
         utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]),
                                   joint_val,
+                                  robot::joint_axis[i],
                                   &(global_link_rotations[4*child_link_idx]));
       }
       else // if link has rotation and joint has rotation, then we need to rotate using both
@@ -195,6 +258,7 @@ inline void computeGlobalLinkTransforms(const JetT* target_positions,
         utils::computeLinkRotation(&(global_link_rotations[4*parent_link_idx]), 
                                   &(link_rotations[4*child_link_idx]), 
                                   joint_val,
+                                  robot::joint_axis[i],
                                   &(global_link_rotations[4*child_link_idx]));
       }
     }

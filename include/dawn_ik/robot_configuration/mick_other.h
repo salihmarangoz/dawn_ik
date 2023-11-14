@@ -46,6 +46,7 @@ const int object_idx_to_link_idx[38] = {1,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,6,9,9,
 
 // Joint info
 const std::string joint_names[18] = {"world_joint","head_world_joint","head_joint1","head_joint2","head_joint3","head_joint4","head_joint5","head_joint6","head_joint_eef","other_world_joint","other_joint1","other_joint2","other_joint3","other_joint4","other_joint5","other_joint6","other_joint7","other_joint_eef"};
+const int joint_axis[18] = {0,0,3,3,3,3,3,3,0,0,3,3,3,3,3,3,3,0};
 const int joint_child_link_idx[18] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 const int joint_parent_link_idx[18] = {-1,0,1,2,3,4,5,6,7,0,9,10,11,12,13,14,15,16}; // -1 if no link available
 const int joint_is_position_bounded[18] = {0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0}; // bool

@@ -45,7 +45,6 @@ public:
   int num_acm_link_pairs; // number of zeros in the acm matrix
   // int num_targets; // GET FROM targets !!!
   int endpoint_link_idx; // FROM YAML
-  
 
   // Mapping vectors
   std::vector<int> joint_idx_to_variable_idx; // -1 if no variable available. Can be used as joint_has_variable vector
@@ -56,6 +55,7 @@ public:
 
   // Joint info
   std::vector<std::string> joint_names;
+  std::vector<int> joint_axis; // 0:undefined, 1:x, 2:y, 3:z, -1:-x, -2:-y, -3:-z
   std::vector<int> joint_child_link_idx;
   std::vector<int> joint_parent_link_idx; // -1 if no link available
   std::vector<int> joint_is_position_bounded; // bool

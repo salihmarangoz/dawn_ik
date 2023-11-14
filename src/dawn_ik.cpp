@@ -296,8 +296,11 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   //problem.AddResidualBlock(future_endpoint_goal, nullptr, optm_target_positions);
 
   // ============= Collision Avoidance Goal ============
-  ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
-  problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
+  if (monitor_state->collision_state.int_pair_a.size() > 0) // skip this objective if proximity is the case
+  {
+    ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
+    problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
+  }
 
   // ========== Minimal Joint Displacement Goal ==========
   ceres::CostFunction* minimal_joint_displacement_goal = MinimalJointDisplacementGoal::Create(shared_block);

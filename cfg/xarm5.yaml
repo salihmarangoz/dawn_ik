@@ -197,3 +197,4 @@ proximity:
 #DONE
 extra:
   horti_acm_tricks: false # hardcoded acm modification trick for horti robot. TODO: this should be automated
+  use_partial_chain_targets: false # only include kinematic chains that are in control
