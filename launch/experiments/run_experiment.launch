@@ -14,6 +14,7 @@
   <arg name="wait_for_init" default="10.0"/>
   <arg name="wait_for_solver" default="10.0"/>
   <arg name="wait_for_shutdown" default="1.0"/>
+  <arg name="use_gazebo" default="false"/>
   <!-- ========================================================= -->
 
   <!-- waypoint generator and logger -->
@@ -52,7 +53,7 @@
   <!-- fake simulator -->
   <include file="$(find dawn_ik)/launch/$(arg robot_name)_fake.launch" if="$(arg start_sim)">
     <!-- launch_gazebo -->
-    <arg name="launch_gazebo" value="true"/>
+    <arg name="launch_gazebo" value="$(arg use_gazebo)"/>
   </include>
 
   <!-- solver -->
