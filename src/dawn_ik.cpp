@@ -171,7 +171,7 @@ void DawnIK::loopThread()
       }
 
     }
-    ROS_INFO_THROTTLE(0.25, "cycle time: %f", r.cycleTime().toSec());
+    // ROS_INFO_THROTTLE(0.25, "cycle time: %f", r.cycleTime().toSec());
     r.sleep();
   }
 }
@@ -395,7 +395,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
         min_step = limited_vel + limited_acc - jerk_limit;
         max_step = limited_vel + limited_acc + jerk_limit;
         //ROS_WARN_THROTTLE(0.1, "%f %f", min_step, max_step);
-        ROS_WARN_THROTTLE(0.1, "%f", prev_acc[target_idx]);
+        // ROS_WARN_THROTTLE(0.1, "%f", prev_acc[target_idx]);  
       }
       ///////////////////////////////////////////////////////////////////
 

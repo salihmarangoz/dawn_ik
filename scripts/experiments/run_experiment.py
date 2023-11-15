@@ -89,11 +89,17 @@ if __name__ == "__main__":
     replay_trigger = rospy.ServiceProxy('/moveit_replay_trajectory/trigger', Empty)
 
   listener = tf.TransformListener()
-  dawn_ik_goal_pub = rospy.Publisher("/dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
+  namespace = rospy.get_namespace()
+  dawn_ik_goal_pub = rospy.Publisher(f"{namespace}/dawn_ik_solver/ik_goal", IKGoal, queue_size=5)
   marker_pub = rospy.Publisher("~goal_marker", Marker, queue_size = 5)
   rospy.Subscriber("/joint_states", JointState, track_joint_state)
 
-  print("Reading file:", waypoints_file)
+  rospy.loginfo("Reading waypoints from: " + waypoints_file)
+  # check if the file exists
+  if not os.path.isfile(waypoints_file):
+    rospy.logerr("Waypoints file does not exist!")
+    exit(-1)
+  
   waypoints = np.loadtxt(waypoints_file)
   w_t = waypoints[:,0]
   w_x = waypoints[:,1]
@@ -198,28 +204,28 @@ if __name__ == "__main__":
       if wait_for_shutdown_remained < 0: break
 
   #################### check for collisions after the experiment is done #################################
-  rospy.loginfo("Started offline collision checking")
-  total_collisions = 0
-  for entry in entries:
-    js = JointState()
-    js.name = entry["joint_names"]
-    js.position = entry["joint_positions"]
-    res = check_collision(js) # remove procedure call
-    entry["collision_state"] = res.collision_state
-    entry["collision_distance"] = res.collision_distance
-    total_collisions += int(res.collision_state)
-  rospy.loginfo("Finished offline collision checking")
-  rospy.loginfo("Total collisions: " + str(total_collisions))
+  # rospy.loginfo("Started offline collision checking")
+  # total_collisions = 0
+  # for entry in entries:
+  #   js = JointState()
+  #   js.name = entry["joint_names"]
+  #   js.position = entry["joint_positions"]
+  #   res = check_collision(js) # remove procedure call
+  #   entry["collision_state"] = res.collision_state
+  #   entry["collision_distance"] = res.collision_distance
+  #   total_collisions += int(res.collision_state)
+  # rospy.loginfo("Finished offline collision checking")
+  # rospy.loginfo("Total collisions: " + str(total_collisions))
   
   #################### save results to a file #################################
-  timestr = time.strftime("%Y%m%d-%H%M%S")
-  out_filename_default = SCRIPT_DIR + "/../../results/experiment_" + timestr + ".json" # or yaml
-  out_filename = rospy.get_param("~output_file", out_filename_default)
-  if out_filename == "": out_filename = out_filename_default
+  # timestr = time.strftime("%Y%m%d-%H%M%S")
+  # out_filename_default = SCRIPT_DIR + "/../../results/experiment_" + timestr + ".json" # or yaml
+  # out_filename = rospy.get_param("~output_file", out_filename_default)
+  # if out_filename == "": out_filename = out_filename_default
 
-  with open(out_filename, "w") as f:
-    #f.write(yaml.dump(entries, default_flow_style=None, sort_keys=False)) # yaml is better at storing human readable data
-    f.write(json.dumps(entries)) # json is better at storing machine readable data
+  # with open(out_filename, "w") as f:
+  #   #f.write(yaml.dump(entries, default_flow_style=None, sort_keys=False)) # yaml is better at storing human readable data
+  #   f.write(json.dumps(entries)) # json is better at storing machine readable data
 
   print("=====================================================")
   print("Experiment Finished. Everything will be closed now...")
