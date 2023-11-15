@@ -11,7 +11,7 @@
 
 #DONE
 # Starting from this endpoint to the root, all joints will be the optimization parameter
-endpoint_link: "arm_1_tcp"
+endpoint_link: "left_hand_v1s_grasp_link"
 
 world_frame: "world"
 
@@ -180,8 +180,11 @@ proximity:
       translation: [0, 0.025, 0.05]
 
     - link: "arm_1_7"
-      shape: "Sphere(0.05)"
+      shape: "Sphere(0.07)"
       translation: [0.0, 0.0, 0.0]
+    - link: "arm_1_7"
+      shape: "Sphere(0.11)"
+      translation: [-0.01, 0.0, 0.14]
 
 #########################################
 
@@ -231,8 +234,11 @@ proximity:
       translation: [0, -0.025, 0.05]
 
     - link: "arm_2_7"
-      shape: "Sphere(0.05)"
+      shape: "Sphere(0.07)"
       translation: [0.0, 0.0, 0.0]
+    - link: "arm_2_7"
+      shape: "Sphere(0.11)"
+      translation: [0.01, 0.0, 0.14]
 
 
 #########################################################
