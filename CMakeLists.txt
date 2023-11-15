@@ -156,7 +156,7 @@ add_executable(solver_node
   src/robot_monitor.cpp
   src/experimental.cpp
 )
-target_compile_definitions(solver_node PRIVATE -DUSE_MICK_OTHER=0)
+target_compile_definitions(solver_node PRIVATE -DUSE_MICK_OTHER=0 -DUSE_REPAIR_ARM_1=1 -DUSE_REPAIR_ARM_2=0)
 add_dependencies(solver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(solver_node
   ${catkin_LIBRARIES}
@@ -166,22 +166,22 @@ target_link_libraries(solver_node
   ruckig::ruckig
 )
 
-# add_executable(solver_node_other
-#   src/nodes/solver_node.cpp
-#   src/dawn_ik.cpp
-#   src/joint_trajectory_control_interface.cpp
-#   src/robot_monitor.cpp
-#   src/experimental.cpp
-# )
-# target_compile_definitions(solver_node_other PRIVATE -DUSE_MICK_OTHER=1)
-# add_dependencies(solver_node_other ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(solver_node_other
-#   ${catkin_LIBRARIES}
-#   ${Boost_LIBRARIES}
-#   ${hpp-fcl_LIBRARIES}
-#   Ceres::ceres
-#   ruckig::ruckig
-# )
+add_executable(solver_node_other
+  src/nodes/solver_node.cpp
+  src/dawn_ik.cpp
+  src/joint_trajectory_control_interface.cpp
+  src/robot_monitor.cpp
+  src/experimental.cpp
+)
+target_compile_definitions(solver_node_other PRIVATE -DUSE_MICK_OTHER=0 -DUSE_REPAIR_ARM_1=0 -DUSE_REPAIR_ARM_2=1)
+add_dependencies(solver_node_other ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(solver_node_other
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${hpp-fcl_LIBRARIES}
+  Ceres::ceres
+  ruckig::ruckig
+)
 
 ############# robot_parser_node executable ###########
 add_executable(robot_parser_node 

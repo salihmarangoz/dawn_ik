@@ -5,6 +5,10 @@
 
 #if USE_MICK_OTHER
 #include <dawn_ik/robot_configuration/mick_other.h>
+#elif USE_REPAIR_ARM_1
+#include <dawn_ik/robot_configuration/repair_arm_1.h>
+#elif USE_REPAIR_ARM_2
+#include <dawn_ik/robot_configuration/repair_arm_2.h>
 #else
 #include <dawn_ik/robot_configuration/autogen_test.h>
 #endif
