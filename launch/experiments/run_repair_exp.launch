@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- =================== PARAMETERS ========================== -->
+  <arg name="robot_name" default="repair"/>
+  <arg name="waypoints_file" default="circle_xz_arm_1"/>
+  <arg name="waypoints_file_2" default="eight_xz"/>
+  <arg name="trajectory_file" default=""/> <!-- empty to disable -->
+  <arg name="endpoint_frame" default="arm_1_tcp"/>
+  <arg name="endpoint_frame_2" default="arm_2_tcp"/>
+  <arg name="solver" default="dawn_ik"/> <!-- values: dawn_ik or collision_ik or empty string to disable -->
+  <arg name="world_frame" default="world"/>
+  <arg name="start_sim" default="True"/>
+  <arg name="wait_for_init" default="10.0"/>
+  <arg name="wait_for_solver" default="10.0"/>
+  <arg name="wait_for_shutdown" default="1.0"/>
+  <arg name="use_gazebo" default="false"/>
+  <!-- ========================================================= -->
+
+  <!-- fake simulator -->
+  <include file="$(find dawn_ik)/launch/$(arg robot_name)_fake.launch" if="$(arg start_sim)">
+    <!-- launch_gazebo -->
+    <arg name="launch_gazebo" value="$(arg use_gazebo)"/>
+  </include>
+
+  <!-- solver -->
+  <include file="$(find dawn_ik)/launch/$(arg robot_name)_solver.launch" if="$(eval solver == 'dawn_ik')"/>
+  <include file="$(find dawn_ik)/launch/collision_ik/$(arg robot_name)_solver_collision_ik.launch" if="$(eval solver == 'collision_ik')"/>
+
+</launch>

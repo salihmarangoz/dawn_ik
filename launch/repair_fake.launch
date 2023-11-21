@@ -29,6 +29,8 @@
   <!-- Start the simulated robot in an empty Gazebo world -->
   <group if="$(arg launch_gazebo)">
     <include file="$(find repair_gazebo)/launch/repair_gazebo.launch" />
+
+    <include file="$(find gazebo2rviz)/launch/gazebo2rviz.launch"/>
   </group>
   <group unless="$(arg launch_gazebo)">
     <!-- fake_joint_driver_node -->
