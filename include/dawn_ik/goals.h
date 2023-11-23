@@ -519,6 +519,7 @@ struct ManipulabilityGoal {
   template <typename T>
   bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
   {
+    // Create a robot state using the joint values
     moveit::core::RobotState robot_state(shared_block.robot_model_);
     for(size_t variable_idx = 0; variable_idx < robot::num_variables; variable_idx++)
     {
@@ -536,20 +537,18 @@ struct ManipulabilityGoal {
     }
     robot_state.updateLinkTransforms();
 
-    // for debugging
-    //shared_block.visual_tools_->publishRobotState(robot_state);
+    // double manipulability_index_tra;
+    // shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_tra, true);
+    // ROS_INFO_THROTTLE(1.0, "manipulability_index_tra: %f", manipulability_index_tra);
+    // if (std::isnan(manipulability_index_tra)) return false; // sad jacobian sounds
+    // residuals[0] = 1.0 - manipulability_index_tra;
 
-    double manipulability_index_tra;
-    shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_tra, true);
-    //shared_block.km_->getManipulabilityIndex(robot_state, "head", manipulability_index_tra, true);
-    ROS_INFO_THROTTLE(1.0, "manipulability_index_tra: %f", manipulability_index_tra);
-    if (std::isnan(manipulability_index_tra)) return false; // sad jacobian sounds
-
-    // double manipulability_index_rot;
-    // km_->getManipulabilityIndex(robot_state, group_name_, manipulability_index_rot, false);
-    // ROS_INFO_THROTTLE(1.0, "manipulability_index_rot: %f", manipulability_index_rot);
-    // if (std::isnan(manipulability_index_rot)) return 1.0; // sad jacobian sounds
-    residuals[0] = 1.0 - manipulability_index_tra;
+    double manipulability_index_rot;
+    shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_rot, false);
+    ROS_INFO_THROTTLE(1.0, "manipulability_index_rot: %f", manipulability_index_rot);
+    if (std::isnan(manipulability_index_rot)) return false; // sad jacobian sounds
+    residuals[0] = 1.0 - manipulability_index_rot;
+    
     return true;
   }
 
@@ -565,9 +564,6 @@ struct ManipulabilityGoal {
   SharedBlock &shared_block;
 };
 #endif
-
-
-
 
 
 } // namespace dawn_ik

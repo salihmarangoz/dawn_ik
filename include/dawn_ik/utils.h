@@ -1,14 +1,9 @@
 #ifndef DAWN_IK_UTILS_H
 #define DAWN_IK_UTILS_H
 
-// COMPILE TIME COMPUTATIONS AND CONSTEXPR UTILS
-#include <stddef.h> // ptrdiff_t
-
-// CERES UTILS
+#include <stddef.h>
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
-
-// VISUALIZATION UTILS
 #include <dawn_ik/robot_configuration/robot_configuration.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
@@ -44,12 +39,10 @@ inline void computeLinkTranslation(const T* current_translation, const T* curren
 
 
 // Computes rotation of the link using the joint (excluding rotation of the link)
-// ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
-// WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
 inline void computeLinkRotation(const T* current_rotation, const T& joint_value, int joint_axis, T* result)
 {
-  T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
+  T angle_axis[3];
   switch (joint_axis)
   {
     case 1:
@@ -89,14 +82,11 @@ inline void computeLinkRotation(const T* current_rotation, const T& joint_value,
   ceres::QuaternionProduct(current_rotation, joint_rotation, result);
 }
 
-
 // Computes rotation of the link using the joint (including rotation of the link)
-// ASSUMES THAT ROTATION OCCURS ON THE Z ANGLE AXIS
-// WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
 inline void computeLinkRotation(const T* current_rotation, const T* link_rotation, const T& joint_value, int joint_axis, T* result)
 {
-  T angle_axis[3];// = {0.0, 0.0, joint_value}; // z axis!
+  T angle_axis[3];
   switch (joint_axis)
   {
     case 1:
@@ -139,7 +129,6 @@ inline void computeLinkRotation(const T* current_rotation, const T* link_rotatio
 }
 
 // Computes rotation of the link without the joint (including rotation of the link)
-// WORKS WELL WITH THE FIRST ORDER OF GRADIENTS
 template <typename T>
 inline void computeLinkRotation(const T* current_rotation, const T* link_rotation, T* result)
 {
@@ -178,6 +167,7 @@ void eulerToMatrix(double a, double b, double c, Eigen::Matrix3d& R) {
 // utils::computeGlobalLinkTransforms(target_values, variable_positions, global_link_translations, global_link_rotations);
 //
 // Set target_positions=nullptr to use without autograd
+// TODO: implement a version only for the kinematic chain
 template<typename JetT, typename ConstT>
 inline void computeGlobalLinkTransforms(const JetT* target_positions, 
                                         const ConstT* variable_positions, 
