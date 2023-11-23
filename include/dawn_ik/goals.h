@@ -368,36 +368,42 @@ struct LookAtGoal {
     T global_link_rotations[4*robot::num_links];
     utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
 
-    // Look at goal cost
-    // see: https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/
+    // target position w.r.t. eef position (world orientation)
     T target_x = shared_block.ik_goal->m3_x - global_link_translations[3*robot::endpoint_link_idx+0];
     T target_y = shared_block.ik_goal->m3_y - global_link_translations[3*robot::endpoint_link_idx+1];
     T target_z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
-    T& w = global_link_rotations[4*robot::endpoint_link_idx+0];
-    T& x = global_link_rotations[4*robot::endpoint_link_idx+1];
-    T& y = global_link_rotations[4*robot::endpoint_link_idx+2];
-    T& z = global_link_rotations[4*robot::endpoint_link_idx+3];
-    T eef_x = 2.0 * (x * z - ceres::abs(w) * y);
-    T eef_y = 2.0 * (y * z + ceres::abs(w) * x);
-    T eef_z = 1.0 - 2.0 * (x * x + y * y);
+
+    // currently looked position w.r.t. eef position (world orientation)
+    T q[4];
+    q[0] = global_link_rotations[4*robot::endpoint_link_idx+0];
+    q[1] = global_link_rotations[4*robot::endpoint_link_idx+1];
+    q[2] = global_link_rotations[4*robot::endpoint_link_idx+2];
+    q[3] = global_link_rotations[4*robot::endpoint_link_idx+3];
+    T fv[3];
+    fv[0] = T(0.0);
+    fv[1] = T(0.0);
+    fv[2] = T(1.0);
+    T result[3];
+    ceres::QuaternionRotatePoint(q, fv, result);
+    T eef_x = result[0];
+    T eef_y = result[1];
+    T eef_z = result[2];
+
+    // maybe cosine similarity...
     T target_norm = ceres::sqrt(target_x*target_x + target_y*target_y + target_z*target_z);
     T eef_norm = ceres::sqrt(eef_x*eef_x + eef_y*eef_y + eef_z*eef_z);
+    residuals[0] = shared_block.ik_goal->m3_weight * ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
 
-    //residuals[7] = shared_block.ik_goal->m3_weight*(target_x/target_norm - eef_x/eef_norm);
-    //residuals[8] = shared_block.ik_goal->m3_weight*(target_y/target_norm - eef_y/eef_norm);
-    //residuals[9] = shared_block.ik_goal->m3_weight*(target_z/target_norm - eef_z/eef_norm);
-
-    residuals[0] = shared_block.ik_goal->m3_weight*ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
     return true;
   }
 
    // Factory to hide the construction of the CostFunction object from the client code.
    static ceres::CostFunction* Create(SharedBlock &shared_block)
    {
-     return (new ceres::NumericDiffCostFunction<LookAtGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new LookAtGoal(shared_block)));
-     //return (new ceres::AutoDiffCostFunction<LookAtGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //return (new ceres::NumericDiffCostFunction<LookAtGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      //            new LookAtGoal(shared_block)));
+     return (new ceres::AutoDiffCostFunction<LookAtGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new LookAtGoal(shared_block)));
    }
 
   SharedBlock &shared_block;
