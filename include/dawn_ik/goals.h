@@ -17,7 +17,8 @@
 #include <moveit_visual_tools/moveit_visual_tools.h>
 #endif
 
-static double acceleration_limit =  M_PI*0.01*0.01*0.5;
+static double acceleration_limit =  M_PI*0.01*0.01*0.5; // TODO
+
 namespace dawn_ik
 {
 
@@ -48,7 +49,7 @@ struct SharedBlock
   command_history(command_history),
   filtered_curr_positions(filtered_curr_positions)
   {
-    // limit m1 endpoint goal distance
+    // limit m1 endpoint goal distance TODO: MOVE THIS TO THE NODE
     if (ik_goal->m1_limit_dist > 0)
     {
       double xyz_length2 = std::pow(monitor_state->link_state.transformations[7*robot::endpoint_link_idx+0] - ik_goal->m1_x, 2)+
@@ -125,6 +126,7 @@ struct PreferredJointPositionGoal {
       int joint_idx = robot::target_idx_to_joint_idx[target_idx];
 
       // TODO: temporarly disable this feature for unbounded joints
+      // TODO: need to get preferred positions from somewhere
       // if (!robot::joint_is_position_bounded[joint_idx])
       // {
       //   residuals[target_idx] = T(0.0);
@@ -169,6 +171,7 @@ struct LimitVelocityGoal{
 
    SharedBlock &shared_block;
 };
+//=================================================================================================
 
 /**
  * LimitAccelerationGoal
@@ -208,6 +211,7 @@ struct LimitAccelerationGoal {
 
    SharedBlock &shared_block;
 };
+//=================================================================================================
 
 /**
  * LimitJerkGoal
@@ -241,6 +245,7 @@ struct LimitJerkGoal {
 
    SharedBlock &shared_block;
 };
+//=================================================================================================
 
 
 /**
@@ -278,6 +283,7 @@ struct AvoidJointLimitsGoal {
 
    SharedBlock &shared_block;
 };
+//=================================================================================================
 
 /**
  * MinimalJointDisplacementGoal
@@ -307,6 +313,7 @@ struct MinimalJointDisplacementGoal {
    
    SharedBlock &shared_block;
 };
+//=================================================================================================
 
 /**
  * EndpointGoal
@@ -321,20 +328,45 @@ struct EndpointGoal {
     T global_link_rotations[4*robot::num_links];
     utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
 
-    // Position cost (SHOULD BE SAME AS ABOVE)
-    // TODO: rework limited target
-    residuals[1] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight;
-    residuals[2] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight;
-    residuals[3] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight;
+    // Position cost
+    residuals[0] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight;
+    residuals[1] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight;
+    residuals[2] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight;
 
     // Orientation cost
-    const T tmp =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
-                   (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
-                   (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
-                   (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
-    residuals[0] = (1.0 - ceres::abs(tmp)) * shared_block.ik_goal->m2_weight * 20.0; // quaternion duality fix
+    const T qdot =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
+                    (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
+                    (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
+                    (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
+    residuals[3] = (1.0 - ceres::abs(qdot)) * shared_block.ik_goal->m2_weight * 20.0;
+    return true;
+  }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 4, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new EndpointGoal(shared_block)));
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 4, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new EndpointGoal(shared_block)));
+   }
+
+  SharedBlock &shared_block;
+};
+//=================================================================================================
+
+/**
+ * LookAtGoal
+*/
+struct LookAtGoal {
+  LookAtGoal(SharedBlock &shared_block) : shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    T global_link_translations[3*robot::num_links];
+    T global_link_rotations[4*robot::num_links];
+    utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
 
     // Look at goal cost
     // see: https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/
@@ -355,22 +387,23 @@ struct EndpointGoal {
     //residuals[8] = shared_block.ik_goal->m3_weight*(target_y/target_norm - eef_y/eef_norm);
     //residuals[9] = shared_block.ik_goal->m3_weight*(target_z/target_norm - eef_z/eef_norm);
 
-    residuals[4] = shared_block.ik_goal->m3_weight*ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
-
+    residuals[0] = shared_block.ik_goal->m3_weight*ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
     return true;
   }
 
    // Factory to hide the construction of the CostFunction object from the client code.
    static ceres::CostFunction* Create(SharedBlock &shared_block)
    {
-     //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-     //            new EndpointGoal(shared_block)));
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new EndpointGoal(shared_block)));
+     return (new ceres::NumericDiffCostFunction<LookAtGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new LookAtGoal(shared_block)));
+     //return (new ceres::AutoDiffCostFunction<LookAtGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new LookAtGoal(shared_block)));
    }
 
   SharedBlock &shared_block;
 };
+//=================================================================================================
+
 
 /**
  * CollisionAvoidanceGoal
@@ -466,53 +499,6 @@ struct CollisionAvoidanceGoal {
 
   SharedBlock &shared_block;
 };
-
-
-/**
- * FutureEndpointGoal
-*/
-struct FutureEndpointGoal {
-  FutureEndpointGoal(SharedBlock &shared_block) : shared_block(shared_block) {}
-
-  template <typename T>
-  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
-  {
-    T future_target_values[robot::num_targets];
-    for (int i=0; i<robot::num_targets; i++)
-    {
-      future_target_values[i] = 2.0*target_values[i] - shared_block.curr_target_positions[i];
-    }
-
-    T global_link_translations[3*robot::num_links];
-    T global_link_rotations[4*robot::num_links];
-    utils::computeGlobalLinkTransforms(future_target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
-
-    // Position cost
-    residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight/2.0;
-    residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight/2.0;
-    residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight/2.0;
-
-    // Orientation cost (FAST)
-    residuals[0] = (global_link_rotations[4*robot::endpoint_link_idx+0] - shared_block.ik_goal->m2_w) * shared_block.ik_goal->m2_weight/2.0;
-    residuals[1] = (global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x) * shared_block.ik_goal->m2_weight/2.0;
-    residuals[2] = (global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y) * shared_block.ik_goal->m2_weight/2.0;
-    residuals[3] = (global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z) * shared_block.ik_goal->m2_weight/2.0;
-
-    return true;
-  }
-
-   // Factory to hide the construction of the CostFunction object from the client code.
-   static ceres::CostFunction* Create(SharedBlock &shared_block)
-   {
-     //return (new ceres::NumericDiffCostFunction<FutureEndpointGoal, ceres::FORWARD, 5, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-     //            new FutureEndpointGoal(shared_block)));
-     return (new ceres::AutoDiffCostFunction<FutureEndpointGoal, 7, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
-                 new FutureEndpointGoal(shared_block)));
-   }
-
-  SharedBlock &shared_block;
-};
-
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
 /**

@@ -84,12 +84,6 @@ private:
   std::mutex ik_goal_mutex;
   dawn_ik::IKGoalPtr ik_goal_msg;
 
-  // TODO
-  void subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg);
-  ros::Subscriber endpoint_sub; 
-  Eigen::Vector3d endpoint;
-  Eigen::Quaterniond direction;
-
   std::deque<Command> command_history;
   std::vector<double> prev_pos, prev_vel, prev_acc;
 

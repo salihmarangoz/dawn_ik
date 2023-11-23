@@ -16,7 +16,6 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
   readParameters();
 
   problem_options.context = ceres::Context::Create();
-  //problem_options.disable_all_safety_checks = true;
 
   for (int i=0; i<robot::num_joints; i++) joint_name_to_joint_idx[robot::joint_names[i]] = i;
 
@@ -32,8 +31,6 @@ DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(p
 
   loop_thread = new boost::thread(boost::bind(&DawnIK::loopThread, this)); // consumer
   ik_goal_sub = priv_nh.subscribe("ik_goal", 1, &DawnIK::goalCallback, this); // producer
-
-  //endpoint_sub = priv_nh.subscribe("/rviz_moveit_motion_planning_display/robot_interaction_interactive_marker_topic/feedback", 1, &DawnIK::subscriberCallback, this);
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
@@ -69,16 +66,6 @@ void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
   ROS_INFO_ONCE("First IK Goal Message Received!");
 }
 
-void DawnIK::subscriberCallback(const visualization_msgs::InteractiveMarkerFeedbackPtr &msg)
-{
-  auto given_endpoint = msg->pose;
-  ROS_WARN_THROTTLE(1.0, "Endpoint received. x: %lf, y: %lf, z: %lf", given_endpoint.position.x, given_endpoint.position.y, given_endpoint.position.z);
-  endpoint.x() =  given_endpoint.position.x;
-  endpoint.y() =  given_endpoint.position.y;
-  endpoint.z() =  given_endpoint.position.z;
-  direction = Eigen::Quaterniond(given_endpoint.orientation.w, given_endpoint.orientation.x, given_endpoint.orientation.y, given_endpoint.orientation.z);
-  ik_goal_msg->mode = IKGoal::MODE_1;
-}
 void DawnIK::loopThread()
 {
   std::vector<std::string> target_names;
@@ -145,17 +132,6 @@ void DawnIK::loopThread()
           double sig_vel0 = solver_history[0][i] - solver_history[1][i];
           double sig_vel1 = solver_history[1][i] - solver_history[2][i];
           double sig_acc0 = sig_vel0 - sig_vel1;
-
-          // center diff
-          //double sig_vel0 = (solver_history[0][i] - solver_history[2][i])/2;
-          //double sig_vel1 = (solver_history[1][i] - solver_history[3][i])/2;
-          //double sig_acc0 = sig_vel0 - sig_vel1;
-
-          // Finite Difference Equation
-          // -5,-4,-3,-2,-1,0 -> derivative order 1
-          //double sig_vel0 = (-12*solver_history[5][i]+75*solver_history[4][i]-200*solver_history[3][i]+300*solver_history[2][i]-300*solver_history[1][i]+137*solver_history[0][i])/(60);
-          // -5,-4,-3,-2,-1,0 -> derivative order 2
-          //double sig_acc0 = (-10*solver_history[5][i]+61*solver_history[4][i]-156*solver_history[3][i]+214*solver_history[2][i]-154*solver_history[1][i]+45*solver_history[0][i])/(12);
 
           // exp weighted avg
           double alpha = 0.8;
@@ -284,16 +260,21 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   problem.AddResidualBlock(avoid_joint_limits_goal, nullptr, optm_target_positions);
 
   // ================== Endpoint Goal ==================
-  ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block);
-  //ceres::ArctanLoss *endpoint_loss = new ceres::ArctanLoss(0.4); // goal weight
-  //ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
-  //ceres::LossFunction *endpoint_scaled_loss = new ceres::ScaledLoss(endpoint_loss, 20000.0, ceres::TAKE_OWNERSHIP); // goal weight
-  problem.AddResidualBlock(endpoint_goal, nullptr, optm_target_positions);
+  if (ik_goal->m1_weight > 0.0 || ik_goal->m2_weight > 0.0)
+  {
+    ceres::CostFunction* endpoint_goal = EndpointGoal::Create(shared_block);
+    //ceres::ArctanLoss *endpoint_loss = new ceres::ArctanLoss(0.4); // goal weight
+    //ceres::RelaxedIKLoss *endpoint_loss = new ceres::RelaxedIKLoss(0.5); // goal weight
+    //ceres::LossFunction *endpoint_scaled_loss = new ceres::ScaledLoss(endpoint_loss, 20000.0, ceres::TAKE_OWNERSHIP); // goal weight
+    problem.AddResidualBlock(endpoint_goal, nullptr, optm_target_positions);
+  }
 
-  // ================== Future Endpoint Goal ==================
-  // TODO: a failed experiment
-  //ceres::CostFunction* future_endpoint_goal = FutureEndpointGoal::Create(shared_block);
-  //problem.AddResidualBlock(future_endpoint_goal, nullptr, optm_target_positions);
+  // ================== Look at Goal ==================
+  if (ik_goal->m3_weight > 0.0 )
+  {
+    ceres::CostFunction* look_at_goal = LookAtGoal::Create(shared_block);
+    problem.AddResidualBlock(look_at_goal, nullptr, optm_target_positions);
+  }
 
   // ============= Collision Avoidance Goal ============
   if (monitor_state->collision_state.int_pair_a.size() > 0) // skip this objective if proximity is the case
@@ -353,17 +334,6 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   //=================================================================================================
   // Set parameter constraints
   //=================================================================================================
-
-  // TODO
-  //options.trust_region_strategy_type = DOGLEG;
-  //options.use_nonmonotonic_steps = true;
-  //options.preconditioner_type = JACOBI;
-  //options.minimizer_type = LINE_SEARCH;
-  //options.line_search_direction_type = BFGS;
-  //options.jacobi_scaling = false;
-
-  //options.use_mixed_precision_solves = true; // Can't use this with DENSE_QR
-
   for (int target_idx=0; target_idx<robot::num_targets; target_idx++)
   {
     const int joint_idx = robot::target_idx_to_joint_idx[target_idx];
