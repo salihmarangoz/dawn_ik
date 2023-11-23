@@ -321,39 +321,18 @@ struct EndpointGoal {
     T global_link_rotations[4*robot::num_links];
     utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
 
-    // Position cost (FAST)
-    // residuals[4] = ceres::hypot(global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x,
-    //                             global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y,
-    //                             global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
-
     // Position cost (SHOULD BE SAME AS ABOVE)
-    //residuals[4] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.ik_goal->m1_x) * shared_block.ik_goal->m1_weight;
-    //residuals[5] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.ik_goal->m1_y) * shared_block.ik_goal->m1_weight;
-    //residuals[6] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.ik_goal->m1_z) * shared_block.ik_goal->m1_weight;
+    // TODO: rework limited target
     residuals[1] = (global_link_translations[3*robot::endpoint_link_idx+0] - shared_block.m1_x_limited) * shared_block.ik_goal->m1_weight;
     residuals[2] = (global_link_translations[3*robot::endpoint_link_idx+1] - shared_block.m1_y_limited) * shared_block.ik_goal->m1_weight;
     residuals[3] = (global_link_translations[3*robot::endpoint_link_idx+2] - shared_block.m1_z_limited) * shared_block.ik_goal->m1_weight;
 
-    // Orientation cost (FAST)
-    // NOTE: abs is wrong here...
-    // residuals[0] = (ceres::abs(global_link_rotations[4*robot::endpoint_link_idx+0]) - abs(shared_block.ik_goal->m2_w)) * shared_block.ik_goal->m2_weight;
-    // residuals[1] = (global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x) * shared_block.ik_goal->m2_weight;
-    // residuals[2] = (global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y) * shared_block.ik_goal->m2_weight;
-    // residuals[3] = (global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z) * shared_block.ik_goal->m2_weight;
-
-    // Orientation cost (FAST) (Mathematically the same as L2 dist, but the jabobian should be smaller)
+    // Orientation cost
     const T tmp =  (global_link_rotations[4*robot::endpoint_link_idx+0] * shared_block.ik_goal->m2_w) + 
                    (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
                    (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
                    (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
     residuals[0] = (1.0 - ceres::abs(tmp)) * shared_block.ik_goal->m2_weight * 20.0; // quaternion duality fix
-
-    // Orientation cost (not correct)
-    // const T tmp =  (ceres::abs(global_link_rotations[4*robot::endpoint_link_idx+0]) * abs(shared_block.ik_goal->m2_w)) + 
-    //                (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
-    //                (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
-    //                (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
-    // residuals[0] = ceres::acos(2.0*tmp*tmp-1.0) * shared_block.ik_goal->m2_weight;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -453,7 +432,6 @@ struct CollisionAvoidanceGoal {
       const T* pos_b = &(global_object_translations[object_idx_b*3]);
 
       // TODO: https://github.com/humanoid-path-planner/hpp-fcl/blob/devel/test/box_box_distance.cpp
-
       // TODO: write a function for this!
       // TODO: maybe use not inflated objects? inflated ones only for the broadphase collision detection.
       const T distance = utils::distSphere2Sphere(pos_a, 
