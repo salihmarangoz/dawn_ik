@@ -410,6 +410,45 @@ struct LookAtGoal {
 };
 //=================================================================================================
 
+/**
+ * DistanceToGoal
+*/
+struct DistanceToGoal {
+  DistanceToGoal(SharedBlock &shared_block) : shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    T global_link_translations[3*robot::num_links];
+    T global_link_rotations[4*robot::num_links];
+    utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
+
+    // target position w.r.t. eef position (world orientation)
+    T target_x = shared_block.ik_goal->m3_x - global_link_translations[3*robot::endpoint_link_idx+0];
+    T target_y = shared_block.ik_goal->m3_y - global_link_translations[3*robot::endpoint_link_idx+1];
+    T target_z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
+    T dist = ceres::sqrt(target_x*target_x + target_y*target_y + target_z*target_z);
+
+    T steep = T(50.0);
+    T max_dist = T(0.4);
+    T min_dist = T(0.1);
+    residuals[0] = ceres::tanh(steep*(dist-max_dist)) + ceres::tanh(steep*(-dist+min_dist)) + 2.0;
+
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     //return (new ceres::NumericDiffCostFunction<DistanceToGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new DistanceToGoal(shared_block)));
+     return (new ceres::AutoDiffCostFunction<DistanceToGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new DistanceToGoal(shared_block)));
+   }
+
+  SharedBlock &shared_block;
+};
+//=================================================================================================
 
 /**
  * CollisionAvoidanceGoal
