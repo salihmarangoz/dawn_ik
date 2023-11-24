@@ -8,7 +8,7 @@ DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms foc
 
 ## Latest Dev Preview
 
-[![](https://img.youtube.com/vi/Jrutd7nmphM/0.jpg)](https://www.youtube.com/watch?v=Jrutd7nmphM)
+[![](https://img.youtube.com/vi/fdVssQZ9O2A/0.jpg)](https://www.youtube.com/watch?v=fdVssQZ9O2A)
 
 Previous recordings:
 - https://www.youtube.com/watch?v=2WPIzhGtnZw
