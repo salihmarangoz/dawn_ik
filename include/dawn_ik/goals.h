@@ -429,6 +429,7 @@ struct DistanceToGoal {
     T target_z = shared_block.ik_goal->m3_z - global_link_translations[3*robot::endpoint_link_idx+2];
     T dist = ceres::sqrt(target_x*target_x + target_y*target_y + target_z*target_z);
 
+    // Maybe add a growing term to prevent the optimizer to exclude this objective?
     T steep = T(50.0);
     T max_dist = T(0.4);
     T min_dist = T(0.1);

@@ -277,9 +277,9 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   }
 
   // ================== Distance to Goal ==================
-  ceres::CostFunction* distance_to_goal = DistanceToGoal::Create(shared_block);
-  ceres::LossFunction *distance_to_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight
-  problem.AddResidualBlock(distance_to_goal, distance_to_loss, optm_target_positions);
+  //ceres::CostFunction* distance_to_goal = DistanceToGoal::Create(shared_block);
+  //ceres::LossFunction *distance_to_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight
+  //problem.AddResidualBlock(distance_to_goal, distance_to_loss, optm_target_positions);
 
   // ============= Collision Avoidance Goal ============
   if (monitor_state->collision_state.int_pair_a.size() > 0) // skip this objective if proximity is the case
