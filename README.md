@@ -16,15 +16,15 @@ $ cd catkin_ws/src
 $ git clone git@github.com:salihmarangoz/dawn_ik.git 
 
 # xArm ROS (optional)
-$ git clone clone git@github.com:salihmarangoz/xarm_ros.git 
+$ git clone git@github.com:salihmarangoz/xarm_ros.git 
 $ cd xarm_ros
 $ git submodule update --init --remote
 
 # Fake Joints (optional)
-$ git clone https://github.com/salihmarangoz/fake_joint
+$ git clone git@github.com:salihmarangoz/fake_joint
 
 # Collision evaluation (optional)
-$ git@github.com:salihmarangoz/moveit_collision_check.git
+$ git clone git@github.com:salihmarangoz/moveit_collision_check.git
 
 # Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
 $ cd $HOME
@@ -74,10 +74,20 @@ $ catkin build
 
 ### Solver/Controller
 
+Start the solver. This command will also launch RViz for providing input to the controller. There will be two interactive markers, one is for the endpoint pose and the other one is for the look-at goal. **Right click** one of the markers to set the current mode.
+
 ```bash
 $ roslaunch dawn_ik lite6_solver.launch
 ```
 
+### Experiments
+
+Runs different experiments consecutively, checks for collisions after an experiment finished, and writes the results into `results` folder.
+
+```bash
+$ roscd dawn_ik/scripts/experiments
+$ bash lite6_experiments.sh
+```
 
 ### Footnotes
 
