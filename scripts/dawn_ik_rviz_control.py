@@ -11,6 +11,7 @@ from dawn_ik.msg import *
 from visualization_msgs.msg import *
 from geometry_msgs.msg import Point
 import tf
+from pyquaternion import Quaternion
 
 
 class RvizController:
@@ -27,6 +28,7 @@ class RvizController:
     self.menu_handler.insert( "ENDPOINT_POSE_ORIENTATION", callback=self.processFeedback )
     self.menu_handler.insert( "ENDPOINT_POSE_ORIENTATION (Adaptive)", callback=self.processFeedback )
     self.menu_handler.insert( "ENDPOINT_POSE + LOOK-AT-GOAL", callback=self.processFeedback )
+    self.menu_handler.insert( "ENDPOINT_POSE + DIRECTION-GOAL", callback=self.processFeedback )
 
     self.header = None
     self.endpoint_pose = None
@@ -50,6 +52,7 @@ class RvizController:
     ENDPOINT_POSE_ORIENTATION   = 4
     ENDPOINT_POSE_ORIENTATION_A = 5
     ENDPOINT_POSE_LOOKATGOAL    = 6
+    ENDPOINT_POSE_DIRECTIONGOAL = 7
 
     #############################################################################
     if self.menu_entry_id == PRINT_POSE:
@@ -108,7 +111,23 @@ class RvizController:
       self.goal.m3_y = self.target_pose.position.y
       self.goal.m3_z = self.target_pose.position.z
       self.goal.m3_weight = 1.0
-
+    #############################################################################
+    elif self.menu_entry_id == ENDPOINT_POSE_DIRECTIONGOAL:
+      self.goal.mode = IKGoal.MODE_1 + IKGoal.MODE_4
+      self.goal.m1_x = self.endpoint_pose.position.x
+      self.goal.m1_y = self.endpoint_pose.position.y
+      self.goal.m1_z = self.endpoint_pose.position.z
+      self.goal.m1_weight = 5.0
+      q = Quaternion(self.endpoint_pose.orientation.w, 
+                     self.endpoint_pose.orientation.x,
+                     self.endpoint_pose.orientation.y,
+                     self.endpoint_pose.orientation.z)
+      direction = q.rotate((0,0,1))
+      print(direction)
+      self.goal.m4_x = direction[0]
+      self.goal.m4_y = direction[1]
+      self.goal.m4_z = direction[2]
+      self.goal.m4_weight = 1.0
 
   def processFeedback(self, feedback):
     self.feedback = feedback

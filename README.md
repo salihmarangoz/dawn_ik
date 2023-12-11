@@ -48,7 +48,7 @@ $ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/moveit_col
 $ cd catkin_ws
 $ rosdep install --from-paths src --ignore-src -r
 $ sudo apt install python3-yaml python-is-python3
-$ pip install pyyaml
+$ pip install pyyaml pyquaternion
 
 ################## EXTERNAL DEPENDENCIES ############################
 

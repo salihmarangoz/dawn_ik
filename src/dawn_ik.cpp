@@ -277,6 +277,13 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
     problem.AddResidualBlock(look_at_goal, nullptr, optm_target_positions);
   }
 
+  // ================== Direction Goal ==================
+  if (ik_goal->m4_weight > 0.0 )
+  {
+    ceres::CostFunction* direction_goal = DirectionGoal::Create(shared_block);
+    problem.AddResidualBlock(direction_goal, nullptr, optm_target_positions);
+  }
+
   // ================== Distance to Goal ==================
   //ceres::CostFunction* distance_to_goal = DistanceToGoal::Create(shared_block);
   //ceres::LossFunction *distance_to_loss = new ceres::ScaledLoss(nullptr, 0.75, ceres::TAKE_OWNERSHIP); // goal weight

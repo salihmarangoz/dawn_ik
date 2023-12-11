@@ -3,7 +3,7 @@
 uint32 MODE_0=0   # IDLE
 uint32 MODE_1=1   # ENDPOINT POSITION CONTROL W.R.T. A POINT
 uint32 MODE_2=2   # ENDPOINT POSITION CONTROL W.R.T. A LINE
-uint32 MODE_3=4
+uint32 MODE_3=4   # DIRECTION GOAL
 uint32 MODE_4=8
 uint32 MODE_5=16
 uint32 MODE_6=32
@@ -47,3 +47,12 @@ float64 m3_x
 float64 m3_y
 float64 m3_z
 float64 m3_weight
+
+###################################################################################################
+# MODE_4: DIRECTION GOAL
+###################################################################################################
+
+float64 m4_x
+float64 m4_y
+float64 m4_z
+float64 m4_weight

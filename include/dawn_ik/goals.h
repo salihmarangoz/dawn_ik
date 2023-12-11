@@ -422,6 +422,57 @@ struct LookAtGoal {
 //=================================================================================================
 
 /**
+ * DirectionGoal
+*/
+struct DirectionGoal {
+  DirectionGoal(SharedBlock &shared_block) : shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    T global_link_translations[3*robot::num_links];
+    T global_link_rotations[4*robot::num_links];
+    utils::computeGlobalLinkTransforms(target_values, shared_block.variable_positions.data(), global_link_translations, global_link_rotations);
+
+    // currently looked position w.r.t. eef position (world orientation)
+    T q[4];
+    q[0] = global_link_rotations[4*robot::endpoint_link_idx+0];
+    q[1] = global_link_rotations[4*robot::endpoint_link_idx+1];
+    q[2] = global_link_rotations[4*robot::endpoint_link_idx+2];
+    q[3] = global_link_rotations[4*robot::endpoint_link_idx+3];
+    T fv[3];
+    fv[0] = T(0.0);
+    fv[1] = T(0.0);
+    fv[2] = T(1.0);
+    T result[3];
+    ceres::QuaternionRotatePoint(q, fv, result);
+    T eef_x = result[0];
+    T eef_y = result[1];
+    T eef_z = result[2];
+
+    // maybe cosine similarity...
+    T eef_norm = ceres::sqrt(eef_x*eef_x + eef_y*eef_y + eef_z*eef_z);
+    residuals[0] = 10.0*shared_block.ik_goal->m4_weight * (shared_block.ik_goal->m4_x - eef_x);
+    residuals[1] = 10.0*shared_block.ik_goal->m4_weight * (shared_block.ik_goal->m4_y - eef_y);
+    residuals[2] = 10.0*shared_block.ik_goal->m4_weight * (shared_block.ik_goal->m4_z - eef_z);
+
+    return true;
+  }
+
+   // Factory to hide the construction of the CostFunction object from the client code.
+   static ceres::CostFunction* Create(SharedBlock &shared_block)
+   {
+     //return (new ceres::NumericDiffCostFunction<DirectionGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     //            new DirectionGoal(shared_block)));
+     return (new ceres::AutoDiffCostFunction<DirectionGoal, 3, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                 new DirectionGoal(shared_block)));
+   }
+
+  SharedBlock &shared_block;
+};
+//=================================================================================================
+
+/**
  * DistanceToGoal
 */
 struct DistanceToGoal {
