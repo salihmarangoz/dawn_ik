@@ -96,13 +96,14 @@ void DawnIK::loopThread()
       command_history = robot_monitor->getCommandHistory();
       auto latest_command = command_history.front();
 
-      // IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
-      // IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
-      // if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
-      // {
-      //   ik_solution = ik_solution_without_noise; // overwrite previous solution
-      // }
-      IKSolution ik_solution = update(ik_goal_msg_copy, false); // clean init
+      IKSolution ik_solution = update(ik_goal_msg_copy, true); // noisy init
+      IKSolution ik_solution_without_noise = update(ik_goal_msg_copy, false); // clean init
+      if (ik_solution.solver_summary.final_cost > ik_solution_without_noise.solver_summary.final_cost)
+      {
+        ik_solution = ik_solution_without_noise; // overwrite previous solution
+      }
+
+      // IKSolution ik_solution = update(ik_goal_msg_copy, false); // clean init
 
       // Publish output
 //      if(latest_command.position_set)
