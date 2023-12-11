@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen">
+    <!--remap from="joint_trajectory_command" to="/pos_joint_traj_controller/command"/>
+    <remap from="joint_trajectory_state" to="/pos_joint_traj_controller/state"/-->
+    <remap from="joint_trajectory_command" to="/pos_joint_traj_controller_arm/command"/>
+    <remap from="joint_trajectory_state" to="/pos_joint_traj_controller_arm/state"/>
+  </node>
+
+  <node name="dawn_ik_rviz_control" pkg="dawn_ik" type="dawn_ik_rviz_control.py" output="screen">
+    <param name="robot_frame" value="arm_base_link"/>
+  </node>
+
+</launch>
