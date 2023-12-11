@@ -392,7 +392,10 @@ struct LookAtGoal {
     // maybe cosine similarity...
     T target_norm = ceres::sqrt(target_x*target_x + target_y*target_y + target_z*target_z);
     T eef_norm = ceres::sqrt(eef_x*eef_x + eef_y*eef_y + eef_z*eef_z);
-    residuals[0] = shared_block.ik_goal->m3_weight * ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
+    //residuals[0] = shared_block.ik_goal->m3_weight * ceres::acos((target_x*eef_x + target_y*eef_y + target_z*eef_z)/(target_norm*eef_norm));
+    residuals[0] = 10.0*shared_block.ik_goal->m3_weight * (target_x/target_norm - eef_x);
+    residuals[1] = 10.0*shared_block.ik_goal->m3_weight * (target_y/target_norm - eef_y);
+    residuals[2] = 10.0*shared_block.ik_goal->m3_weight * (target_z/target_norm - eef_z);
 
     return true;
   }
@@ -402,7 +405,7 @@ struct LookAtGoal {
    {
      //return (new ceres::NumericDiffCostFunction<LookAtGoal, ceres::FORWARD, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      //            new LookAtGoal(shared_block)));
-     return (new ceres::AutoDiffCostFunction<LookAtGoal, 1, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<LookAtGoal, 3, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new LookAtGoal(shared_block)));
    }
 
