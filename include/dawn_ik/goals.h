@@ -338,7 +338,15 @@ struct EndpointGoal {
                     (global_link_rotations[4*robot::endpoint_link_idx+1] * shared_block.ik_goal->m2_x) + 
                     (global_link_rotations[4*robot::endpoint_link_idx+2] * shared_block.ik_goal->m2_y) + 
                     (global_link_rotations[4*robot::endpoint_link_idx+3] * shared_block.ik_goal->m2_z);
-    residuals[3] = (1.0 - ceres::abs(qdot)) * shared_block.ik_goal->m2_weight * 20.0;
+
+    //residuals[3] = (1.0 - qdot) * shared_block.ik_goal->m2_weight * 20.0;
+
+    //residuals[3] = (1.0 - ceres::abs(qdot)) * shared_block.ik_goal->m2_weight * 20.0;
+    
+    residuals[3] = shared_block.ik_goal->m2_weight*(global_link_rotations[4*robot::endpoint_link_idx+0] - shared_block.ik_goal->m2_w);
+    residuals[4] = shared_block.ik_goal->m2_weight*(global_link_rotations[4*robot::endpoint_link_idx+1] - shared_block.ik_goal->m2_x);
+    residuals[5] = shared_block.ik_goal->m2_weight*(global_link_rotations[4*robot::endpoint_link_idx+2] - shared_block.ik_goal->m2_y);
+    residuals[6] = shared_block.ik_goal->m2_weight*(global_link_rotations[4*robot::endpoint_link_idx+3] - shared_block.ik_goal->m2_z);
     return true;
   }
 
@@ -347,7 +355,7 @@ struct EndpointGoal {
    {
      //return (new ceres::NumericDiffCostFunction<EndpointGoal, ceres::FORWARD, 4, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
      //            new EndpointGoal(shared_block)));
-     return (new ceres::AutoDiffCostFunction<EndpointGoal, 4, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+     return (new ceres::AutoDiffCostFunction<EndpointGoal, 7, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
                  new EndpointGoal(shared_block)));
    }
 
