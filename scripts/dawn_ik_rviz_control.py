@@ -10,6 +10,9 @@ from interactive_markers.menu_handler import *
 from dawn_ik.msg import *
 from visualization_msgs.msg import *
 from geometry_msgs.msg import Point
+from geometry_msgs.msg import PoseStamped
+import tf2_ros
+import tf2_geometry_msgs
 import tf
 from pyquaternion import Quaternion
 
@@ -20,6 +23,14 @@ class RvizController:
     self.server = InteractiveMarkerServer("dawn_ik_rviz_controls")
     self.goal_pub = rospy.Publisher("dawn_ik_solver/ik_goal", IKGoal, queue_size=1)
     self.goal = IKGoal()
+
+    self.tf_buffer = tf2_ros.Buffer()
+    self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+
+    if rospy.has_param("~robot_frame"):
+      self.robot_frame = rospy.get_param("~robot_frame")
+    else:
+      self.robot_frame = None
 
     self.menu_handler = MenuHandler()
     self.menu_handler.insert( "PRINT_POSE", callback=self.processFeedback )
@@ -131,6 +142,18 @@ class RvizController:
 
   def processFeedback(self, feedback):
     self.feedback = feedback
+
+    if self.robot_frame is not None:
+      try:
+        pose = PoseStamped()
+        pose.header = feedback.header
+        pose.pose = feedback.pose
+        transform = self.tf_buffer.lookup_transform(self.robot_frame, feedback.header.frame_id, rospy.Time(0))
+        pose = tf2_geometry_msgs.do_transform_pose(pose, transform)
+        feedback.pose = pose.pose
+      except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+        rospy.logwarn("Transform from {} to {} not found; assuming pose already in target frame".format(feedback.header.frame_id, self.robot_frame))
+    
     if feedback.marker_name == "endpoint":
       self.header = feedback.header
       # qnorm = (feedback.pose.orientation.w**2 + feedback.pose.orientation.x**2 + feedback.pose.orientation.y**2 + feedback.pose.orientation.z**2)**0.5
