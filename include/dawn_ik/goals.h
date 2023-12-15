@@ -392,7 +392,7 @@ struct LookAtGoal {
     fv[1] = T(0.0);
     fv[2] = T(1.0);
     T result[3];
-    ceres::QuaternionRotatePoint(q, fv, result);
+    ceres::UnitQuaternionRotatePoint(q, fv, result);
     T eef_x = result[0];
     T eef_y = result[1];
     T eef_z = result[2];
@@ -445,13 +445,11 @@ struct DirectionGoal {
     fv[1] = T(0.0);
     fv[2] = T(1.0);
     T result[3];
-    ceres::QuaternionRotatePoint(q, fv, result);
+    ceres::UnitQuaternionRotatePoint(q, fv, result);
     T eef_x = result[0];
     T eef_y = result[1];
     T eef_z = result[2];
 
-    // maybe cosine similarity...
-    T eef_norm = ceres::sqrt(eef_x*eef_x + eef_y*eef_y + eef_z*eef_z);
     residuals[0] = 10.0*shared_block.ik_goal->m4_weight * (shared_block.ik_goal->m4_x - eef_x);
     residuals[1] = 10.0*shared_block.ik_goal->m4_weight * (shared_block.ik_goal->m4_y - eef_y);
     residuals[2] = 10.0*shared_block.ik_goal->m4_weight * (shared_block.ik_goal->m4_z - eef_z);

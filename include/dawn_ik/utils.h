@@ -29,7 +29,6 @@ template <typename T>
 inline void computeLinkTranslation(const T* current_translation, const T* current_rotation, const T* link_translation, T* result)
 {
   T rotated_pt[3];
-  //ceres::QuaternionRotatePoint(current_rotation, link_translation, rotated_pt); // safe
   ceres::UnitQuaternionRotatePoint(current_rotation, link_translation, rotated_pt);
 
   result[0] = rotated_pt[0] + current_translation[0];
