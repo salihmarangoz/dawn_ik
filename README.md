@@ -10,42 +10,83 @@ DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms foc
 
 ```bash
 ################# ROS DEPENDENCIES ##################################
-$ cd catkin_ws/src
+cd catkin_ws/src
 
 # This package
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git -b repair_integration
+git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git -b repair_integration
 
 # Fake Joints (optional alternative to Gazebo) (forked and modified)
-$ git clone https://github.com/salihmarangoz/fake_joint
+git clone https://github.com/salihmarangoz/fake_joint
 
 # For robot state collision evaluation
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/moveit_collision_check.git
+git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/moveit_collision_check.git
+
+# repair packages
+git clone --recurse-submodules -j8 https://github.com/RePAIRProject/repair_ros_robot.git
 
 # Others
-$ cd catkin_ws
-$ rosdep install --from-paths src --ignore-src -r
-$ sudo apt install python3-yaml python-is-python3
-$ pip install pyyaml
+cd catkin_ws
+rosdep install --from-paths src --ignore-src -r
+sudo apt install python3-yaml python-is-python3
+pip install pyyaml
 
 ################## EXTERNAL DEPENDENCIES ############################
 
 # Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
-$ cd $HOME
-#$ git clone git@github.com:salihmarangoz/ceres-solver.git
-$ git clone git@github.com:ceres-solver/ceres-solver.git -b 2.2.0rc1
-$ sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev libeigen3-dev libsuitesparse-dev
-$ cd ceres-solver
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_BUILD_TYPE=Release -DUSE_CUDA=OFF ..
-$ make -j8
-$ sudo make install
+cd $HOME
+#git clone git@github.com:salihmarangoz/ceres-solver.git
+git clone git@github.com:ceres-solver/ceres-solver.git -b 2.2.0rc1
+sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev libeigen3-dev libsuitesparse-dev
+cd ceres-solver
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DUSE_CUDA=OFF ..
+make -j8
+sudo make install
 
 # Update dynamic linker run-time bindings
 sudo ldconfig
 ```
 
+> Install [XBot2](https://advrhumanoids.github.io/xbot2/master/index.html) to use the real robot drivers.
+
+## Building
+
+```bash
+cd catkin_ws
+
+# Build
+catkin build
+
+# After successful build, source the workspace in all the terminals
+source devel/setup.bash
+```
+
 ## Running
+
+### XBot2
+
+- Start roscore
+
+  ```bash
+  roscore
+  ```
+
+- Start XBot2
+
+  ```bash
+  cd catkin_ws
+  source devel/setup.bash
+
+  # source xbot2 setup
+  echo ". /opt/xbot/setup.sh" >> ~/.bashrc
+
+  # source repair config for xbot2
+  set_xbot2_config ~/repair_robot_ws/src/repair_ros_robot/repair_cntrl/config/repair_basic.yaml
+
+  # start xbot2 core (dummy)
+  xbot2-core --hw dummy
+  ```
 
 ### Simulation
 
@@ -53,10 +94,13 @@ sudo ldconfig
 # select one!
 
 # For Fake Joints:
-$ roslaunch dawn_ik repair_fake.launch
+roslaunch dawn_ik repair_fake.launch
 
 # For Gazebo:
-$ roslaunch dawn_ik repair_fake.launch launch_gazebo:=true
+roslaunch dawn_ik repair_fake.launch launch_gazebo:=true
+
+# For xbot2 (dummy):
+roslaunch dawn_ik repair_xbot_dummy.launch
 ```
 
 ### Code Generation - Skip if you are using pre-generated headers
@@ -67,27 +111,27 @@ Make sure the robot description is loaded. (if the fake/sim is running then it i
 
 ```bash
 # To skip the code generation step, replace autogen_test.h with pre-generated headers (repair_arm_1.h, repair_arm_2.h.)
-$ roscd dawn_ik/include/dawn_ik/robot_configuration
+roscd dawn_ik/include/dawn_ik/robot_configuration
 
 # select one!
-$ cp repair_arm_1.h autogen_test.h
-$ cp repair_arm_1.h autogen_test.h
+cp repair_arm_1.h autogen_test.h
+cp repair_arm_1.h autogen_test.h
 
 ############################################
 # To do the code generation step:
 
 # select one!
-$ rosrun dawn_ik robot_parser_node _cfg:=repair_arm_1
-$ rosrun dawn_ik robot_parser_node _cfg:=repair_arm_2
+rosrun dawn_ik robot_parser_node _cfg:=repair_arm_1
+rosrun dawn_ik robot_parser_node _cfg:=repair_arm_2
 
 # Re-compile the project after this step. 
-$ catkin build
+catkin build
 ```
 
 ### DawnIK Solver/Controller
 
 ```bash
-$ roslaunch dawn_ik repair_solver.launch
+roslaunch dawn_ik repair_solver.launch
 ```
 
 ### Experiments
@@ -96,14 +140,20 @@ Before doing the experiments make sure that:
 
 - Generated code is for that robot, while using dawn_ik.
 
-For doing the experiments you can start everything **ALL-IN-ONE** line. Stop roscore and all other things.
+- Requires the following to be running
+  - roscore
+  - xbot2-core (dummy)
+  - repair_xbot_dummy.launch
 
 ```bash
 # Fake Joints + Rviz
-$ roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik
+roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik
 
 # Gazebo + Rviz
-$ roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik use_gazebo:=true
+roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik use_gazebo:=true
+
+# Xbot2 (dummy) + Rviz
+roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik
 ```
 
 Both arms move in XZ plane.
