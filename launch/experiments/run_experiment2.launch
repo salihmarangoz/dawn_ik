@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- =================== PARAMETERS ========================== -->
+  <arg name="robot_name" default="repair" />
+  <arg name="waypoints_file" default="circle_xz_arm_1" />
+  <arg name="waypoints_file_2" default="eight_xz" />
+  <arg name="trajectory_file" default="" /> <!-- empty to disable -->
+  <arg name="endpoint_frame" default="arm_1_tcp" />
+  <arg name="endpoint_frame_2" default="arm_2_tcp" />
+  <arg name="solver" default="dawn_ik" /> <!-- values: dawn_ik or collision_ik or empty string to
+  disable -->
+  <arg name="world_frame" default="world" />
+  <arg name="start_sim" default="True" />
+  <arg name="wait_for_init" default="10.0" />
+  <arg name="wait_for_solver" default="10.0" />
+  <arg name="wait_for_shutdown" default="1.0" />
+  <arg name="use_gazebo" default="false" />
+  <!-- ========================================================= -->
+
+  <!-- fake simulator -->
+  <!-- <include file="$(find dawn_ik)/launch/$(arg robot_name)_fake.launch" if="$(arg start_sim)">
+    <arg name="launch_gazebo" value="$(arg use_gazebo)"/>
+  </include> -->
+
+  <!-- solver -->
+  <include file="$(find dawn_ik)/launch/$(arg robot_name)_solver.launch"
+    if="$(eval solver == 'dawn_ik')" />
+  <include file="$(find dawn_ik)/launch/collision_ik/$(arg robot_name)_solver_collision_ik.launch"
+    if="$(eval solver == 'collision_ik')" />
+
+  <!-- waypoint generator and logger -->
+  <!-- <group ns="arm_1"> -->
+    <node name="run_experiment" pkg="dawn_ik" type="run_experiment.py" output="screen"
+      required="true" >
+      <param name="arm_group_name" value="arm_1" />
+      <param name="namespace" value="/arm_1/"/>
+      <param name="waypoints_file"
+        value="$(find dawn_ik)/waypoints/$(arg robot_name)/$(arg waypoints_file).txt" />
+      <param name="output_file"
+        value="$(find dawn_ik)/results/$(arg robot_name)/$(arg solver)-$(arg waypoints_file)-$(arg trajectory_file).json" />
+      <param name="wait_for_init" value="$(arg wait_for_init)" />
+      <param name="wait_for_solver" value="$(arg wait_for_solver)" />
+      <param name="wait_for_shutdown" value="$(arg wait_for_shutdown)" />
+      <param name="world_frame" value="$(arg world_frame)" />
+      <param name="endpoint_frame" value="$(arg endpoint_frame)" />
+      <param name="trigger_moveit_replay_trajectory" value="$(eval trajectory_file != '')" />
+    </node>
+  <!-- </group> -->
+
+</launch>
