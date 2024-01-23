@@ -22,6 +22,9 @@
     <arg name="launch_gazebo" value="$(arg use_gazebo)"/>
   </include> -->
 
+  <!-- xbot_dummy -->
+  <include file="$(find dawn_ik)/launch/$(arg robot_name)_xbot_dummy.launch" />
+
   <!-- solver -->
   <include file="$(find dawn_ik)/launch/$(arg robot_name)_solver.launch" if="$(eval solver == 'dawn_ik')"/>
   <include file="$(find dawn_ik)/launch/collision_ik/$(arg robot_name)_solver_collision_ik.launch" if="$(eval solver == 'collision_ik')"/>

@@ -1,9 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-
-  <!-- moveit xbot bridge -->
-  <node name="moveit_xbot_bridge" pkg="repair_moveit_xbot" type="moveit_xbot_bridge_node" output="screen" />
-
   <!-- Set the param that trajectory_execution_manager needs to find the controller plugin -->
   <arg name="moveit_controller_manager" default="moveit_simple_controller_manager/MoveItSimpleControllerManager" />
   <param name="moveit_controller_manager" value="$(arg moveit_controller_manager)"/>
@@ -21,6 +17,8 @@
     <arg name="load_robot_description" value="true" />
   </include>
 
+  <node name="moveit_xbot_client_py" pkg="repair_interface" type="moveit_client.py" output="screen" />
+
   <!-- Start the controllers and robot state publisher-->
   <!-- Robot state publisher -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
@@ -37,9 +35,6 @@
   <include file="$(find repair_moveit_config_v2)/launch/moveit_rviz.launch">
     <arg name="rviz_config" value="$(find repair_moveit_config_v2)/launch/moveit.rviz" />
   </include>
-
-  <!-- launch the repair_interface node -->
-  <node name="repair_interface" pkg="repair_interface" type="repair_interface_node" output="screen" />
 
   <!-- launch the dawnik_bridge node -->
   <include file="$(find repair_interface)/launch/dawnik_bridge.launch" />
