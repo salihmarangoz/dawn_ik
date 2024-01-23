@@ -240,6 +240,3007 @@ proximity:
       shape: "Sphere(0.11)"
       translation: [0.01, 0.0, 0.14]
 
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.500, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.450, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.400, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.350, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.300, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.250, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.200, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.150, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.100, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.050, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [-0.000, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.050, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.100, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.150, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.200, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.250, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.300, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.350, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.400, 1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -1.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -1.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, -0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.200, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.250, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.300, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.350, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.400, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.450, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.500, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.550, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.600, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.650, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.700, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.750, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.800, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.850, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.900, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 0.950, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 1.000, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 1.050, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 1.100, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 1.150, 0.975]
+    - link: "table_top_link"
+      shape: "Sphere(0.025)"
+      translation: [0.450, 1.200, 0.975]
+
 
 #########################################################
 ### Extra ###############################################
