@@ -146,11 +146,11 @@ Before doing the experiments make sure that:
   - repair_xbot_dummy.launch
 
 ```bash
-# Fake Joints + Rviz
-roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik
+# Fake Joints + Rviz (only run this one command)
+roslaunch dawn_ik run_experiment_old.launch robot_name:=repair solver:=dawn_ik
 
-# Gazebo + Rviz
-roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik use_gazebo:=true
+# Gazebo + Rviz (only run this one command)
+roslaunch dawn_ik run_experiment_old.launch robot_name:=repair solver:=dawn_ik use_gazebo:=true
 
 # Xbot2 (dummy) + Rviz
 roslaunch dawn_ik run_experiment.launch robot_name:=repair solver:=dawn_ik
