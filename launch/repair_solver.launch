@@ -3,9 +3,9 @@
 <launch>
 
   <group ns="arm_1">
-    <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen">
-      <remap from="joint_trajectory_command" to="/arm_1_trajectory_controller/command" />
-      <remap from="joint_trajectory_state" to="/arm_1_trajectory_controller/state" />
+    <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen" >
+      <remap from="joint_trajectory_command" to="/dawnik_bridge/arm1/command" />
+      <remap from="joint_trajectory_state" to="/dawnik_bridge/trajectory_state" />
     </node>
 
     <node name="dawn_ik_rviz_control" pkg="dawn_ik" type="dawn_ik_rviz_control.py" output="screen" />
@@ -13,8 +13,8 @@
 
   <group ns="arm_2">
     <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node_other" output="screen">
-      <remap from="joint_trajectory_command" to="/arm_2_trajectory_controller/command" />
-      <remap from="joint_trajectory_state" to="/arm_2_trajectory_controller/state" />
+      <remap from="joint_trajectory_command" to="/dawnik_bridge/arm2/command" />
+      <remap from="joint_trajectory_state" to="/dawnik_bridge/trajectory_state" />
     </node>
 
     <node name="dawn_ik_rviz_control" pkg="dawn_ik" type="dawn_ik_rviz_control.py" output="screen" />

@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0.2)
 project(dawn_ik)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++17)
+# add_compile_options(-std=c++17)
+set(CMAKE_CXX_STANDARD 17)
 
 ## Further optimizations
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wno-int-to-pointer-cast")

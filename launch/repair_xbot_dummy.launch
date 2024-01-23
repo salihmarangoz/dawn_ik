@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- moveit xbot bridge -->
+  <node name="moveit_xbot_bridge" pkg="repair_moveit_xbot" type="moveit_xbot_bridge_node" output="screen" />
+
+  <!-- Set the param that trajectory_execution_manager needs to find the controller plugin -->
+  <arg name="moveit_controller_manager" default="moveit_simple_controller_manager/MoveItSimpleControllerManager" />
+  <param name="moveit_controller_manager" value="$(arg moveit_controller_manager)"/>
+  <!-- load controller_list -->
+  <rosparam file="$(find repair_moveit_xbot)/config/controllers.yaml"/>
+
+  <!-- Run the main MoveIt executable with trajectory execution -->
+  <include file="$(find repair_moveit_config_v2)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true" />
+    <!-- <arg name="moveit_controller_manager" value="ros_control" /> -->
+    <arg name="fake_execution_type" value="interpolate" />
+    <arg name="info" value="true" />
+    <arg name="debug" value="false" />
+    <arg name="pipeline" value="ompl" />
+    <arg name="load_robot_description" value="true" />
+  </include>
+
+  <!-- Start the controllers and robot state publisher-->
+  <!-- Robot state publisher -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="100.0" />
+    <param name="tf_prefix" type="string" value="" />
+  </node>
+
+  <!-- Joint trajectory controller -->
+  <!-- <rosparam file="$(find repair_gazebo)/config/controllers.yaml" command="load" />
+  <node name="repair_controller_spawner" pkg="controller_manager" type="spawner" output="screen"
+    args="joint_state_controller arm_1_trajectory_controller arm_2_trajectory_controller torso_trajectory_controller" /> -->
+
+  <!-- Start moveit_rviz with the motion planning plugin -->
+  <include file="$(find repair_moveit_config_v2)/launch/moveit_rviz.launch">
+    <arg name="rviz_config" value="$(find repair_moveit_config_v2)/launch/moveit.rviz" />
+  </include>
+
+  <!-- launch the repair_interface node -->
+  <node name="repair_interface" pkg="repair_interface" type="repair_interface_node" output="screen" />
+
+  <!-- launch the dawnik_bridge node -->
+  <include file="$(find repair_interface)/launch/dawnik_bridge.launch" />
+</launch>
