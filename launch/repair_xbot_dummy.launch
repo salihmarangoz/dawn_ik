@@ -19,14 +19,15 @@
     <arg name="load_robot_description" value="true" />
   </include>
 
-  <node name="moveit_xbot_client_py" pkg="repair_interface" type="moveit_client.py" output="screen" />
-
   <!-- Start the controllers and robot state publisher-->
   <!-- Robot state publisher -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="100.0" />
     <param name="tf_prefix" type="string" value="" />
   </node>
+
+  <node name="moveit_xbot_client_py" pkg="repair_interface" type="moveit_client_single.py" output="screen" />
+  <node name="xbot_joint_state_repub" pkg="repair_interface" type="xbot_bridge.py" output="screen" />
 
   <!-- Joint trajectory controller -->
   <!-- <rosparam file="$(find repair_gazebo)/config/controllers.yaml" command="load" />
