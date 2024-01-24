@@ -6,6 +6,8 @@
   <!-- load controller_list -->
   <rosparam file="$(find repair_moveit_xbot)/config/controllers.yaml"/>
 
+  <node name="moveit_xbot_bridge_node" pkg="repair_moveit_xbot" type="moveit_xbot_bridge_node" />
+
   <!-- Run the main MoveIt executable with trajectory execution -->
   <include file="$(find repair_moveit_config_v2)/launch/move_group.launch">
     <arg name="allow_trajectory_execution" value="true" />

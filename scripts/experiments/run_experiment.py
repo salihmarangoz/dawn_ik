@@ -103,7 +103,7 @@ if __name__ == "__main__":
     robot = moveit_commander.RobotCommander()
     rospy.sleep(1)
     move_group = moveit_commander.MoveGroupCommander(
-        arm_group_name, ns="/"
+        arm_group_name, ns="/", wait_for_servers=30.0
     )
 
     # rospy.loginfo("Waiting for the check_collision service...")
