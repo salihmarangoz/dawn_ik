@@ -28,6 +28,9 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 
+from repair_interface.srv import *
+
+
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 AXES = "rxyz"
@@ -100,11 +103,17 @@ if __name__ == "__main__":
         "~trigger_moveit_replay_trajectory", False
     )
 
-    robot = moveit_commander.RobotCommander()
-    rospy.sleep(1)
-    move_group = moveit_commander.MoveGroupCommander(
-        arm_group_name, ns="/", wait_for_servers=30.0
-    )
+    # robot = moveit_commander.RobotCommander()
+    # rospy.sleep(1)
+    # move_group = moveit_commander.MoveGroupCommander(
+    #     arm_group_name, ns="/", wait_for_servers=30.0
+    # )
+
+    rospy.loginfo("[Experiment] Waiting for move arm to pose service")
+    rospy.wait_for_service('/move_arm_to_pose_py')
+    rospy.loginfo("[Experiment] Service found")
+
+    move_arm_to_pose = rospy.ServiceProxy('/move_arm_to_pose_py', MoveArmToPose)
 
     # rospy.loginfo("Waiting for the check_collision service...")
     # rospy.wait_for_service("/moveit_collision_check/check_collision")
@@ -173,10 +182,28 @@ if __name__ == "__main__":
     pose_goal.orientation.y = quad[1]
     pose_goal.orientation.z = quad[2]
     pose_goal.orientation.w = quad[3]
-    move_group.set_pose_target(pose_goal)
-    plan = move_group.go(wait=True)
-    move_group.stop()
-    move_group.clear_pose_targets()
+    # move_group.set_pose_target(pose_goal)
+    # plan = move_group.go(wait=True)
+    # move_group.stop()
+    # move_group.clear_pose_targets()
+
+    pose_stamped = PoseStamped()
+    pose_stamped.header.frame_id = world_frame
+    pose_stamped.pose = pose_goal
+
+    # move using the service
+    move_arm_to_pose_req = MoveArmToPoseRequest()
+    move_arm_to_pose_req.arm = 0 if arm_group_name == "arm_1" else 1
+    move_arm_to_pose_req.target_pose = pose_stamped
+
+    # call the service
+    resp = move_arm_to_pose(move_arm_to_pose_req)
+
+    if not resp.success:
+        rospy.logerr("[Experiment] Failed to move the robot to the initial pose!")
+        exit(-1)
+
+    rospy.loginfo("[Experiment] Robot moved to the initial pose successfully!")
 
     # wait for the solver to move the robot to the initial pose
     rospy.sleep(wait_for_solver)
