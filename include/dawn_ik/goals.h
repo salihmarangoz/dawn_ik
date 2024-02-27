@@ -555,7 +555,6 @@ struct CollisionAvoidanceGoal {
                                       (T*)global_object_translations,
                                       (T*)global_object_rotations);
 
-    // TODO: supports only spheres!!!
     int num_int_pairs = shared_block.monitor_state->collision_state.int_pair_a.size();
     for (int i=0; i<num_int_pairs; i++)
     {
@@ -565,19 +564,16 @@ struct CollisionAvoidanceGoal {
       int link_idx_b = robot::object_idx_to_link_idx[object_idx_b];
       const CollisionObject* object_a = shared_block.int_objects[object_idx_a];
       const CollisionObject* object_b = shared_block.int_objects[object_idx_b];
+
+
       const Sphere& shape_a = static_cast<const Sphere&>(*(object_a->collisionGeometry()));
       const Sphere& shape_b = static_cast<const Sphere&>(*(object_b->collisionGeometry()));
       const T* pos_a = &(global_object_translations[object_idx_a*3]);
       const T* pos_b = &(global_object_translations[object_idx_b*3]);
-
-      // TODO: https://github.com/humanoid-path-planner/hpp-fcl/blob/devel/test/box_box_distance.cpp
-      // TODO: write a function for this!
-      // TODO: maybe use not inflated objects? inflated ones only for the broadphase collision detection.
       const T distance = utils::distSphere2Sphere(pos_a, 
-                                                  shape_a.radius-robot::default_inflation, 
-                                                  pos_b, 
-                                                  shape_b.radius-robot::default_inflation);
-
+                                          shape_a.radius-robot::default_inflation, 
+                                          pos_b, 
+                                          shape_b.radius-robot::default_inflation);
       double weight = 0.005;
       double eps = 0.00001;
       if (distance <= 0)
@@ -605,6 +601,126 @@ struct CollisionAvoidanceGoal {
 
   SharedBlock &shared_block;
 };
+
+// ==================================================================
+
+/**
+ * CollisionAvoidanceGoalNumeric
+*/
+struct CollisionAvoidanceGoalNumeric {
+  CollisionAvoidanceGoalNumeric(SharedBlock &shared_block): shared_block(shared_block) {}
+
+  template <typename T>
+  bool operator()(const T* target_values, T* residuals) const // param_x, param_y, residuals
+  {
+    // Jet conversion is needed for some variables because we have unknown number of residuals in this structure
+    T variable_positions_JET[robot::num_variables];
+    for (int i=0; i<robot::num_variables; i++) variable_positions_JET[i] = T(shared_block.variable_positions[i]);
+    T object_transform_translation_only_JET[robot::num_objects*3]; 
+    T object_transform_quaternion_only_JET[robot::num_objects*4]; 
+    for (int i=0; i<robot::num_objects; i++)
+    {
+      object_transform_translation_only_JET[i*3+0] = T(robot::object_transform_translation_only[i][0]);
+      object_transform_translation_only_JET[i*3+1] = T(robot::object_transform_translation_only[i][1]);
+      object_transform_translation_only_JET[i*3+2] = T(robot::object_transform_translation_only[i][2]);
+      object_transform_quaternion_only_JET[i*4+0] = T(robot::object_transform_quaternion_only[i][0]);
+      object_transform_quaternion_only_JET[i*4+1] = T(robot::object_transform_quaternion_only[i][1]);
+      object_transform_quaternion_only_JET[i*4+2] = T(robot::object_transform_quaternion_only[i][2]);
+      object_transform_quaternion_only_JET[i*4+3] = T(robot::object_transform_quaternion_only[i][3]);
+    }
+
+    // Compute link transforms
+    T global_link_translations[robot::num_links*3];
+    T global_link_rotations[robot::num_links*4];
+    utils::computeGlobalLinkTransforms(target_values, variable_positions_JET, global_link_translations, global_link_rotations);
+
+    // Compute internal object positions
+    T global_object_translations[robot::num_objects*3];
+    T global_object_rotations[robot::num_objects*4];
+    utils::computeCollisionTransforms((const T*)global_link_translations,
+                                      (const T*)global_link_rotations,
+                                      (const T*)object_transform_translation_only_JET,
+                                      (const T*)object_transform_quaternion_only_JET,
+                                      (const int*)robot::object_can_skip_translation,
+                                      (const int*)robot::object_can_skip_rotation,
+                                      (const int*)robot::object_idx_to_link_idx,
+                                      robot::num_objects,
+                                      (T*)global_object_translations,
+                                      (T*)global_object_rotations);
+
+    int num_int_pairs = shared_block.monitor_state->collision_state.int_pair_a.size();
+    for (int i=0; i<num_int_pairs; i++)
+    {
+      int object_idx_a = shared_block.monitor_state->collision_state.int_pair_a[i];
+      int object_idx_b = shared_block.monitor_state->collision_state.int_pair_b[i];
+      int link_idx_a = robot::object_idx_to_link_idx[object_idx_a];
+      int link_idx_b = robot::object_idx_to_link_idx[object_idx_b];
+      const CollisionObject* object_a = shared_block.int_objects[object_idx_a];
+      const CollisionObject* object_b = shared_block.int_objects[object_idx_b];
+
+      //const Sphere& shape_a = static_cast<const Sphere&>(*(object_a->collisionGeometry()));
+      //const Sphere& shape_b = static_cast<const Sphere&>(*(object_b->collisionGeometry()));
+      const T* pos_a = &(global_object_translations[object_idx_a*3]);
+      const T* pos_b = &(global_object_translations[object_idx_b*3]);
+
+      hpp::fcl::Transform3f T1;
+      T1.setQuatRotation(hpp::fcl::Quaternion3f(global_object_rotations[object_idx_a*4+0],
+                                                global_object_rotations[object_idx_a*4+1],
+                                                global_object_rotations[object_idx_a*4+2],
+                                                global_object_rotations[object_idx_a*4+3]));
+      T1.setTranslation(hpp::fcl::Vec3f(global_object_translations[object_idx_a*3+0],
+                                        global_object_translations[object_idx_a*3+1],
+                                        global_object_translations[object_idx_a*3+2]));
+
+      hpp::fcl::Transform3f T2;
+      T2.setQuatRotation(hpp::fcl::Quaternion3f(global_object_rotations[object_idx_b*4+0],
+                                                global_object_rotations[object_idx_b*4+1],
+                                                global_object_rotations[object_idx_b*4+2],
+                                                global_object_rotations[object_idx_b*4+3]));
+      T2.setTranslation(hpp::fcl::Vec3f(global_object_translations[object_idx_b*3+0],
+                                        global_object_translations[object_idx_b*3+1],
+                                        global_object_translations[object_idx_b*3+2]));
+
+      hpp::fcl::DistanceRequest dist_req;
+      hpp::fcl::DistanceResult dist_res;
+      hpp::fcl::distance(object_a->collisionGeometry().get(), T1, object_b->collisionGeometry().get(), T2, dist_req, dist_res);
+
+      const T distance = dist_res.min_distance;
+
+      double weight = 0.005;
+      double eps = 0.00001;
+      if (distance <= 0)
+        residuals[i] = T(weight/eps);
+      else// if (distance < 0.1)
+        residuals[i] = weight / (distance+eps);
+      //else
+      //  residuals[i] = T(0.0);
+    }
+
+    return true; 
+  }
+
+  
+  // Factory to hide the construction of the CostFunction object from the client code.
+  static ceres::CostFunction* Create(SharedBlock &shared_block)
+  {
+    int num_int_pairs = shared_block.monitor_state->collision_state.int_pair_a.size();
+    return (new ceres::NumericDiffCostFunction<CollisionAvoidanceGoal, ceres::FORWARD, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+                new CollisionAvoidanceGoal(shared_block), ceres::TAKE_OWNERSHIP, num_int_pairs));
+    //return (new ceres::AutoDiffCostFunction<CollisionAvoidanceGoal, ceres::DYNAMIC, robot::num_targets>(  // num_of_residuals, size_param_x, size_param_y, ...
+    //            new CollisionAvoidanceGoal(shared_block), num_int_pairs));
+
+  }
+
+  SharedBlock &shared_block;
+};
+
+
+
+// ======================================================================
+
+
+
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
 /**

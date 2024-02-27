@@ -293,6 +293,7 @@ IKSolution DawnIK::update(const dawn_ik::IKGoalPtr &ik_goal, bool noisy_initiali
   if (monitor_state->collision_state.int_pair_a.size() > 0) // skip this objective if proximity is the case
   {
     ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoal::Create(shared_block);
+    //ceres::CostFunction* collision_avoidance_goal = CollisionAvoidanceGoalNumeric::Create(shared_block);
     problem.AddResidualBlock(collision_avoidance_goal, nullptr, optm_target_positions);
   }
 
