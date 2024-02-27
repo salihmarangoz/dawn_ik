@@ -387,7 +387,7 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
 
       visualization_msgs::Marker marker;
       marker.header = msg->header;
-      marker.ns = std::string("robot_collision_body");
+      marker.ns = std::string("robot_collision_body_sphere");
       marker.id = id_counter++;
       marker.type = visualization_msgs::Marker::SPHERE;
       marker.scale.x = (shape.radius - robot::default_inflation)*2;
@@ -413,7 +413,29 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
     }
     else if (curr_object->getNodeType() == hpp::fcl::GEOM_BOX)
     {
-      ROS_WARN("GEOM_BOX TODO"); // TODO
+      const Box& shape = static_cast<const Box&>(*(curr_object->collisionGeometry()));
+
+      visualization_msgs::Marker marker;
+      marker.header = msg->header;
+      marker.ns = std::string("robot_collision_body_box");
+      marker.id = id_counter++;
+      marker.type = visualization_msgs::Marker::CUBE;
+      marker.scale.x = (shape.halfSide.x() - robot::default_inflation)*2;
+      marker.scale.y = (shape.halfSide.y() - robot::default_inflation)*2;
+      marker.scale.z = (shape.halfSide.z() - robot::default_inflation)*2;
+      marker.pose.position.x = curr_translation.x();
+      marker.pose.position.y = curr_translation.y();
+      marker.pose.position.z = curr_translation.z();
+      marker.pose.orientation.x = curr_rotation.x();
+      marker.pose.orientation.y = curr_rotation.y();
+      marker.pose.orientation.z = curr_rotation.z();
+      marker.pose.orientation.w = curr_rotation.w();
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.color.a = 0.75; // Don't forget to set the alpha!
+      marker.color.r = 0.0;
+      marker.color.g = 0.0;
+      marker.color.b = 1.0;
+      arr.markers.push_back(marker);
     }
     else if (curr_object->getNodeType() == hpp::fcl::GEOM_CYLINDER)
     {

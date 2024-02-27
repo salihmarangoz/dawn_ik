@@ -2,17 +2,11 @@
 
 DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms focusing on observation capabilities with collision avoidance and multiple objectives.
 
-### [===> Thesis Notes](thesis/THESIS_NOTES.md) (meetings, etc.)
+### TODO
 
-### [===> My Notes](thesis/MY_NOTES.md)
+- Collision rotations look wrong. Needs to be checked!
 
-## Latest Dev Preview
-
-[![](https://img.youtube.com/vi/fdVssQZ9O2A/0.jpg)](https://www.youtube.com/watch?v=fdVssQZ9O2A)
-
-Previous recordings:
-- https://www.youtube.com/watch?v=2WPIzhGtnZw
-- https://www.youtube.com/watch?v=HZM6uRaNSIk
+- Add number of repetitions for the waypoints.
 
 ## Dependencies
 
@@ -195,12 +189,6 @@ $ catkin build
 $ roscd dawn_ik/scripts/experiments
 $ bash lite6_experiments.sh
 ```
-
-
-
-### TODO
-
-- Add number of repetitions for the waypoints.
 
 ### F.A.Q.
 
