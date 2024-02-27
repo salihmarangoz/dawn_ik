@@ -133,9 +133,9 @@ proximity:
   inflation: 0.05
   objects:
     # LITE6 COLLISION MODEL WITH SPHERES
-    - link: "link_base"
-      shape: "Box(0.1, 0.1, 0.1)"
-      translation: [0.2, 0.0, 0.0]
+    - link: "link1"
+      shape: "Box(0.1, 0.5, 0.1)"
+      translation: [0.35, 0.0, 0.0]
 
     - link: "link_base"
       shape: "Sphere(0.1)"

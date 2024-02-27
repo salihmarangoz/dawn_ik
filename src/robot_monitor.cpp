@@ -333,7 +333,12 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
     int_collision_objects[object_idx]->setTranslation(Vec3f(global_object_translations[object_idx*3+0], 
                                                             global_object_translations[object_idx*3+1], 
                                                             global_object_translations[object_idx*3+2]));
-    int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(&(global_object_rotations[object_idx*4])).toRotationMatrix());
+    //int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(&(global_object_rotations[object_idx*4])).toRotationMatrix());
+    int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(global_object_rotations[object_idx*4+0],
+                                                                      global_object_rotations[object_idx*4+1],
+                                                                      global_object_rotations[object_idx*4+2],
+                                                                      global_object_rotations[object_idx*4+3])
+                                                                      .toRotationMatrix());
     int_collision_objects[object_idx]->computeAABB();
   }
   if (int_collision_manager.size() <= 0) int_collision_manager.registerObjects(int_collision_objects); // init collision manager if not initialized
@@ -396,10 +401,7 @@ RobotMonitor::computeAndPublishVisualization(const JointLinkCollisionStateConstP
       marker.pose.position.x = curr_translation.x();
       marker.pose.position.y = curr_translation.y();
       marker.pose.position.z = curr_translation.z();
-      marker.pose.orientation.x = curr_rotation.x();
-      marker.pose.orientation.y = curr_rotation.y();
-      marker.pose.orientation.z = curr_rotation.z();
-      marker.pose.orientation.w = curr_rotation.w();
+      marker.pose.orientation.w = 1.0;
       marker.action = visualization_msgs::Marker::ADD;
       marker.color.a = 0.75; // Don't forget to set the alpha!
       marker.color.r = 0.0;
