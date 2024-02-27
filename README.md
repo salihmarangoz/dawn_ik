@@ -4,8 +4,6 @@ DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms foc
 
 ### TODO
 
-- Collision rotations look wrong. Needs to be checked!
-
 - Add number of repetitions for the waypoints.
 
 ## Dependencies
@@ -81,6 +79,8 @@ $ roslaunch dawn_ik mick_fake.launch
 ### Code Generation
 
 **BE CAREFUL:** MAKE SURE JOINTS DONT HAVE EXTRA POSITION LIMITS. SOME CONFIGURATIONS LIMIT JOINT POSITIONS BETWEEN [-PI,+PI] FOR MORE STABLE MOVEIT SOLUTIONS. (See horti_model repository's salih_marangoz_thesis branch as an example and check the README.md)
+
+**FOR ADDING COLLISION OBJECTS OTHER THAN SPHERES:** Modify `dawn_ik.cpp` around line 295 to create `CollisionAvoidanceGoalNumeric` instead of `CollisionAvoidanceGoal`. With this change, dawn_ik will use numerical diff instead of autodiff. Be careful because the convergence performance may be affected.
 
 **ALSO:** For experiments, we disable head arm's collision in general. But this intervenes with the ACM. We recommend enabling all collisions (see horti_macro.xacro -> `experiment` property)
 
