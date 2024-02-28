@@ -2,7 +2,7 @@
 
 <launch>
 
-  <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen">
+  <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node_horti" output="screen">
     <remap from="joint_trajectory_command" to="/head_controller/command"/>
     <remap from="joint_trajectory_state" to="/head_controller/state"/>
   </node>

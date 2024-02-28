@@ -2,7 +2,7 @@
 
 <launch>
 
-  <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node" output="screen">
+  <node name="dawn_ik_solver" pkg="dawn_ik" type="solver_node_lite6" output="screen">
     <remap from="joint_trajectory_command" to="/ufactory/lite6_traj_controller/command"/>
     <remap from="joint_trajectory_state" to="/ufactory/lite6_traj_controller/state"/>
   </node>

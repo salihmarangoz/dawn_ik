@@ -147,38 +147,31 @@ include_directories(
   ${hpp-fcl_INCLUDE_DIRS}
 )
 
-############# solver_node executable ###########
-add_executable(solver_node
+set (SOLVER_NODE_SRC
   src/nodes/solver_node.cpp
   src/dawn_ik.cpp
   src/joint_trajectory_control_interface.cpp
   src/robot_monitor.cpp
   src/experimental.cpp
 )
-target_compile_definitions(solver_node PRIVATE -DUSE_MICK_OTHER=0)
-add_dependencies(solver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(solver_node
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${hpp-fcl_LIBRARIES}
-  Ceres::ceres
-)
 
-# add_executable(solver_node_other
-#   src/nodes/solver_node.cpp
-#   src/dawn_ik.cpp
-#   src/joint_trajectory_control_interface.cpp
-#   src/robot_monitor.cpp
-#   src/experimental.cpp
-# )
-# target_compile_definitions(solver_node_other PRIVATE -DUSE_MICK_OTHER=1)
-# add_dependencies(solver_node_other ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(solver_node_other
-#   ${catkin_LIBRARIES}
-#   ${Boost_LIBRARIES}
-#   ${hpp-fcl_LIBRARIES}
-#   Ceres::ceres
-# )
+list (APPEND robot_targets horti lite6 mick mick_other trolley)
+
+############# solver_node executable for each defined robot ###########
+foreach(target IN LISTS robot_targets)
+  string(TOUPPER ${target} target_upper)
+  string(CONCAT enable_target "-DUSE_" ${target_upper} "=1") 
+  string(CONCAT target_name "solver_node_" ${target})
+  add_executable(${target_name} ${SOLVER_NODE_SRC})
+  target_compile_definitions(${target_name} PRIVATE ${enable_target})
+  add_dependencies(${target_name} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${target_name} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${hpp-fcl_LIBRARIES} Ceres::ceres)
+endforeach()
+
+############# solver_node executable for autogen_test.h ###########
+add_executable(solver_node ${SOLVER_NODE_SRC})
+add_dependencies(solver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(solver_node ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${hpp-fcl_LIBRARIES} Ceres::ceres)
 
 ############# robot_parser_node executable ###########
 add_executable(robot_parser_node 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="xarm_ros_version" default="1" doc="Set to 2 if you use new xarm_ros with generic xarm_device urdf"//>
+  <arg name="xarm_ros_version" default="1" doc="Set to 2 if you use new xarm_ros with generic xarm_device urdf" />
   <arg name="paused" default="false" doc="Starts gazebo in paused mode" />
   <arg name="gui" default="true" doc="Starts gazebo gui" />
   <arg name="effort_control" default="false"/>
@@ -21,8 +21,6 @@
   <group ns="$(arg namespace)">
     <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node"/>
   </group>
-
-
 
   <!-- send robot urdf to param server, joint limit may be overwritten if use moveit planner -->
   <param if="$(eval arg('xarm_ros_version') == 1)" name="robot_description" command="$(find xacro)/xacro
