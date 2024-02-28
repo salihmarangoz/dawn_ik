@@ -7,9 +7,12 @@
     <remap from="joint_trajectory_state" to="/pos_joint_traj_controller/state"/-->
     <remap from="joint_trajectory_command" to="/pos_joint_traj_controller_arm/command"/>
     <remap from="joint_trajectory_state" to="/pos_joint_traj_controller_arm/state"/>
+    <param name="transform_ik_goal" value="true"/>
+    <param name="robot_frame" value="arm_base_link"/>
   </node>
 
   <node name="dawn_ik_rviz_control" pkg="dawn_ik" type="dawn_ik_rviz_control.py" output="screen">
+    <param name="transform_ik_goal" value="false"/>
     <param name="robot_frame" value="arm_base_link"/>
   </node>
 

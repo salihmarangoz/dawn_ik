@@ -34,6 +34,9 @@
 #include <eigen3/Eigen/Core>
 #include <control_msgs/JointTrajectoryControllerState.h>
 
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+
 namespace dawn_ik
 {
 
@@ -62,6 +65,8 @@ private: // Parameters
   double p_update_rate;
   double p_init_noise;
   double p_max_step_size;
+  bool p_transform_ik_goal;
+  std::string p_robot_frame;
   ceres::Problem::Options problem_options;
 
 private:
@@ -90,6 +95,11 @@ private:
   double acc_loss_weight;
 
   ros::Publisher debug_pub;
+
+  std::unique_ptr<tf2_ros::Buffer> tf_buffer;
+  std::unique_ptr<tf2_ros::TransformListener> tf_listener;
+
+  bool transformIKGoal(dawn_ik::IKGoal &ik_goal);
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
   moveit::core::RobotModelPtr robot_model_;

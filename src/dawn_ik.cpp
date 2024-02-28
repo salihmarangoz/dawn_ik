@@ -1,6 +1,8 @@
 #include <dawn_ik/dawn_ik.h>
 #include <std_msgs/Float64MultiArray.h>
 
+#include <tf2_eigen/tf2_eigen.h>
+
 // TODO LIST
 // - remove interactive marker feedback stuff
 // - goals should be able to handle non-bounded positions
@@ -14,6 +16,12 @@ namespace dawn_ik
 DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
 {
   readParameters();
+
+  if (p_transform_ik_goal)
+  {
+    tf_buffer = std::make_unique<tf2_ros::Buffer>();
+    tf_listener = std::make_unique<tf2_ros::TransformListener>(*tf_buffer);
+  }
 
   problem_options.context = ceres::Context::Create();
 
@@ -56,6 +64,9 @@ void DawnIK::readParameters()
 
   priv_nh.param("max_step_size", p_max_step_size, 0.01);
   if (p_max_step_size < 0.0){ROS_ERROR("Invalid max_step_size!"); p_max_step_size = 0.0;} // disable on error
+
+  priv_nh.param("transform_ik_goal", p_transform_ik_goal, false);
+  priv_nh.param("robot_frame", p_robot_frame, std::string("base_link"));
 }
 
 void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
@@ -64,6 +75,56 @@ void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
   std::scoped_lock(ik_goal_mutex);
   ik_goal_msg = msg;
   ROS_INFO_ONCE("First IK Goal Message Received!");
+}
+
+bool DawnIK::transformIKGoal(dawn_ik::IKGoal &ik_goal)
+{
+  if (ik_goal.header.frame_id == p_robot_frame) // already in the correct frame
+  {
+    return true;
+  }
+  else if (ik_goal.header.frame_id == "")
+  {
+    ROS_WARN_THROTTLE(1.0, "IK goal frame_id is empty, cannot transform!");
+    return false;
+  }
+  geometry_msgs::TransformStamped transform;
+  try
+  {
+    transform = tf_buffer->lookupTransform(p_robot_frame, ik_goal.header.frame_id, ros::Time(0));
+  }
+  catch (tf2::TransformException &ex)
+  {
+    ROS_WARN_THROTTLE(1.0, "Failed to transform IK goal: %s", ex.what());
+    return false;
+  }
+  Eigen::Vector3d m1(ik_goal.m1_x, ik_goal.m1_y, ik_goal.m1_z);
+  Eigen::Quaterniond m2(ik_goal.m2_w, ik_goal.m2_x, ik_goal.m2_y, ik_goal.m2_z);
+  Eigen::Vector3d m3(ik_goal.m3_x, ik_goal.m3_y, ik_goal.m3_z);
+  Eigen::Vector3d m4(ik_goal.m4_x, ik_goal.m4_y, ik_goal.m4_z);
+
+  tf2::doTransform(m1, m1, transform);
+  tf2::doTransform(m2, m2, transform);
+  tf2::doTransform(m3, m3, transform);
+  tf2::doTransform(m4, m4, transform);
+
+  ik_goal.m1_x = m1.x();
+  ik_goal.m1_y = m1.y();
+  ik_goal.m1_z = m1.z();
+  ik_goal.m2_w = m2.w();
+  ik_goal.m2_x = m2.x();
+  ik_goal.m2_y = m2.y();
+  ik_goal.m2_z = m2.z();
+  ik_goal.m3_x = m3.x();
+  ik_goal.m3_y = m3.y();
+  ik_goal.m3_z = m3.z();
+  ik_goal.m4_x = m4.x();
+  ik_goal.m4_y = m4.y();
+  ik_goal.m4_z = m4.z();
+
+  ik_goal.header.frame_id = p_robot_frame; // avoid repeated transformation
+
+  return true;
 }
 
 void DawnIK::loopThread()
@@ -75,15 +136,17 @@ void DawnIK::loopThread()
     target_names.push_back(robot::joint_names[joint_idx]);
   }
 
-  ros::Rate r(p_update_rate);
-  while (ros::ok())
+  for (ros::Rate r(p_update_rate); ros::ok(); r.sleep())
   {
     ik_goal_mutex.lock();
-
     dawn_ik::IKGoalPtr ik_goal_msg_copy = ik_goal_msg;
     ik_goal_mutex.unlock();
 
-
+    if (p_transform_ik_goal)
+    {
+      if (!transformIKGoal(*ik_goal_msg_copy))
+        continue;
+    }
 
     if (ik_goal_msg_copy->mode != IKGoal::MODE_0)
     {
@@ -149,7 +212,6 @@ void DawnIK::loopThread()
 
     }
     ROS_INFO_THROTTLE(0.25, "cycle time: %f", r.cycleTime().toSec());
-    r.sleep();
   }
 }
 

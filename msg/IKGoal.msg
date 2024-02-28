@@ -1,4 +1,5 @@
 # This message expresses DawnIK Solver goal
+std_msgs/Header header
 
 uint32 MODE_0=0   # IDLE
 uint32 MODE_1=1   # ENDPOINT POSITION CONTROL W.R.T. A POINT
