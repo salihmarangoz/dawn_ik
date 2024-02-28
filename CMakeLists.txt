@@ -130,7 +130,7 @@ generate_messages(DEPENDENCIES std_msgs sensor_msgs)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
+#  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp rospy message_runtime
 #  DEPENDS system_lib
 )
