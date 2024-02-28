@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="xarm_ros_version" default="1" doc="Set to 2 if you use new xarm_ros with generic xarm_device urdf"//>
   <arg name="paused" default="false" doc="Starts gazebo in paused mode" />
   <arg name="gui" default="true" doc="Starts gazebo gui" />
   <arg name="effort_control" default="false"/>
@@ -21,9 +22,14 @@
     <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node"/>
   </group>
 
+
+
   <!-- send robot urdf to param server, joint limit may be overwritten if use moveit planner -->
-  <param name="robot_description" command="$(find xacro)/xacro
+  <param if="$(eval arg('xarm_ros_version') == 1)" name="robot_description" command="$(find xacro)/xacro
     --inorder '$(find xarm_description)/urdf/lite6_robot.urdf.xacro' ros_namespace:=$(arg namespace) add_gripper:=$(arg add_gripper) add_vacuum_gripper:=$(arg add_vacuum_gripper) effort_control:=$(arg effort_control) velocity_control:=$(arg velocity_control)" />
+
+  <param unless="$(eval arg('xarm_ros_version') == 1)" name="robot_description" command="$(find xacro)/xacro
+    --inorder '$(find xarm_description)/urdf/xarm_device.urdf.xacro' robot_type:=lite dof:=6 hw_ns:=$(arg namespace) add_gripper:=$(arg add_gripper) add_vacuum_gripper:=$(arg add_vacuum_gripper) effort_control:=$(arg effort_control) velocity_control:=$(arg velocity_control)" />
 
   <!-- spawn robot model in gazebo, located on the table 
   <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model"
