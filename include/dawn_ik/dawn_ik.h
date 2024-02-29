@@ -33,6 +33,7 @@
 
 #include <eigen3/Eigen/Core>
 #include <control_msgs/JointTrajectoryControllerState.h>
+#include <std_srvs/SetBool.h>
 
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
@@ -85,6 +86,7 @@ private:
   ros::Publisher solver_summary_pub;                                  // solver log
   std::deque< std::vector<double> > solver_history;                   // solver history
 
+  bool pauseCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
   void goalCallback(const dawn_ik::IKGoalPtr &msg);
   std::mutex ik_goal_mutex;
   dawn_ik::IKGoalPtr ik_goal_msg;
@@ -95,6 +97,8 @@ private:
   double acc_loss_weight;
 
   ros::Publisher debug_pub;
+  ros::ServiceServer pause_srv;
+  std::atomic_bool paused;
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer;
   std::unique_ptr<tf2_ros::TransformListener> tf_listener;

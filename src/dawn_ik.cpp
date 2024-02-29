@@ -1,6 +1,5 @@
 #include <dawn_ik/dawn_ik.h>
 #include <std_msgs/Float64MultiArray.h>
-
 #include <tf2_eigen/tf2_eigen.h>
 
 // TODO LIST
@@ -13,9 +12,11 @@
 namespace dawn_ik
 {
 
-DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev())
+DawnIK::DawnIK(ros::NodeHandle &nh, ros::NodeHandle &priv_nh): nh(nh), priv_nh(priv_nh), rand_gen(rand_dev()), paused(false)
 {
   readParameters();
+
+  pause_srv = priv_nh.advertiseService("pause", &DawnIK::pauseCallback, this);
 
   if (p_transform_ik_goal)
   {
@@ -67,6 +68,13 @@ void DawnIK::readParameters()
 
   priv_nh.param("transform_ik_goal", p_transform_ik_goal, false);
   priv_nh.param("robot_frame", p_robot_frame, std::string("base_link"));
+}
+
+bool DawnIK::pauseCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+{
+  paused = req.data;
+  res.success = true;
+  return true;
 }
 
 void DawnIK::goalCallback(const dawn_ik::IKGoalPtr &msg)
@@ -148,7 +156,7 @@ void DawnIK::loopThread()
         continue;
     }
 
-    if (ik_goal_msg_copy->mode != IKGoal::MODE_0)
+    if (!paused && ik_goal_msg_copy->mode != IKGoal::MODE_0)
     {
       // Random initialization is important to escape from DOF-lowering singularities. But it is possible to get noisy results with a limited time budget.
       // If we initialize using the previous joint state with added random noise, we can prevent these singularities, but we may not find a smooth solution with a limited time budget.
