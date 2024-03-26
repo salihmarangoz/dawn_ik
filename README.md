@@ -1,52 +1,32 @@
-# DawnIK Solver (Salih Marangoz Thesis)
+# DawnIK Solver
 
-DawnIK Solver [1]  is a real-time inverse kinematics solver for robotic arms focusing on observation capabilities with collision avoidance and multiple objectives.
+DawnIK [1]  is a real-time inverse kinematics solver for robotic arms focusing on observation capabilities with collision avoidance and multiple objectives. This repository contains the accompanying code for the paper "DawnIK: Decentralized Collision-Aware Inverse Kinematics Solver for Heterogeneous Multi-Arm Systems" by Salih Marangoz, Rohit Menon, Nils Dengler, Maren Bennewitz submitted for IEEE-RAS Humanoids 2023. you can find the paper at https://arxiv.org/abs/2307.12750
 
-### TODO
+[![](https://img.youtube.com/vi/-k7XJkbAB6A/0.jpg)](https://www.youtube.com/watch?v=-k7XJkbAB6A)
 
-- Add number of repetitions for the waypoints.
+
 
 ## Dependencies
 
 ```bash
-################# ROS DEPENDENCIES ##################################
 $ cd catkin_ws/src
 
 # This package
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/salih_marangoz_thesis.git
+$ git clone git@github.com:salihmarangoz/dawn_ik.git 
 
-# Horti Robot (use salih_master_thesis branch!)
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/horti_model.git -b salih_master_thesis
-
-# Mick Robot (modified copy of horti_model package)
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/mick_model.git
-
-# xArm ROS (forked)
-$ git clone clone git@github.com:salihmarangoz/xarm_ros.git
+# xArm ROS (optional)
+$ git clone git@github.com:salihmarangoz/xarm_ros.git 
 $ cd xarm_ros
 $ git submodule update --init --remote
 
-# Fake Joints (optional alternative to Gazebo) (forked and modified)
-$ git clone https://github.com/salihmarangoz/fake_joint
+# Fake Joints (optional)
+$ git clone git@github.com:salihmarangoz/fake_joint
 
-# OPTIONAL: Collision IK
-# Includes trained model for lite6 (forked and heavily modified)
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/collision_ik.git
-
-# OPTIONAL: For robot state collision evaluation
-$ git clone git@gitlab.igg.uni-bonn.de:phenorob/oc2/active_perception/moveit_collision_check.git
-
-# Others
-$ cd catkin_ws
-$ rosdep install --from-paths src --ignore-src -r
-$ sudo apt install python3-yaml python-is-python3
-$ pip install pyyaml pyquaternion
-
-################## EXTERNAL DEPENDENCIES ############################
+# Collision evaluation (optional)
+$ git clone git@github.com:salihmarangoz/moveit_collision_check.git
 
 # Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
 $ cd $HOME
-#$ git clone git@github.com:salihmarangoz/ceres-solver.git
 $ git clone git@github.com:ceres-solver/ceres-solver.git -b 2.2.0rc1
 $ sudo apt-get install cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev libeigen3-dev libsuitesparse-dev
 $ cd ceres-solver
@@ -55,9 +35,13 @@ $ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release -DUSE_CUDA=OFF ..
 $ make -j8
 $ sudo make install
+$ sudo ldconfig # Update dynamic linker run-time bindings
 
-# Update dynamic linker run-time bindings
-sudo ldconfig
+# Other packages
+$ cd catkin_ws
+$ rosdep install --from-paths src --ignore-src -r
+$ sudo apt install python3-yaml python-is-python3
+$ pip install pyyaml
 ```
 
 ## Running
@@ -65,141 +49,50 @@ sudo ldconfig
 ### Simulation
 
 ```bash
-# select one!
+# Start with gazebo
 $ roslaunch dawn_ik lite6_sim.launch
-$ roslaunch dawn_ik horti_sim.launch
-#$ roslaunch dawn_ik mick_sim.launch TODO
-
-# or without Gazebo (using fake_joints)
+# or using fake_joints
 $ roslaunch dawn_ik lite6_fake.launch
-$ roslaunch dawn_ik horti_fake.launch
-$ roslaunch dawn_ik mick_fake.launch
 ```
 
 ### Code Generation
 
-**BE CAREFUL:** MAKE SURE JOINTS DONT HAVE EXTRA POSITION LIMITS. SOME CONFIGURATIONS LIMIT JOINT POSITIONS BETWEEN [-PI,+PI] FOR MORE STABLE MOVEIT SOLUTIONS. (See horti_model repository's salih_marangoz_thesis branch as an example and check the README.md)
-
-**FOR ADDING COLLISION OBJECTS OTHER THAN SPHERES:** Modify `dawn_ik.cpp` around line 295 to create `CollisionAvoidanceGoalNumeric` instead of `CollisionAvoidanceGoal`. With this change, dawn_ik will use numerical diff instead of autodiff. Be careful because the convergence performance may be affected.
-
-**ALSO:** For experiments, we disable head arm's collision in general. But this intervenes with the ACM. We recommend enabling all collisions (see horti_macro.xacro -> `experiment` property)
+- Make sure that the robot joints don't have further position limits (e.g. for improving MoveIt's planninng behavior where it is limited between [-PI,+PI]).
+- If you would like to use collisions objects other than spheres you need to modify the code. Modify `dawn_ik.cpp` around line 295 to create `CollisionAvoidanceGoalNumeric` instead of `CollisionAvoidanceGoal`. With this change, dawn_ik will use numerical diff instead of autodiff. Be careful because the convergence performance may be affected.
+- DawnIK can be used to isolate an arm from the collision computations in an multi-arm system. This is usually done by disabling collisions for the controlled arm. However, for the ACM computations with MoveIt make sure all collisions are enabled.
 
 Make sure the robot description is loaded. (if the fake/sim is running then it is probably loaded). Re-compile the project after this step. 
 
 ```bash
-# To skip the code generation step, replace autogen_test.h with pre-generated headers (lite6.h, horti.h, etc.)
+# 1. Option: Generate the header
+$ rosrun dawn_ik robot_parser_node _cfg:=lite6 # for lite6.yaml
+
+# 2. Option: Use a pre-generated header
 $ roscd dawn_ik/include/dawn_ik/robot_configuration
-
-# select one!
 $ cp lite6.h autogen_test.h
-$ cp horti.h autogen_test.h
-$ cp mick.h autogen_test.h
 
+# Re-compile the project
 $ catkin build
-
-############################################
-# To do the code generation step:
-
-# select one!
-$ rosrun dawn_ik robot_parser_node _cfg:=lite6
-$ rosrun dawn_ik robot_parser_node _cfg:=horti
-$ rosrun dawn_ik robot_parser_node _cfg:=mick
-
-# Re-compile the project after this step. 
 ```
 
 ### Solver/Controller
 
-DawnIK and CollisionIK (with goal+collision adapter) are available.
+Start the solver. This command will also launch RViz for providing input to the controller. There will be two interactive markers, one is for the endpoint pose and the other one is for the look-at goal. **Right click** one of the markers to set the current mode.
 
 ```bash
-# If you would like to use our solver, select one!
 $ roslaunch dawn_ik lite6_solver.launch
-$ roslaunch dawn_ik horti_solver.launch
-$ roslaunch dawn_ik mick_solver.launch
-# Extra: Control two arms at the same time:
-$ roslaunch dawn_ik mick_other.launch
-
-# If you would like to use collision_ik...
-# For lite6 + collision_ik:
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp lite6_settings.yaml settings.yaml # overwriting!
-$ roslaunch dawn_ik lite6_solver_collision_ik.launch
-
-# For horti + collision_ik:
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp horti_settings.yaml settings.yaml # overwriting!
-$ roslaunch dawn_ik horti_solver_collision_ik.launch
-
-# For mick + collision_ik:
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp mick_settings.yaml settings.yaml # overwriting!
-$ roslaunch dawn_ik mick_solver_collision_ik.launch
 ```
 
-### Experiments
-
-Before doing the experiments make sure that:
-
-- Generated code is for that robot, while using dawn_ik.
-- `settings.yaml` is set for that robot, while using collision_ik.
-
-For doing the experiments you can start everything **ALL-IN-ONE** line. Stop roscore and all other things. Available robots for experiments are `horti`, `lite6` and `mick`. Available solvers are `dawn_ik` and `collision_ik`.
-
-```bash
-# Example: Horti + DawnIK + test.txt
-$ roscd dawn_ik/include/dawn_ik/robot_configuration
-$ cp horti.h autogen_test.h
-$ catkin build
-$ roslaunch dawn_ik run_experiment.launch robot_name:=horti solver:=dawn_ik waypoints_file:=test endpoint_frame:=head_link_eef
-
-# Example: Lite6 + CollisionIK + lower_y.txt
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp lite6_settings.yaml settings.yaml # overwriting!
-$ roslaunch dawn_ik run_experiment.launch robot_name:=lite6 solver:=collision_ik waypoints_file:=lower_y endpoint_frame:=link_eef
-
-# Example: Mick + CollisionIK + mid_y.txt + test.bag
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp mick_settings.yaml settings.yaml # overwriting!
-$ roslaunch dawn_ik run_experiment.launch robot_name:=mick solver:=collision_ik waypoints_file:=mid_y trajectory_file:=test endpoint_frame:=head_link_eef
-
-###### EXTRA ######
-# MANUALLY STOP WHEN THE EXPERIMENT IS FINISHED
-# Example: Mick + Two DawnIK's
-$ roscd dawn_ik/include/dawn_ik/robot_configuration
-$ cp mick.h autogen_test.h
-$ catkin build
-$ roslaunch dawn_ik run_experiment_other.launch robot_name:=mick solver:=dawn_ik waypoints_file:=eight_xy waypoints_file_other:=square_yz_other endpoint_frame:=head_link_eef endpoint_frame_other:=other_link_eef
-```
-
-Waypoints are located in `waypoints` folder. Results are saved into the `results` folder. For analyzing and generating figures see `results/analyze_results.ipynb` notebook.
-
-### Lite6 Experiment
-
-```bash
-# Setup CollisionIK
-$ roscd relaxed_ik_ros1/relaxed_ik_core/config/
-$ cp lite6_settings.yaml settings.yaml # overwriting!
-
-# Setup DawnIK
-$ roscd dawn_ik/include/dawn_ik/robot_configuration
-$ cp lite6.h autogen_test.h
-$ catkin build
-
-$ roscd dawn_ik/scripts/experiments
-$ bash lite6_experiments.sh
-```
-
-### F.A.Q.
+## F.A.Q.
 
 - Solver crashes:
-  - Make sure to disable `horti_acm_tricks` for robots that are not Horti.
+  - Make sure to disable `horti_acm_tricks` if it is not Horti. `horti_acm_tricks` disabled collision checking between the external arms. So, if you have a multi-arm robotic system with more than 2 arms, you may need to adapt the code in `robot_parser.cpp` for your use case.
 
 - Parser crashes:
   - Only single-axis revolute joints and static joints are supported.
 
 
-### Footnotes
+## Footnotes
 
 - [1] [Ceres Solver](http://ceres-solver.org/) is heavily used in this project so we named this project similar to [how Ceres Solver is named](http://ceres-solver.org/#f1). [Dawn](https://solarsystem.nasa.gov/missions/dawn/overview/) is the spacecraft launched in 2007 by NASA, reached to Ceres in 2015 and acquired the dwarf planet's information of global shape, mean density, surface morphology, mineralogy, etc. by the middle of 2016. 
 

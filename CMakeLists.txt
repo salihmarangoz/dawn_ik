@@ -80,7 +80,6 @@ add_message_files(
   JointLinkCollisionState.msg
   SolverSummary.msg
   IKGoal.msg
-  Constraint.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -153,7 +152,6 @@ set (SOLVER_NODE_SRC
   src/dawn_ik.cpp
   src/joint_trajectory_control_interface.cpp
   src/robot_monitor.cpp
-  src/experimental.cpp
 )
 
 list (APPEND robot_targets horti lite6 mick mick_other trolley)
@@ -232,15 +230,6 @@ target_link_libraries(robot_parser_node
 #############
 ## Testing ##
 #############
-
-add_executable(test_node src/test.cpp)
-add_dependencies(test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_node   
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  Ceres::ceres
-  ${hpp-fcl_LIBRARIES}
-)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_dawn_ik.cpp)

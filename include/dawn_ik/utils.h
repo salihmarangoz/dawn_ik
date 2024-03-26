@@ -144,6 +144,7 @@ inline T distSphere2Sphere(const T* first_sphere_pos, double first_sphere_radius
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> first_sphere_pos_e(first_sphere_pos);
   Eigen::Map<const Eigen::Matrix<T, 3, 1>> second_sphere_pos_e(second_sphere_pos);
   return (first_sphere_pos_e - second_sphere_pos_e).norm() - first_sphere_radius - second_sphere_radius;
+  //return (first_sphere_pos_e - second_sphere_pos_e).squaredNorm() - pow(first_sphere_radius + second_sphere_radius, 2); // FAST APPROXIMATION
 }
 
 // doesnt support autodiff!!!

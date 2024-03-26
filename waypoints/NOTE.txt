@@ -1,6 +1,0 @@
-make sure that wayponits file extensions are set to .txt
-
-don't use dash ("-") while naming waypoint files.
-
-also roll,pitch,yaw are in 'rxyz' convention. r -> rotational frame (not fixed/static), xyz -> the order of rotation
-

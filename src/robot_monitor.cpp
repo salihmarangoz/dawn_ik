@@ -333,7 +333,6 @@ RobotMonitor::computeJointLinkCollisionState(const JointLinkStateConstPtr& msg)
     int_collision_objects[object_idx]->setTranslation(Vec3f(global_object_translations[object_idx*3+0], 
                                                             global_object_translations[object_idx*3+1], 
                                                             global_object_translations[object_idx*3+2]));
-    //int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(&(global_object_rotations[object_idx*4])).toRotationMatrix());
     int_collision_objects[object_idx]->setRotation(Eigen::Quaterniond(global_object_rotations[object_idx*4+0],
                                                                       global_object_rotations[object_idx*4+1],
                                                                       global_object_rotations[object_idx*4+2],

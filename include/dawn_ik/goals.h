@@ -753,17 +753,15 @@ struct ManipulabilityGoal {
     }
     robot_state.updateLinkTransforms();
 
-    // double manipulability_index_tra;
-    // shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_tra, true);
-    // ROS_INFO_THROTTLE(1.0, "manipulability_index_tra: %f", manipulability_index_tra);
-    // if (std::isnan(manipulability_index_tra)) return false; // sad jacobian sounds
-    // residuals[0] = 1.0 - manipulability_index_tra;
+    double manipulability_value;
+    shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_value, false); // true -> translation, false -> rotation
+    ROS_INFO_THROTTLE(0.1, "manipulability_value: %f", manipulability_value);
+    if (std::isnan(manipulability_value)) return false; // sad jacobian sounds
 
-    double manipulability_index_rot;
-    shared_block.km_->getManipulabilityIndex(robot_state, "lite6", manipulability_index_rot, false);
-    ROS_INFO_THROTTLE(1.0, "manipulability_index_rot: %f", manipulability_index_rot);
-    if (std::isnan(manipulability_index_rot)) return false; // sad jacobian sounds
-    residuals[0] = 1.0 - manipulability_index_rot;
+    //residuals[0] = 1.0 - manipulability_value;
+
+    double b = 0.05;
+    residuals[0] = 2.0 * b / (pow(manipulability_value,2) + b);
     
     return true;
   }

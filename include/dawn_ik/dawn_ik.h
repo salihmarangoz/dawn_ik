@@ -20,10 +20,8 @@
 #include <dawn_ik/robot_monitor.h>
 #include <dawn_ik/goals.h>
 
-#include <dawn_ik/Constraint.h>
 #include <dawn_ik/IKGoal.h>
 #include <dawn_ik/SolverSummary.h>
-#include <dawn_ik/experimental.h> // TODO: EXPERIMENTAL STUFF!
 
 #ifdef ENABLE_EXPERIMENT_MANIPULABILITY
 #include <moveit/kinematics_metrics/kinematics_metrics.h>
