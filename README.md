@@ -1,10 +1,25 @@
-# DawnIK Solver
+# DawnIK
 
 DawnIK [1]  is a real-time inverse kinematics solver for robotic arms focusing on observation capabilities with collision avoidance and multiple objectives. This repository contains the accompanying code for the paper "DawnIK: Decentralized Collision-Aware Inverse Kinematics Solver for Heterogeneous Multi-Arm Systems" by Salih Marangoz, Rohit Menon, Nils Dengler, Maren Bennewitz submitted for IEEE-RAS Humanoids 2023. you can find the paper at https://arxiv.org/abs/2307.12750
 
 [![](https://img.youtube.com/vi/-k7XJkbAB6A/0.jpg)](https://www.youtube.com/watch?v=-k7XJkbAB6A)
 
 
+## Goal Types
+
+DawnIK has different goals defined in `goals.h` which can be combined specifically for a use-case. There are some examples:
+
+### Position Goal
+
+[![](https://img.youtube.com/vi/zrl12iFnM6M/0.jpg)](https://www.youtube.com/watch?v=zrl12iFnM6M)
+
+### Position Goal + Orientation Goal
+
+[![](https://img.youtube.com/vi/_uTy60yxK6U/0.jpg)](https://www.youtube.com/watch?v=_uTy60yxK6U)
+
+### Look-at Goal (+ Position Goal with a small weight)
+
+[![](https://img.youtube.com/vi/3-Y2mOZWGVc/0.jpg)](https://www.youtube.com/watch?v=3-Y2mOZWGVc)
 
 ## Dependencies
 
