@@ -9,17 +9,9 @@ DawnIK [1]  is a real-time inverse kinematics solver for robotic arms focusing o
 
 DawnIK has different goals defined in `goals.h` which can be combined specifically for a use-case. There are some examples:
 
-### Position Goal
-
-[![](https://img.youtube.com/vi/zrl12iFnM6M/0.jpg)](https://www.youtube.com/watch?v=zrl12iFnM6M)
-
-### Position Goal + Orientation Goal
-
-[![](https://img.youtube.com/vi/_uTy60yxK6U/0.jpg)](https://www.youtube.com/watch?v=_uTy60yxK6U)
-
-### Look-at Goal (+ Position Goal with a small weight)
-
-[![](https://img.youtube.com/vi/3-Y2mOZWGVc/0.jpg)](https://www.youtube.com/watch?v=3-Y2mOZWGVc)
+- Position Goal: [[Video]](https://www.youtube.com/watch?v=zrl12iFnM6M)
+- Position Goal + Orientation Goal: [[Video]](https://www.youtube.com/watch?v=_uTy60yxK6U)
+- Look-at Goal (+ Position Goal with a small weight): [[Video]](https://www.youtube.com/watch?v=3-Y2mOZWGVc)
 
 ## Dependencies
 
