@@ -29,9 +29,6 @@ $ git submodule update --init --remote
 # Fake Joints (optional)
 $ git clone git@github.com:salihmarangoz/fake_joint
 
-# Collision evaluation (optional)
-$ git clone git@github.com:salihmarangoz/moveit_collision_check.git
-
 # Ceres Solver 2.x.x (http://ceres-solver.org/installation.html)
 $ cd $HOME
 $ git clone git@github.com:ceres-solver/ceres-solver.git -b 2.2.0rc1
